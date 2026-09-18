@@ -1,0 +1,6 @@
+{
+  "name": "matt-craft",
+  "description": "Matt Schulkind's workflow and documentation skills for AI-assisted engineering.",
+  "version": "0.1.0",
+  "skills": "./skills"
+}

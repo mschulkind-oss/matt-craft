@@ -1,0 +1,60 @@
+#!/bin/sh
+# Verify the matt-craft skills corpus.
+set -eu
+
+[ "$#" -eq 1 ] || { echo "usage: check-skills SKILLS_DIR" >&2; exit 2; }
+root=$1
+[ -d "$root" ] || { echo "check-skills: not a directory: $root" >&2; exit 1; }
+
+fails=0
+bad() { printf 'check-skills: %s\n' "$*" >&2; fails=$((fails + 1)); }
+
+for dir in "$root"/*; do
+    [ -d "$dir" ] || { bad "unexpected non-directory at skill root: $dir"; continue; }
+    skill="$dir/SKILL.md"
+    [ -f "$skill" ] || { bad "missing SKILL.md: $dir"; continue; }
+    [ "$(sed -n '1p' "$skill")" = '---' ] || bad "frontmatter must start $skill"
+    name=$(sed -n 's/^name: *//p' "$skill" | head -n 1)
+    [ "$name" = "$(basename "$dir")" ] || bad "frontmatter name does not match directory: $skill"
+    description=$(sed -n 's/^description: *//p' "$skill" | head -n 1)
+    case "$description" in
+        'Use when '*) : ;;
+        *) bad "description must begin with 'Use when ': $skill" ;;
+    esac
+done
+
+finder="fd"
+if ! command -v fd >/dev/null 2>&1; then
+    finder="find"
+fi
+
+if [ "$finder" = "fd" ]; then
+    skills_list=$(fd -t f 'SKILL.md' "$root" | sort)
+    links=$(fd -t l . "$root")
+else
+    skills_list=$(find "$root" -type f -name 'SKILL.md' | sort)
+    links=$(find "$root" -type l)
+fi
+
+for skill in $skills_list; do
+    python3 - "$skill" <<'PY' || fails=$((fails + 1))
+import os
+import re
+import sys
+
+skill = os.path.abspath(sys.argv[1])
+base = os.path.dirname(skill)
+text = open(skill, encoding="utf-8").read()
+for target in re.findall(r"\]\((references/[^)#]+)(?:#[^)]*)?\)", text):
+    path = os.path.realpath(os.path.join(base, target))
+    outside = os.path.commonpath((base, path)) != base
+    if outside or not os.path.isfile(path):
+        print(f"check-skills: shipped reference does not resolve: {skill}: {target}", file=sys.stderr)
+        raise SystemExit(1)
+PY
+done
+
+[ -z "$links" ] || bad "rendered skills contain symlinks: $links"
+
+[ "$fails" -eq 0 ] || exit 1
+printf 'agent skills valid: %s\n' "$root"
