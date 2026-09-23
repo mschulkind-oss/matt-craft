@@ -5,9 +5,9 @@ description: Use when creating, updating, reconciling, or compacting a project's
 
 # Roadmap
 
-The roadmap is a **routing table with a priority order**: each open decision, the doc that holds it,
-and what ruling it releases. It is not where the thinking lives, and it is not a record of what
-happened.
+The roadmap is a **routing table with a priority order**: each committed piece of unfinished work,
+its next actor and action, and the doc that holds the details. It is not where the thinking lives,
+and it is not a record of what happened.
 
 Default location: **`roadmap.md`** at the project root, unless the repo has an established one.
 
@@ -26,7 +26,8 @@ These are the ones a long-lived roadmap breaks first, and they break silently.
 1. **One table line per item.** No paragraphs, no sub-bullets, no per-item callouts. If an item
    needs a paragraph, the paragraph belongs in its doc and the row links it.
 2. **Never restate what the doc says** — not the question, the stakes, the options, or your
-   leaning. The row names the decision and links it; a reader who wants the argument clicks.
+   leaning. The row names the next action or decision and links it; a reader who wants the
+   argument clicks.
 3. **No history.** Not what a row used to say, not why it changed, not what a previous count was,
    not a correction of an earlier correction. `git log -p -- <roadmap>` is the record. A sentence
    beginning *"this row used to say"* is always a deletion.
@@ -50,27 +51,38 @@ These are the ones a long-lived roadmap breaks first, and they break silently.
 A **counted** status line and the date — tally the actual rows, never assert. Then three sentences
 stating what the file is and is not, so the next agent editing it inherits the rules above.
 
-### 2. Rule these first
+### 2. Actionable (▶️)
 
-The prioritization answer, and the reason the file exists. Five to eight lines, each worth one
-sitting.
-
-**State the ordering basis in the file** so the order is checkable rather than asserted. The
-default basis, which fits most projects:
-
-> a defect live in shipped code outranks blocked build work, which outranks a ruling that only
-> closes a doc; ties break toward the smallest sitting.
+**The primary agent queue.** If an agent can make useful progress now without a new user ruling,
+put the next step here — including investigation, research, experiments, writing or revising a
+design, planning, implementation, and verification. **Actionable does not mean ready to implement.**
+A missing answer is often the work: research it, test it, or prepare a recommendation before asking
+for a ruling. Do not invent a ruling or implement past a genuine owner gate.
 
 ```markdown
-| | Rule | Releases | Cost |
+| # | Next agent action | Doc | Stops at |
 |---|---|---|---|
-| **1** | [`OQ-ID`](doc.md#anchor) — the decision, in six words | **Defect, live today.** `file.go:168` keeps X, so Y | one ruling |
+| **1** | Research the two options and recommend one | [Design](doc.md) | User rules [the choice](doc.md#question) |
+| **2** | Implement the agreed slice | [Plan](plan.md) | Run tests and verify on target |
 ```
 
-> [!WARNING]
-> **Verify before you rank.** Call a row a *defect* only if you found it in the tree — name the
-> `file:line`. The previous roadmap's prose is not evidence; it is the thing most likely to be
-> stale, and ranking off it puts a closed question at the top of the list.
+Each row names a **concrete next action**, not just a project or a status. Link the work's source;
+name the first actual stop in **Stops at** (a user ruling, external dependency, or verifiable done
+condition). An item can need the user *eventually* and still be ▶️ now. Keep it here while an agent
+can advance it, and move it to 💬 only when the next step truly belongs to the user. Split independent
+steps into separate rows so an owner-gated decision does not hide unrelated agent work. A build
+step must be implementable cold from its linked docs: resolve or explicitly delegate every
+necessary question. Otherwise the ▶️ action is to research or design, not to guess and build.
+
+**State the ordering basis in the file** so the order is checkable. Default: fix a verified live
+defect, then work that unblocks the most other work, then smaller independent steps. Call a row a
+defect only after finding it in the tree; cite `file:line`, not the previous roadmap's claim.
+
+When asked to **“take action on everything”**, work through every ▶️ row, not just build tasks.
+Advance each as far as evidence and delegated authority allow; update its doc and row as the next
+step changes. Do not silently skip research, and do not treat this as permission to make subjective
+owner decisions or perform destructive/external actions without the required confirmation. Report
+what advanced, what closed, and what now needs the user or an external condition.
 
 ### 3. Needs you (💬)
 
@@ -96,47 +108,37 @@ unanswerable apart) and **small calls** that do not deserve a row.
 - Where a decision is genuinely subjective, mark the row 🤷 rather than manufacturing a
   recommendation. The leaning still lives in the doc, not here.
 - **No artificial "pick one" bottlenecks.** Never ask the user to sequence approved work — that is
-  yours. Ask only what you cannot decide.
+  yours. Ask only what you cannot decide. If an agent can still narrow the question, put that step
+  in ▶️ instead; 💬 is for the *next* action that only the user can take.
 
-### 4. Ready (📦)
-
-Ruled, unblocked, nobody waiting on the user.
-
-**Ready means implementable cold** — an agent with no memory of any conversation could pick it up.
-Apply the gap test to the item and everything it links: every question the implementer must answer
-is answered there, open with a stable id, or explicitly delegated. An answer that exists only in
-this session's context makes the item 💬, not 📦.
-
-> [!WARNING]
-> **Ready work hides inside 💬 rows.** A design with thirteen open questions routinely has three
-> build steps blocked by none of them. Go looking every run — an empty 📦 beside a large 💬 section
-> is usually wrong, and it is the most useful thing a reconcile finds after a stale row.
-
-### 5. Waiting (🔒) and Icebox (🧊)
+### 4. Waiting (🔒) and Icebox (🧊)
 
 Two columns: what it is blocked on, and what would clear it. 🔒 is an environment, hardware, or a
-measurement. 🧊 is genuine uncertainty about whether we want the thing — never a long cycle time,
-and never a queue that got too big.
+measurement that an agent cannot obtain or work around now. 🧊 is genuine uncertainty about whether
+we want the thing — never a long cycle time, and never a queue that got too big. If an agent can
+investigate the blocker or clarify the proposal now, that next step is ▶️, not parked here.
 
-### 6. What this file does not cover
+### 5. What this file does not cover
 
 One short section, with links: candidate work nobody has committed to, and live questions that
-block nothing. Close it with the rule that keeps the file small without losing anything — *a
-question is promoted to a row the day it starts blocking something, and leaves the day it stops.*
+block nothing. Close it with the rule that keeps the file small without losing anything — *committed
+work gets a row when there is a next action; a question gets a row when it blocks that work; both
+leave when the work closes.*
 
 ## The emoji system
 
 Distinct metaphors, not a colour ramp, so the file stays scannable in greyscale.
 
-- 💬 **Needs you** — a decision only the user can make. (🤷 beside it: genuinely their preference.)
-- 📦 **Ready** — designed, ruled, no blockers.
+- ▶️ **Actionable** — a concrete next agent action, whether research, design, build, or verification.
+- 💬 **Needs you** — the next step is a decision only the user can make. (🤷 beside it: genuinely their preference.)
 - 🏗️ **In progress** in the active session.
 - 🔒 **Waiting** on hardware, a host, or a measurement.
-- 🛑 **Broken** — actively failing.
+- 🛑 **Broken** — actively failing; if an agent can investigate or fix it, that work goes in ▶️.
 - 🧊 **Icebox** — unsure we want it.
 
-**Failsafe ambiguity:** when a state is genuinely unclear — built on Linux, unverified on the
-target platform — pick the state that fails safe (🔒 over 📦), so nothing is assumed complete.
+**Failsafe ambiguity:** uncertainty about completion is not completion. If an agent can verify on
+the target, verification is ▶️; if only the owner or unavailable hardware can, route it to 💬 or
+🔒 respectively. Never label unverified work done.
 
 **Vocabulary migrations:** substitute longest-match-first. A `🟡 ❓` → `💬 🤷` rule must run before
 a bare `🟡` → `💬` rule, or the compound splits and strands the old glyph on the most important
@@ -153,15 +155,18 @@ inherited.
    pattern catches *every* spelling in use — a heading style or directive form it misses reads as
    zero, which is indistinguishable from a closed doc.
 2. **Read each doc's status** from the doc.
-3. **Drop every row whose doc shows no live questions**, then open that doc to confirm. This is the
-   highest-yield step in the whole procedure; expect it to fire.
+3. **Check rows whose doc shows no live questions** against the doc and tree. Remove closed work,
+   but keep unfinished research, build, or verification steps in ▶️; zero questions is not done.
 4. **Check recent commits and the working tree** for work that shipped, and for build orders whose
    steps are now done.
-5. **Hunt the 💬 rows for ready work** (see 📦 above) and promote it.
+5. **Hunt 💬, 🔒, and 🧊 for agent actions** — research, narrowing a choice, experiments, partial
+   implementation, verification — and route each independent next step to ▶️. A remaining owner
+   gate belongs in 💬 only once the agent step is exhausted.
 6. **Re-verify every blocker.** "Blocked on a measurement / hardware / another ruling" is a claim
    with a date on it; confirm it still holds.
-7. **Find unrouted questions** — docs carrying live questions that no row names. Give them a row,
-   or name them under *does not cover*.
+7. **Find unrouted work and questions** — committed work with no row, or docs carrying live
+   questions that no row names. Route the next action, or name out-of-scope questions under
+   *does not cover*.
 8. **Re-derive the counted header** from the rows you ended up with, and check every link and
    anchor resolves.
 
@@ -172,7 +177,7 @@ from the docs**, using the old file only as an index of which docs to read. What
 history, which is what `git log` is for.
 
 Then tell the user what the rewrite found: rows already answered in their own docs, counts that
-were wrong, ready work that was buried, questions nothing routed. Those findings are the argument
+were wrong, agent work that was buried, questions nothing routed. Those findings are the argument
 that the compaction was needed, and they are invisible from inside the old file.
 
 ## Doc changes are roadmap changes
@@ -183,16 +188,16 @@ roadmap edit belongs in the same commit as the doc change.**
 
 | The doc did this | The roadmap does this |
 | --- | --- |
-| A design doc is created (`design-doc`) | A row exists for it, linking the doc |
-| A `💬` question opened | A **Needs you** row, or a new `Live` count on an existing one |
-| A question answered and compacted | `Live` drops; at zero the row leaves |
-| A design settles — zero `💬`, `status: accepted` | The row moves to **Ready** (📦) |
-| An implementation plan opens as a `SKETCH` (`implementation-plan`) | Nothing becomes 📦 — a sketch is not a hand-off |
-| That plan is promoted against the tree | 📦, linking the plan and the design |
-| A brainstorm idea is promoted (`brainstorming`) | It arrives as a row; ideas still being costed do not |
-| A user story records a gap accepted as work (`user-stories`) | Its own row, linking the story |
-| A research round rules an option out or opens a decision (`research`) | The affected row updated, or a new 💬 row |
-| A design ships and graduates (`system-doc`) | The row leaves; anything specified-but-not-built stays as its own row |
+| A design doc is created (`design-doc`) | Route its next agent action to ▶️, or its genuinely owner-only ruling to 💬 |
+| A `💬` question opened | Researchable next step goes to ▶️; only an owner-only next step goes to 💬 |
+| A question answered and compacted | `Live` drops; remove the row only if the underlying work is done |
+| A design settles — zero `💬`, `status: accepted` | Unfinished implementation or verification goes to ▶️ |
+| An implementation plan opens as a `SKETCH` (`implementation-plan`) | Refining the sketch may be ▶️; it is not a build hand-off |
+| That plan is promoted against the tree | Build step goes to ▶️, linking the plan and design |
+| A brainstorm idea is promoted (`brainstorming`) | Route the next agent step or owner ruling; ideas still being costed do not enter the queue |
+| A user story records a gap accepted as work (`user-stories`) | Its own row, linking the story and naming the next actor |
+| A research round rules an option out or opens a decision (`research`) | Update the next action; move to 💬 only if agent work is exhausted |
+| A design ships and graduates (`system-doc`) | The row leaves; anything specified-but-not-built stays as its own ▶️ row |
 
 Two failure modes this exists to prevent, both of which look fine locally: **the answered question
 that still reads blocked**, which costs the user a turn to discover, and **the shipped design whose
