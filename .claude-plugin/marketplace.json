@@ -1,0 +1,14 @@
+{
+  "name": "matt-craft",
+  "description": "Workflow and documentation skills for AI-assisted engineering.",
+  "owner": {
+    "name": "Matt Schulkind"
+  },
+  "plugins": [
+    {
+      "name": "matt-craft",
+      "source": "./",
+      "description": "Workflow and documentation skills for AI-assisted engineering."
+    }
+  ]
+}
