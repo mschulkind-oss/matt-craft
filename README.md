@@ -61,13 +61,14 @@ These skills are plain Markdown prompt templates and work with any coding agent,
 
 ### As a Claude Code Plugin
 
-Install directly via the Claude Code plugin manager:
+Register the GitHub-hosted marketplace (a catalog of installable plugins), then install the plugin:
 
 ```bash
-claude plugin install github:mschulkind-oss/matt-craft
+claude plugin marketplace add mschulkind-oss/matt-craft
+claude plugin install matt-craft@matt-craft
 ```
 
-Once installed, invoke skills with standard slash commands (e.g. `/design-doc` or namespaced `/matt-craft:design-doc`).
+Once installed, invoke a skill as `/matt-craft:design-doc` (or select it from Claude Code's skill list).
 
 ### With Other Agents and Sandboxes
 

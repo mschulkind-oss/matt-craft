@@ -53,6 +53,9 @@ The printed guide is about what the renderer can do. These two are about how we 
 - **Section size limits:** If an inline section or sub-point exceeds several formatted paragraphs, split it into a dedicated document and link it.
 - **Frontmatter `status:` is an axis, not a second spelling of the prose `**Status:**` line.** They answer different questions and both are worth having: the frontmatter one answers *is the argument closed?* in Vantage's closed four; the prose line answers *what does this doc owe someone?* in the vocabulary **`design-doc`** defines. So `BUILT` over `in-review` is a legal and informative pair — in the tree, and still owing one ruling — and squashing them into one value loses that. Two rules follow: a lifecycle word never goes in the frontmatter slot, where anything outside the four **silently renders no chip**; and the document's *genre* — `STORIES`, `INVENTORY`, `HANDOFF` — goes in `tags:` or the title and never in either.
 
+> [!NOTE]
+> **Wrap release-note prose like the rest of the file.** GitHub turns each newline in a release body into a line break, so `publish.yml` runs `changelog-section.sh --unwrap` to join each paragraph and list item onto one line. Do not write long lines to compensate, and do not use a bare newline to force a break — that gets joined too. A break that must survive needs two trailing spaces or a `\`.
+
 ---
 
 ## 2. Open Questions & Decision Ledgers
