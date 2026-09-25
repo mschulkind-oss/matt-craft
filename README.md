@@ -59,6 +59,21 @@ While `matt-craft` skills work in any Markdown-compatible environment, they are 
 
 These skills are plain Markdown prompt templates and work with any coding agent, model, or harness that supports skills.
 
+### With yolo-jail
+
+Add `matt-craft` to the `packs` array in your host's user config at `~/.config/yolo-jail/config.jsonc`, alongside your existing agent packs:
+
+```jsonc
+{
+  "packs": [
+    "claude",
+    "git+https://github.com/mschulkind-oss/matt-craft"
+  ]
+}
+```
+
+Keep your existing entries; `claude` is an example agent pack. Packs belong in the user config, not the workspace config. Restart your jail to make the skills available to your configured agents. See [yolo-jail](https://github.com/mschulkind-oss/yolo-jail) for setup details.
+
 ### As a Claude Code Plugin
 
 Register the GitHub-hosted marketplace (a catalog of installable plugins), then install the plugin:
@@ -74,7 +89,7 @@ Once installed, invoke a skill as `/matt-craft:design-doc` (or select it from Cl
 
 The repository layout follows standard agent skill conventions:
 - Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter triggers (`description: Use when...`).
-- Fully compatible with tools and container sandboxes that consume Git-based skill packs (such as [`yolo-jail`](https://github.com/mschulkind-oss/yolo-jail) via `"packs": ["git+https://github.com/mschulkind-oss/matt-craft"]`).
+- Fully compatible with tools and container sandboxes that consume Git-based skill packs.
 
 ---
 
