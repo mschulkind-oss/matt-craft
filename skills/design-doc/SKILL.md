@@ -339,7 +339,15 @@ Per-question format:
 ## Open Questions
 
 1. 💬 **OQ-1: Queue position on re-entry.** When a PR fails and the agent fixes
-   it, does it go to the back of the queue or retain its position?
+   it, where does it re-enter? The choice determines whether earlier reviews
+   can be bypassed after a fix.
+
+   - **A — Back of the queue.** Recheck against what merged while it was out;
+     the PR waits longer.
+   - **B — Retain its position.** Shorter wait, but earlier reviews may no
+     longer reflect the fixed PR.
+   - **C — Next review cycle.** Keeps this cycle's order, but delays the fix
+     until another cycle begins.
 
    <!-- vantage: oq id=OQ-1 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
@@ -363,6 +371,7 @@ Format rules:
 
 - **Emoji prefix + stable ID + bold title** on the first line — status emoji (💬, 💬 🤷, ✅, 🔒), stable ID, and a bold sentence fragment or direct question.
 - Context on the following lines, including **what the answer decides or blocks** ("this is the closure question"; "determines whether the daemon ever holds auth state"). A question with no stakes attached shouldn't be in the list.
+- **Choices belong on separate lines.** If the question offers A/B/C (or any named alternatives), put each in its own indented bullet under the question, with a bold label, a short description, and the material trade-off. Leave a blank line before and after the nested list so it stays inside the question in Markdown. Never run `A: … B: … C: …` together in a paragraph — not in the question, context, or leaning. Keep the stakes and options easy to scan before the answer block; don't bury the choice in a long introductory sentence. For a simple two-way question, plain prose is fine if it stays readable.
 - `_Leaning:_` — your current best guess with brief rationale. Always have one; "I genuinely don't know" or deferring to user preference (🤷) is itself a leaning worth stating. **A leaning is replaced, never versioned.** There is no "Leaning (second version)" and no "Leaning (fourth version, and it is review's)" — a leaning is what you think *now*, so when it changes it changes and the old one goes. If *why* it changed is load-bearing, that reason is a fact about the system: state it in the body as one. The leaning is not an autobiography of the design.
 - `**Answer:**` on its own line, then a blockquote starting as `_(empty — fill in when decided)_`.
 - **An `oq` directive on every 💬 question that states a leaning**, indented inside the list item with blank lines around it, carrying the question's id and the leaning restated in words. Without it the question renders with no button for the reviewer to click, and `vantage-check` reports it as an error. A 🔒 or ✅ question needs none.
@@ -545,6 +554,7 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
 - [ ] A negative-space section says what this does NOT cover
 - [ ] Alternatives considered, each with an explicit verdict
 - [ ] Live Open Questions have status emoji (💬), stable ID, bold title, stakes, leaning, empty Answer blockquote, and an `oq` directive carrying the id and the leaning text
+- [ ] Every lettered or named choice in Open Questions has its own indented bullet and trade-off; no A/B/C alternatives run together in prose
 - [ ] `uvx vantage-check <doc>` is clean — in particular every section number, question id and filename in prose is a link (`ref/*`)
 - [ ] Settled decisions are compacted into the Decision Ledger + normative body text (with refuted objections preserved as warnings)
 - [ ] The ledger's `Built` column was filled by opening the tree, not by reading commit messages
