@@ -5,15 +5,12 @@ documentation skills for AI-assisted engineering (`brainstorming`, `design-doc`,
 `implementation-plan`, `research`, `roadmap`, `system-doc`, `user-stories`,
 `vantage-docs`).
 
-## Canonical Source of Truth
+## Skill Contributions
 
-**Do not author new skills directly in this repository.** Canonical skill authoring,
-testing, and review happen upstream in Matt's private **Backplane** repository
-(`agent-config/skills/`).
-
-Changes to this repository are deployed via Backplane's `bin/sync-matt-craft`
-pipeline, which dereferences symlinks, performs automated privacy audits, runs
-corpus validations, and pushes updates to GitHub.
+Skill content is maintained in an upstream authoring tree and synchronized into
+this repository after review and validation. Open an issue or pull request to
+propose improvements; a direct edit to a synchronized skill may need to be
+applied upstream before the next release.
 
 ## Local Checks
 
