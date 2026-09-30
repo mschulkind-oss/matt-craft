@@ -10,7 +10,7 @@
 #
 # For every tracked Markdown file under the given paths it checks:
 #
-#   NOSTATUS   no `**Status:**` line at all
+#   NOSTATUS   neither a `stage:` key nor a `**Status:**` line
 #   BADWORD    stage (or legacy prose word) is not one of the seven
 #   DUPSTAGE   stage is copied into the prose status line
 #   NEEDDATE   a dated word carries no ISO date
@@ -18,7 +18,7 @@
 #   UNSTAMPED  BUILT with no MEASURED:/UNMEASURED: clause
 #   FMSTATUS   frontmatter `status:` outside Vantage's four (renders no chip)
 #   RULING     the "Needs your ruling" line disagrees with the live questions
-#   GRADUATE   BUILT, zero live questions — hand off to system-doc
+#   GRADUATE   BUILT, no questions left — hand off to system-doc
 #
 # Exit 0 = clean, 1 = at least one finding, 2 = bad invocation. GRADUATE is a
 # notice rather than a finding: it reports work that is ready to hand off, not
@@ -81,6 +81,15 @@ while IFS= read -r doc; do
         fm && /^stage:[ \t]*/ {
             stage = $0
             sub(/^stage:[ \t]*/, "", stage)
+            # This convention check supports simple YAML scalars, not YAML
+            # escapes. Strip comments outside quotes, never a quoted hash.
+            sq = sprintf("%c", 39)
+            quote = substr(stage, 1, 1)
+            if (quote == "\"" || quote == sq) {
+                tail = substr(stage, 2)
+                endquote = index(tail, quote)
+                if (endquote) stage = substr(tail, 1, endquote - 1)
+            } else sub(/[ \t]+#.*$/, "", stage)
             gsub(/^[ \t"'"'"']+|[ \t"'"'"']+$/, "", stage)
             next
         }
@@ -93,6 +102,12 @@ while IFS= read -r doc; do
 
         /^\*\*Status:\*\*/ && status_line == ""  { status_line = $0; next }
         /^\*\*Needs your ruling/ && ruling == "" { ruling = $0; next }
+
+        # Answered scaffolds still owe compaction; ledger checkmarks do not.
+        index($0, done) && $0 ~ /OQ-[A-Z]*[0-9]+/ && $0 !~ /^[ \t]*\|/ {
+            nanswered++
+            next
+        }
 
         # Blocked decisions still owe an answer, so they prevent graduation.
         index($0, lock) && $0 ~ /OQ-[A-Z]*[0-9]+/ && !index($0, done) {
@@ -116,7 +131,7 @@ while IFS= read -r doc; do
             if (fmstatus != "" && !(fmstatus in ok_fm))
                 print "FMSTATUS|frontmatter status \"" fmstatus "\" is outside Vantage'"'"'s four, so it renders no chip"
 
-            if (status_line == "") { print "NOSTATUS|no **Status:** line"; exit }
+            if (status_line == "" && stage == "") { print "NOSTATUS|no stage: key and no **Status:** line"; exit }
 
             rest = status_line
             sub(/^\*\*Status:\*\*[ \t]*/, "", rest)
@@ -156,6 +171,7 @@ while IFS= read -r doc; do
                 line = ruling
                 while (match(line, /OQ-[A-Z]*[0-9]+/)) {
                     id = substr(line, RSTART, RLENGTH)
+                    if (id in named) { line = substr(line, RSTART + RLENGTH); continue }
                     if (!(id in live))
                         print "RULING|Needs your ruling names " id ", which is not a live question"
                     named[id] = 1; claimed++
@@ -171,8 +187,10 @@ while IFS= read -r doc; do
                 print "RULING|no Needs your ruling line, " nlive " live: " ids
             }
 
-            if (word == "BUILT" && nlive == 0 && nblocked == 0)
-                print "GRADUATE|BUILT, zero live questions — hand off to system-doc"
+            if (word == "BUILT" && nlive == 0 && nblocked == 0 && nanswered == 0)
+                print "GRADUATE|BUILT, no questions left — hand off to system-doc"
+            if (word == "BUILT" && nanswered > 0)
+                print "RULING|BUILT while " nanswered " answered question(s) await compaction"
             if (word == "BUILT" && nblocked > 0)
                 print "RULING|BUILT while " nblocked " blocked question(s) still owe an answer"
             if (word == "BUILT" && nlive > 0)

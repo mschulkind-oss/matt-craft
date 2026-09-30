@@ -102,8 +102,8 @@ next: "Build the bucket and unit tests; stop at the targeted test gate"
 
 # Plan: token bucket for the poller
 
-**Design:** [`rate-limiting.md`](rate-limiting.md) · **Status:** completed against the tree ·
-Written against `a1b2c3d`, 2026-09-01.
+**Status:** 2026-09-01. Completed against the tree, written against `a1b2c3d`.
+**Design:** [`rate-limiting.md`](rate-limiting.md).
 Precedence: the design wins on behavior, the tree wins on fact, this file
 is advice and is the first thing to be wrong.
 
@@ -168,7 +168,7 @@ Two rules govern it, and **`design-doc`** owns both:
 
 Do it **close to hand-off**, because it rots at the speed of the tree. Promoting means: stamp the written-against commit, drop the `SKETCH` status, and re-check every line that has been sitting in the sketch since the design was open — those are the stalest lines in the file, and they were written before the rulings.
 
-**Deleted when the work lands.** Git keeps it; a stale plan sitting next to a shipped feature is a trap for the next reader. Two things graduate out of it first:
+**Deleted at graduation**, in the same commit that adds the system doc (see **`system-doc`**, Step 4), not at landing. Keep the plan and roadmap links while graduation or verification is owed; stamp it with the repository's built stage (`BUILT` with **`design-doc`**'s mapping). Git keeps it afterward. Two things move out first:
 
 - **Traps that turned out to be real** → the system doc's warnings (see **`system-doc`**). They are now permanent knowledge about the system.
 - **What the plan got wrong** → the retro below.
@@ -177,15 +177,17 @@ Do it **close to hand-off**, because it rots at the speed of the tree. Promoting
 
 Keep `stage`, `next`, and actual `depends-on` paths in this file's frontmatter. Review the
 roadmap in the **same commit** whenever links, sequencing rationale, or remaining scope
-change; do not copy plan state or blockers into a second table. See **`roadmap`**.
+change; do not copy plan state or blockers into a second table. See **`roadmap`** for capability checks before `vantage-check index` and
+`--roadmap <path>` selection when multiple roadmaps are supported.
 
 - **Opened as a sketch:** set `stage: SKETCH`, name refinement as the next action, and link
   the design gates. This is not a build hand-off, even if it has a priority position.
 - **Promoted against the tree:** set the repository's ready stage (default `DECIDED`),
   record the written-against commit, and name the first build step in `next`. Review the
   roadmap link to this hand-off and its order, not a duplicated ready label.
-- **Work landed, plan deleted:** remove closed work from the roadmap and give specified-but-
-  absent or unverified work its own source and next step rather than letting it evaporate.
+- **Work landed:** set the built stage and retain the plan and roadmap links while graduation
+  or verification is owed. **Graduated, plan deleted:** remove closed entries and give
+  specified-but-absent or unverified work its own live source and next step.
 
 ## Whether this is working
 

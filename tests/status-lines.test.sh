@@ -227,6 +227,74 @@ stage: BUILT
    <!-- vantage: oq id=OQ-3 -->
 EOF
 
+# Regression fixtures for stage-first validation, comments, and compaction.
+w current-only.md <<'EOF'
+---
+stage: CURRENT
+---
+# Maintained
+EOF
+w bad-only.md <<'EOF'
+---
+stage: SHIPPED
+---
+# Invalid even without prose
+EOF
+w dated-only.md <<'EOF'
+---
+stage: DESIGN
+---
+# A stage is not its evidence
+EOF
+w stage-comment.md <<'EOF'
+---
+stage: DESIGN  # still being argued
+---
+**Status:** 2026-09-29.
+EOF
+w stage-quoted-comment.md <<'EOF'
+---
+stage: 'DESIGN' # still being argued
+---
+**Status:** 2026-09-29.
+EOF
+w stage-hash.md <<'EOF'
+---
+stage: "DESIGN # not a comment"
+---
+**Status:** 2026-09-29.
+EOF
+w built-answered.md <<'EOF'
+---
+stage: BUILT
+---
+**Status:** 2026-09-29. MEASURED: test.
+1. ✅ **OQ-A1: Ruled.** Awaiting compaction.
+
+   <!-- vantage: oq id=OQ-A1 -->
+
+   **Answer:**
+   > Agreed.
+EOF
+w built-ledger.md <<'EOF'
+---
+stage: BUILT
+---
+**Status:** 2026-09-29. MEASURED: test.
+| ID | Ruling | Built |
+| :--- | :--- | :--- |
+| OQ-A1 | Agreed | ✅ |
+EOF
+w built-answered-specimen.md <<'EOF'
+---
+stage: BUILT
+---
+**Status:** 2026-09-29. MEASURED: test.
+~~~markdown
+1. ✅ **OQ-A1: Example.** Not a question here.
+~~~
+EOF
+
 git add -A && git commit -qm fixtures
 
 run() { sh "$script" "docs/design/$1" 2>&1 || true; }
@@ -284,5 +352,22 @@ expect stage-undated.md NEEDDATE "frontmatter DECIDED still needs a prose date"
 
 reject stage-blocked.md GRADUATE "blocked decisions prevent graduation"
 expect stage-blocked.md RULING "BUILT with a blocked question is reported"
+
+expect current-only.md "ok  " "CURRENT needs neither prose nor a date"
+[ "$(code current-only.md)" = 0 ] && ok "CURRENT-only exits 0" || bad "CURRENT-only must pass"
+expect bad-only.md BADWORD "invalid stage is checked before missing prose"
+reject bad-only.md NOSTATUS "invalid stage does not hide behind NOSTATUS"
+expect dated-only.md NEEDDATE "a dated stage without prose still needs evidence"
+expect stage-comment.md "ok  " "plain stage accepts a YAML comment"
+expect stage-quoted-comment.md "ok  " "quoted stage accepts an outside YAML comment"
+expect stage-hash.md BADWORD "a hash inside quotes remains part of the stage"
+reject built-answered.md GRADUATE "an answered question prevents graduation"
+expect built-answered.md "1 answered question(s) await compaction" "answered question reports compaction owed"
+[ "$(code built-answered.md)" = 1 ] && ok "compaction owed exits 1" || bad "compaction owed must fail"
+expect built-ledger.md GRADUATE "ledger checkmarks do not prevent graduation"
+expect built-answered-specimen.md GRADUATE "fenced answered examples do not prevent graduation"
+expect stage-built.md "BUILT, no questions left" "graduation notice includes every question state"
+stale_count=$(run ruling-stale.md | awk '/names OQ-9, which/ { n++ } END { print n+0 }')
+[ "$stale_count" = 1 ] && ok "linked stale id reports once, not label plus anchor" || bad "linked stale id reported $stale_count times"
 
 exit $((fails > 0))

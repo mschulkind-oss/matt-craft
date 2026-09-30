@@ -12,7 +12,7 @@ Vantage renders Markdown with full GitHub Flavored Markdown (GFM) fidelity, KaTe
 [§1](#1-formatting) points at the formatting conventions — it does not restate them. [§2](#2-open-questions--decision-ledgers) and [§3](#3-defined-terms) are the substantive conventions every doc in the tree follows regardless of kind: how decisions are recorded, and how terms are defined. [§4](#4-vantage-check--read-it-first-run-it-last) is the tool, and it bookends the work:
 
 > [!IMPORTANT]
-> **Before writing** — run `uvx vantage-check style-guide` and read what it prints. It is the canonical formatting conventions, straight from the renderer's own source. This skill deliberately does not restate them ([§1](#1-formatting)); for unreleased changes use a checker built from the project checkout. If the command cannot run, read [`references/style-guide.md`](references/style-guide.md).
+> **Before writing** — run `uvx vantage-check style-guide` and read what it prints. It is the canonical formatting conventions, straight from the renderer's own source. This skill deliberately does not restate them ([§1](#1-formatting)); for unreleased changes use a checker built from the project checkout. If the command cannot run, or its guide lacks *Planning documents*, read [`references/style-guide.md`](references/style-guide.md).
 >
 > **After writing** — run `uvx vantage-check <file>` and fix what it reports.
 
@@ -32,7 +32,7 @@ Vantage renders Markdown with full GitHub Flavored Markdown (GFM) fidelity, KaTe
 | Source | When |
 | :--- | :--- |
 | `uvx vantage-check style-guide` | Always, when it runs. Generated from the viewer's own module, so it is correct for the Vantage in front of you. |
-| [`references/style-guide.md`](references/style-guide.md) | Only when the command cannot run — no `uvx`, no network, no binary on `PATH`. A dated snapshot of the same text. |
+| [`references/style-guide.md`](references/style-guide.md) | When the command cannot run, or its guide lacks *Planning documents*. A snapshot with explicitly documented local corrections; see its header. |
 
 That covers document structure, relative links and line anchors, frontmatter, Mermaid, code and diff fences, callouts, tables, task lists, the `$$...$$` math rule, Vantage's `<!-- vantage: … -->` directives, and the reserved `vantage:` frontmatter key.
 
@@ -53,9 +53,14 @@ The renderer defines syntax; these rules define how we write:
 - **Section size limits:** move sections longer than several formatted paragraphs to a
   dedicated document and link them.
 - **One home per planning fact:** source documents own `status`, `stage`, `next`, and
-  `depends-on` as top-level frontmatter. The roadmap owns relative priority and its
-  rationale, not copied counts or state. See **`roadmap`** for the portable annotated-list
-  shape and **`design-doc`** for the stage vocabulary.
+  `depends-on` as top-level frontmatter, never under `vantage:`. The roadmap owns relative
+  priority and its rationale, not copied counts or state. Vantage derives the rest — the
+  badge beside each link, the one-line *Referenced by* under a document's frontmatter card,
+  and the planning page (`g p`, at `/.vantage/planning`) — so never hand-maintain a
+  backlinks list, a status table, or a list of questions awaiting a ruling, except
+  **`design-doc`**'s checked **Needs your ruling** header for plain-Markdown readers. See
+  **`roadmap`** for the portable annotated-list shape and **`design-doc`** for the stage
+  vocabulary.
 - **Two axes:** `status` says whether the argument is closed (`draft`, `in-review`,
   `accepted`, `deprecated`); `stage` says what the document owes someone, in the repo's
   vocabulary. Put neither genre words nor lifecycle stages in `status`. Keep prose
@@ -64,12 +69,10 @@ The renderer defines syntax; these rules define how we write:
   question markers, and body text must stand without Vantage badges or comments. A static
   export and GitHub have no planning badges; do not compensate with copied status tables.
 
-For a Vantage-enabled repository, read the printed guide's planning conventions too:
-`[planning]` selects the scan and roadmap, `[planning.stages]` maps exact repository stage
-words to `open`, `ready`, `built`, or `done`, and `vantage-check index` shows the derived
-planning state. A `done` role removes the document's questions from the active queue; it
-is not a way to hide unfinished work. Tool support is version-dependent — report when the
-installed checker lacks it rather than treating absence as a clean index.
+Vantage needs no enabling step; `.vantage.toml` is optional. **`roadmap`**, *Vantage
+integration*, owns stage-role effects, dependencies, roadmap discovery/pinning, routing,
+and index capabilities. **`design-doc`** owns repository stage words and their mapping.
+Do not mark unfinished work `done`: it removes every planning contribution without warning.
 
 > [!NOTE]
 > **Wrap release-note prose like the rest of the file.** GitHub turns each newline in a release body into a line break, so `publish.yml` runs `changelog-section.sh --unwrap` to join each paragraph and list item onto one line. Do not write long lines to compensate, and do not use a bare newline to force a break — that gets joined too. A break that must survive needs two trailing spaces or a `\`.
@@ -77,53 +80,73 @@ installed checker lacks it rather than treating absence as a clean index.
 ---
 
 ## 2. Open Questions & Decision Ledgers
-When surfacing and recording design decisions:
-- **Phase 1 (Deliberating):** In-flight questions use status emojis and full scaffolding:
-  - 💬 **Open Question:** Active decision awaiting ruling.
-  - 💬 🤷 **Deferred Question:** Pure subjective user preference where agent has no technical leaning.
-  - ✅ **Answered / Resolved:** Decided question awaiting compaction.
-  - 🔒 **Blocked:** Blocked on upstream decisions or experiments.
-  Format: stable ID (`OQ-N`), bold title + stakes, `_Leaning:_`, fill-in blockquote `**Answer:**`, and an `oq` directive carrying the id. Open questions with a leaning also carry the leaning text; blocked questions need no leaning. Keep the directive in ✅ answered and 🔒 blocked states until compaction, so the planning index can still see them. Neither state gets the one-click leaning button.
+The **`design-doc`** skill owns the question scaffold, emoji legend, answering protocol, and compaction. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns directive syntax and checks; **`roadmap`**, *Vantage integration*, owns planning-tool behavior and routing.
 
-  > [!IMPORTANT]
-  > **Three parts of that scaffolding are checked, all at error severity** (Vantage 0.5.9). The printed style guide ([§1](#1-formatting)) states them in full; what they cost you here:
-  >
-  > - **The `oq` directive is not optional.** A 💬 question with a `_Leaning:_` and no `oq` directive renders with nothing for the reviewer to click — `vantage/oq-missing`. Its `leaning` value restates the leaning in words and is never `"Yes"`: that text *is* the review comment the next agent reads, and nobody remembers which button was pressed.
-  > - **The id is the question's anchor now**, so its shape is checked (`vantage/oq-id-format`) and so is uniqueness within the document (`vantage/oq-id-duplicate`). A malformed or duplicated one silently goes nowhere.
-  > - **Every reference to a question, a section or a file is a link** — `ref/unlinked-oq`, `ref/unlinked-section`, `ref/unlinked-file`. See below.
+Apply that scaffold to every question. The all-state directive requirement below is an
+authoring convention even when an older printed guide describes only the omission its
+checker catches; do not let that narrower wording erase blocked or preference questions.
+The shipped snapshot records this correction pending the upstream generator repair.
+This section owns the renderer contract:
+- **Every question carries an `oq` directive**, in 💬, preference, 🔒, and ✅ states.
+  Indent it inside the list item with blank lines around it and content after it;
+  a trailing directive attaches to nothing (`vantage/orphan`).
+- A 💬 directive's `leaning="…"` restates the visible `_Leaning:_` in the same words,
+  including a preference or honest uncertainty. That attribute is what **Take this
+  leaning** files as a review comment. Without it the button files only "Take the
+  stated leaning." 🔒 gets the id alone; ✅ retains its directive until same-turn
+  compaction. Neither state offers the one-click leaning button.
+- A directive is more than a button: a question without one does not exist to the
+  index, badges, or planning page. A green check is not proof all questions exist.
 
-  ```markdown
-  1. 💬 **OQ-9: Queue position on re-entry.** Does a fixed PR go to the back?
+> [!IMPORTANT]
+> **Three parts of that scaffolding are checked, all at error severity.** The matching style guide or corrected snapshot ([§1](#1-formatting)) describes them; what they cost you here:
+>
+> - **The `oq` directive is not optional, and only one case of it is checked.** A 💬 question in a list item, with an `OQ-` id, a `_Leaning:_` line and no `oq` directive, renders with nothing for the reviewer to click — `vantage/oq-missing`. A 🔒 or ✅ question, or a 💬 one with no leaning yet, that lacks a directive gets **no finding at all**, and does not exist to the planning index: no badge count, no planning-page card, no *Unrouted* entry. Check those by eye. Its `leaning` value restates the leaning in words and is never `"Yes"`: that text *is* the review comment the next agent reads, and nobody remembers which button was pressed.
+> - **The id is the question's anchor now**, so its shape is checked (`vantage/oq-id-format`) and so is uniqueness within the document (`vantage/oq-id-duplicate`). A malformed or duplicated one silently goes nowhere.
+> - **Every reference to a question, a section or a file is a link** — `ref/unlinked-oq`, `ref/unlinked-section`, `ref/unlinked-file`. See below.
 
-     <!-- vantage: oq id=OQ-9 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
+```markdown
+1. 💬 **OQ-9: Queue position on re-entry.** Does a fixed PR go to the back?
 
-     _Leaning:_ Back of the queue.
+   <!-- vantage: oq id=OQ-9 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
-     **Answer:**
-     > _(empty — fill in when decided)_
-  ```
+   _Leaning:_ Back of the queue — the fix might interact with what merged while it was out.
 
-  The id is `OQ`, a hyphen, an optional short uppercase prefix, then digits:
+   **Answer:**
+   > _(empty — fill in when decided)_
+```
 
-  ```text
-  OQ-9      valid        OQ-foo   no — the prefix is uppercase
-  OQ-TP6    valid        OQ-tp6   no
-  OQ-A03    valid        OQ6      not a reference at all — the hyphen is the convention
-  ```
+The id is `OQ`, a hyphen, an optional short uppercase prefix, then digits:
 
-  The prefix is what keeps ids distinct once two documents reference each other's questions; use one in both whenever they do.
-- **Phase 2 (Compacted):** *Never delete a decision* — but a decision's durable form is a **Decision Ledger row plus normative body text**, not an ever-growing question scaffold. When questions are settled:
-  - Fold the ruling directly into the normative text of the body section it governs (§X).
-  - Preserve refuted objections and known traps as warnings (`> [!WARNING]`) in the body text (refuted objections are documentation, not history).
-  - Compact answered questions into a clean table: `| ID | Ruling / Decision | Date | Settled in |`.
-  - **Compaction destroys the `oq` directive** — that is what compaction is — and with it the question's anchor. Inbound references stay links; they repoint at the ledger (below).
+```text
+OQ-9      valid        OQ-foo   no — the prefix is uppercase
+OQ-TP6    valid        OQ-tp6   no
+OQ-A03    valid        OQ6      not a reference at all — the hyphen is the convention
+```
 
-  > [!WARNING]
-  > **The worst breakage here is invisible to every checker, including this one.** `vantage-check` reports a dead `#OQ-N` in a sibling document — and only if you run it there. **Rule ids are also cited from source comments,** which no markdown tool parses at all. One sprint's compaction deleted 49 directives; 28 of those ids resolved to nowhere afterwards and 9 inbound references were left stale. So the grep is unscoped, and it runs *before* the compaction, not after:
-  >
-  > ```console
-  > $ rg -n 'OQ-[A-Z]*[0-9]'    # the whole repo: code comments, tests, tickets
-  > ```
+The prefix is what keeps ids distinct once two documents reference each other's questions; use one in both whenever they do.
+
+### Compaction and references
+
+**`design-doc`** owns same-turn answering and compaction. Use its five-column ledger:
+`| ID | Ruling / Decision | Date | Settled in | Built |`. Fill `Built` from the tree;
+*Settled in* is a section link, not a bare number. A bare id is permitted only in a table
+whose first column is exactly `ID`; that row also preserves a compacted dependency id.
+
+Compaction deletes the directive and therefore its case-sensitive question anchor.
+Repoint inbound Markdown links to `#decision-ledger` in the same commit, including
+roadmap links; a ledger link routes nothing. Keep a `depends-on` question fragment
+unchanged if its id remains in a ledger row; see **`roadmap`** for dependency semantics.
+
+Before compacting, search the **whole repository**, not only docs:
+
+```console
+$ rg -n 'OQ-[A-Z]*[0-9]'    # source comments, tests, tickets, and docs
+```
+
+Question ids in source comments are invisible to Markdown tools. Run document checks
+on every referring file too; an unpassed file is not checked. Never assume a clean check
+proves source citations survived.
 
 ### A reference is a link, or it is a lie
 
@@ -142,10 +165,11 @@ An `OQ-` id, a `§N` section number and a filename all read like pointers. Writt
                                            doc-relative, against the file the token names
 ```
 
-Two consequences worth knowing before the checker tells you:
+Three consequences worth knowing before the checker tells you:
 
 - **A specimen is not a reference.** An id in a template, a filename in a command, a `§N` in an example — put it in a fenced block, which these rules never read. Prose and inline code are read; fences are not.
 - **The link is checked against what the reference *names*,** not merely that it resolves. A section number linked to a different heading, or a filename linked to a different file, is a finding.
+- **On a roadmap, the target also decides routing.** A badge does not prove a heading link routes questions. See **`roadmap`**, *Vantage integration*, for the exact rules and multi-roadmap selection.
 
 ---
 
@@ -244,10 +268,19 @@ uvx vantage-check style-guide             # BEFORE writing: the canonical conven
 uvx vantage-check docs/design/api.md      # AFTER writing: does this actually render?
 uvx vantage-check docs/ userguide/        # directories, walked for .md and .markdown
 uvx vantage-check help                    # commands, options, and every rule id
-uvx vantage-check index                   # planning state in supporting versions
+uvx vantage-check index                   # only after the capability check below
 ```
 
 `check` is the default command, so a bare path list runs it. With **no arguments at all it prints help rather than checking anything** — always pass a path.
+
+### Planning capabilities
+
+Before any `index` invocation, confirm the installed checker's `help` lists `index`
+and `planning/*` rules. For multiple roadmaps, also check for `--roadmap <path>` and
+select the one being reviewed. **`roadmap`**, *Vantage integration*, owns discovery,
+pinning, root selection, index exit codes, and the manual fallback. Do not assume a
+proposed release is published. Refresh the release or use a project-built checker
+when available; disclose missing support rather than calling it an empty index.
 
 ### Before writing: `style-guide`
 
@@ -259,7 +292,7 @@ Three reasons it is a step and not a formality:
 - **The published wheel can lag a local checkout.** Read a project-built checker when available. For unpublished conventions not in the installed binary, consult the shipped snapshot and disclose which version was checked; do not claim an older checker verified new planning behavior.
 - **Some of it you cannot check by eye.** Vantage's `<!-- vantage: … -->` directives (`section`, `block`, `oq`, and their closed vocabulary of tones and badges) and the reserved `vantage:` frontmatter key are *silently inert* when wrong — nothing breaks, and nothing styles either. Reading the vocabulary first is the cheap way to get them right; `check`'s `vantage/*` rules are the only way to find out afterwards.
 
-If the command is unavailable, read [`references/style-guide.md`](references/style-guide.md) — the same text, snapshotted, shipped inside this skill so it is there when the network is not. Say in your hand-off that you worked from the snapshot.
+If the command is unavailable or its guide lacks *Planning documents*, read [`references/style-guide.md`](references/style-guide.md) — the same text, snapshotted, shipped inside this skill so it is there when the network is not. Say in your hand-off that you worked from the snapshot.
 
 ### After writing: `check`
 
@@ -281,7 +314,7 @@ It is a quality gate, not a delivery dependency: a missing checker never blocks 
 | :--- | :--- | :--- |
 | `0` | Nothing to fix | Done. |
 | `1` | Findings that fail the run | Fix them. |
-| `2` | Bad arguments, a path that is not there, or a `.vantage.toml` that cannot be trusted | Fix the invocation or the config, then re-run. |
+| `2` | Bad arguments, a path that is not there, or a `.vantage.toml` that cannot be trusted | Fix the invocation or the config, then re-run — **unless** the message is `unknown rule "planning/…"`: the config is newer than the checker, not wrong. Leave it alone, and run a checker whose help lists that rule (a project-built checker when available) or report the files as unverified. |
 | `3` | **A check could not run** | The documents were not fully checked, so the result is *unknown*, not clean. Re-run, or report the files as unverified. |
 
 > [!WARNING]
@@ -307,6 +340,7 @@ docs/standards/distribution.md
 | `--format text\|json` | Output format. Default `text`. JSON keeps `failures` (could-not-check) as a sibling of `findings` (broken), so a consumer cannot confuse the two. |
 | `--strict` | Warnings fail the run as well as errors. |
 | `-q`, `--quiet` | Drop the summary line. |
+| `-j`, `--jobs <n>\|auto` | Threads to check with (default `auto`: one per 12 files, at most 6); `--jobs 1` checks in this thread alone. `VANTAGE_CHECK_JOBS` sets a machine's default. |
 | `--color` / `--no-color` | Force colour on or off (default: on when stdout is a terminal). |
 | `--config <path>` | Use this `.vantage.toml`. A path that is not there is an error. |
 | `--no-config` | Ignore `.vantage.toml`; use the built-in defaults. |
@@ -315,11 +349,11 @@ docs/standards/distribution.md
 > [!NOTE]
 > **Paths come first, or name the command.** `vantage-check --format json docs/` exits `2` with *unknown option* — the bare form takes a path list, and an option before the first path is read as the command name. Either put the options after the paths, or say `check` explicitly: `vantage-check check --format json docs/`.
 
-Configuration is optional. A `.vantage.toml` at the **repository root** (never in `.vantage/`, which is transient state) can set `check.strict`, `check.exit-code`, and per-rule severities of `"error"`, `"warning"` or `"off"`. A config file that is present but wrong — unknown key, misspelled rule name, a severity that is not one — exits `2` rather than warning.
+Configuration is optional. A `.vantage.toml` at the **repository root** (never in `.vantage/`, which is transient state) can set `check.strict`, `check.exit-code`, per-rule severities of `"error"`, `"warning"` or `"off"`, and the `[planning]` table ([planning ownership](#writing-rules-and-planning-ownership)). A config file that is present but wrong — unknown key, misspelled rule name, a severity that is not one, a `[planning.stages]` role outside the four — exits `2` on every run, a `check` of an unrelated file included, rather than warning.
 
 ### What it checks
 
-Five families in planning-index versions, and the split is the point:
+Five families when the installed help lists `planning/*`; an older checker has no planning row — and the split is the point:
 
 | Family | The question it answers |
 | :--- | :--- |
@@ -335,23 +369,24 @@ Links and directives come from the *parsed* document, never a text search, so `[
 
 ### Fix the document, not the rule
 
-The temptation on a red run is to switch the rule off in `.vantage.toml`. Don't. Every default-on rule reports something genuinely broken in the rendered page — a link that goes nowhere, a directive that styles nothing, a frontmatter block that rendered as a horizontal rule and a heading of raw keys. Silencing the rule hides the breakage, not just the message. Change severities only when the human asks, and say why in the commit.
+The temptation on a red run is to switch the rule off in `.vantage.toml`. Don't. Every default-on rule reports something genuinely broken — in the rendered page (a link that goes nowhere, a directive that styles nothing, a frontmatter block that rendered as a horizontal rule and a heading of raw keys) or in the planning facts (a stage outside the declared words, a `depends-on` entry naming nothing, a `ready` or `built` stage over open questions). Silencing the rule hides the breakage, not just the message, and so does re-staging a document to a `done` word to quiet `planning/stage-disagrees`. Change severities only when the human asks, and say why in the commit.
 
 The one exception the tool documents for itself is performance: `vantage/block-split` re-parses the enclosing block per directive, which is quadratic on a long Open Questions list (a 40-question list measures ~171 ms against ~0.3 ms with the rule off). If that ever matters, turning *that* rule off is a considered trade, not a silencing.
 
 ### Checking a tree that predates the checker
 
-A repo with a backlog will report dozens of findings that are not yours. **Check the files you touched**, not the whole tree, so the run's output is about your work. Clearing the backlog is its own task — propose it, don't fold it into an unrelated change.
+A repo with a backlog will report dozens of findings that are not yours. **Check the files you touched**, not the whole tree, so the run's output is about your work. Clearing the backlog is its own task — propose it, don't fold it into an unrelated change. One exception: the planning rules report against the document that holds the question, never against the roadmap, so a check of the roadmap alone passes even when your edit left questions elsewhere unrouted. After editing the roadmap, or any document's `stage` or questions, also run `vantage-check index` and read *Unrouted* and *Disagrees*.
 
 ### What it does *not* check
 
-The checker reports what breaks rendering. It has no opinion on:
+The checker reports broken rendering and supported planning facts. It does not verify:
 
 - prose, structure, or section size ([§1](#1-formatting));
-- whether Open Questions have been compacted into a Decision Ledger ([§2](#2-open-questions--decision-ledgers));
+- whether Open Questions have been compacted into a Decision Ledger ([§2](#2-open-questions--decision-ledgers)) — `index` lists a built document under *Graduate* only once they are, but no rule fails on it;
+- a missing `oq` directive on a 🔒, ✅, or leaning-less 💬 question; open questions left in a `done`-role document; a stage word written in `status` (reported only when `vantage: status-chip` is set) or repeated in a prose `**Status:**` line; and any `stage` word at all when `[planning.stages]` declares none;
 - whether a term of art is defined, or whether glossary entries carry Origin lines ([§3](#3-defined-terms));
 - external `https://` links — it never touches the network;
 - Mermaid **layout** — diagrams are validated headless, grammar only, so one that parses can still lay out badly;
 - general Markdown hygiene — the `markdown/hygiene` family is off by default, because its rules are opinions about Markdown rather than statements about whether Vantage can render the page.
 
-A clean run means the page renders. Everything above in this guide is still yours to get right.
+A complete clean run means the checked page renders, not that every planning convention was followed. Everything above in this guide is still yours to get right.

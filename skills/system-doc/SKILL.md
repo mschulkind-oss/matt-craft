@@ -27,16 +27,22 @@ brainstorming → research → design-doc → implementation-plan → (build it)
 
 **`design-doc`** says reaching the built state hands off to here, and that reads like the *start* of a wait — for a review, a soak, some later moment when the doc is ready. There is no such moment. In one census ~40 design docs qualified for graduation and sat, until a whole restructure was needed to route them.
 
-The fact that settles it took a census to find and one line to state: **the evergreen tree has exactly one state.** 41 of 41 reference docs in that repo carried `status: current`. There is no "built but not yet current" for a doc to wait in, so reaching built *is* the cue, necessarily.
+See **`design-doc`**, *Graduation is the cue*, for why reaching built is sufficient.
+A candidate has the repository's `built`-role `stage:` and **no question left in
+question form**: 💬, 🔒, and ✅ awaiting compaction all prevent graduation. Inspect
+questions for missing directives, which would make the index falsely show a candidate.
 
-So the trigger is mechanical, and it is worth running as one: **a doc stamped `BUILT` with zero unanswered questions (including 🔒 blocked ones) is a graduation candidate.** `design-doc` ships a check that lists them.
+With a checker whose help lists `index` and declared stages, *Graduate* prints the
+candidates. See **`roadmap`**, *Vantage integration*, for capabilities, index exit codes,
+and `--roadmap <path>` selection when multiple roadmaps are supported. Otherwise
+**`design-doc`**'s shell script is an emoji-based fallback, not the index of record.
 
 > [!WARNING]
-> A built claim carries a measurement clause — `MEASURED:` or `UNMEASURED:` — and an `UNMEASURED:` design doc graduates like any other, **carrying that fact with it.** Three docs in that census claimed built with zero runtime observation recorded, two of them describing a macOS backend no CI job has ever exercised. Reconciling against the code ([step 1](#step-1--reconcile-against-the-code)) proves the code exists; it proves nothing about whether anyone watched it run. Say which in the source header; prioritize any outstanding verification in the roadmap without copying the evidence there.
+> A built claim carries a measurement clause — `MEASURED:` or `UNMEASURED:` — and an `UNMEASURED:` design doc graduates like any other, **carrying that fact with it.** Three docs in that census claimed built with zero runtime observation recorded, two of them describing a macOS backend no CI job has ever exercised. Reconciling against the code ([step 1](#step-1--reconcile-against-the-code)) proves the code exists; it proves nothing about whether anyone watched it run. Say which in the reference's prose `**Status:**` line, after the verification stamp (for example, **Status:** Verified 2026-08-30 against `a1b2c3d`. UNMEASURED: target observation remains outstanding.), never as a stage word, since the stage lives only in `stage:`. Prioritize any outstanding verification in the roadmap without copying the evidence there.
 
 Not this skill:
 
-- A design still being decided, or with live `💬` questions → `design-doc`
+- A design still being decided, or with live `💬` or `🔒` questions → `design-doc`
 - Knowledge about the *world* — libraries, protocols, prior art → `docs/research/` via `research`. System docs are evergreen knowledge about **what we built**; research docs are evergreen knowledge about everything else.
 - A user-facing guide, tutorial, or README → those have a different reader again (someone *using* the thing, not maintaining it)
 
@@ -176,7 +182,8 @@ This is a bounded sweep, not an order to edit every consumer: inspect documents 
 | Risk / mitigation table | **Cut** the risks the build resolved. A risk that is *still live* isn't history — move it into the section it threatens |
 | Sequencing, "what I'd build in order" | **Cut.** It's built |
 | The before-and-after framing: "what exists today", the gap, the diagnosis | **Cut** — it describes a world that no longer exists |
-| Open Questions, leanings, answer blockquotes | **Cut** |
+| Open Questions, leanings, answer blockquotes, and every `oq` directive | **Cut** — a directive left in a `done`-role doc fails no rule and appears on no planning list, so nothing else will catch it |
+| `next:` and `depends-on:` frontmatter | **Cut** — a reference owes no next step, and a `depends-on` naming the retired design or plan fails `planning/depends-on-missing` once step 4 deletes it |
 | Decision Ledger | **Cut**, minus the rows that pass the test below |
 | Postscripts, `⚠ Retracted:` headings, status archaeology | **Cut** — resolve them. The claim is either true, in which case state it plainly in the body, or it's gone |
 
@@ -184,7 +191,7 @@ This is a bounded sweep, not an order to edit every consumer: inspect documents 
 
 > **Would a maintainer, reading only the normative text, undo this on purpose?**
 
-If yes, the ruling keeps a one-line row in a short `## Why it's this way` appendix — **with its original `OQ-N` ID**, because those IDs are cited in code comments, tickets, and sibling docs, and after step 4 this doc is the only place they resolve. If no, it dies; git has it.
+If yes, the ruling keeps a one-line row in a short `## Why it's this way` appendix — **with its original `OQ-N` ID**, because those IDs are cited in code comments, tickets, and sibling docs, and after step 4 this doc is the only place they resolve. If no, it dies; git has it. Make the appendix a table whose first column is headed exactly `ID` and holds the bare question id, which is the shape `vantage-check` reads as the id's declaration. Any other shape (a `Ruling` first column, a bullet) makes every id an unlinked reference, and `ref/unlinked-oq` fails it. With its directive gone, the id has no anchor, so an inbound question-anchor link is re-pointed at `#why-its-this-way` (step 3).
 
 This appendix is not a history section. Every row is forward-facing: it exists to stop a future change, not to record a past conversation. If it grows past a dozen rows, the rulings weren't absorbed into the body properly.
 
@@ -236,7 +243,7 @@ Five things, all load-bearing:
 1. **The title names the thing.** Inverts the design-doc rule: no claims, no questions. Someone arriving from a grep hit needs to know what they've landed in.
 2. **A verification date and a commit.** The most valuable line in the doc, because it tells the reader how far to trust it — and because it makes re-verification a bounded diff instead of a re-read. Never restate it without redoing step 1.
 
-   `stage: CURRENT` is the same lifecycle value **`design-doc`** uses for an evergreen doc, where it deliberately takes **no date**. Keep that value only in frontmatter. The prose date is different: a lifecycle date on a living record claims nothing and expires on its own, while *this* date is a **verification stamp** — a claim about work someone actually did, bounded by the commit beside it. Do not let a vocabulary sweep strip it.
+   `stage: CURRENT` is the same lifecycle value **`design-doc`** uses for an evergreen doc, where it deliberately takes **no date**. Keep that value only in frontmatter. Where stages are declared, use a declared `done`-role word (`CURRENT = "done"` for this vocabulary), or `planning/stage-vocabulary` fails. Without declared stages the word has no tool role. The prose date is different: a lifecycle date on a living record claims nothing and expires on its own, while *this* date is a **verification stamp** — a claim about work someone actually did, bounded by the commit beside it. Do not let a vocabulary sweep strip it. Keep reference trees out of **`design-doc`**'s `status-lines.sh` paths (default `docs/design docs/plans`): it reports this verification date as `NODATE (CURRENT takes no date)`, which is not a reason to delete the stamp.
 3. **`covers:` — the doc's declared perimeter.** The paths this doc claims to describe. This is what turns "is this doc stale?" from a judgement call into a command; see *Staying current*. Get it right: too narrow and real drift goes unnoticed, too broad and every unrelated commit cries wolf.
 4. **What it is, in one paragraph, present tense.**
 5. **Where the code lives** — component → *package*, with the key types named. The thing a design doc structurally cannot have (it predates the code) and the thing that makes a reference doc worth opening.
@@ -275,9 +282,12 @@ $ rg -n '§[0-9]'  docs/                 # section references from siblings
 Every hit gets rewritten to the new path **and a valid anchor**. A corrected path with a dead `#anchor` is the same broken link with extra steps.
 
 > [!IMPORTANT]
-> **The `OQ-` grep is unscoped on purpose: rule ids are cited from source comments, and no markdown tool can see them.** One sprint's compaction deleted 49 `oq` directives; 28 of those ids resolved to nowhere afterwards. A graduation in the same tree had to preserve seven ids in its [`## Why it's this way` appendix](#the-one-test-for-keeping-a-ruling) precisely *because* Go comments cited them — after step 4 that appendix is the only place they resolve at all. Run the grep before you decide which rulings survive step 2, not after.
+> **Question ids** (`OQ-…`) are cited from source comments, which Markdown tools never
+> parse. Search before deciding which rulings survive; **`design-doc`** owns the
+> compaction procedure; **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns
+> directive syntax and reference rules. Retain needed ids in the appendix table.
 
-Inbound references are links now, not bare prose, so the last step of this one is mechanical: run `uvx vantage-check` over the referring documents. A path that no longer exists is `link/missing-target`, and an anchor that survived the rewrite by accident is `link/dead-section-anchor`. Two caveats the grep still covers — an id cited in a code comment is invisible to the checker, and so is a doc you forgot to pass it.
+Inbound references are links now, not bare prose, so the last step of this one is mechanical: run `uvx vantage-check` over the referring documents. A path that no longer exists is `link/missing-target`, and an anchor that survived the rewrite by accident is `link/dead-section-anchor`. A `#OQ-N` anchor dies with its directive, so a link that named a question in the design doc is re-pointed at the reference's `#why-its-this-way`, never at `#OQ-N`. A `depends-on:` entry in another document's frontmatter is an inbound reference too, and it is not a link. Re-point it at the reference, which as a `done` document never makes anything wait, and keep a `#OQ-…` fragment only when the id survives in the appendix. A dead entry is `planning/depends-on-missing`, which only a checker whose `help` lists that planning rule can report. Check capabilities; do not remove valid config because an older checker rejects it. Three caveats the grep still covers: an id cited in a code comment is invisible to the checker, so is a doc you forgot to pass it, and so is a `depends-on` entry to an older checker.
 
 If an inbound link points at material that got cut, the linking doc is asking for something the system doc no longer says. That's a finding, not a formatting problem: either the material was load-bearing and belongs back in, or the link was to deliberation and the *sentence* needs rewriting, not just the URL.
 
@@ -286,12 +296,20 @@ If an inbound link points at material that got cut, the linking doc is asking fo
 
 ### The roadmap is an inbound reference too
 
-A grep scoped to `docs/` misses it — the roadmap sits at the repo root (`roadmap.md`, or the local equivalent), and its link to the design doc you are about to delete is the one most likely to be left dangling. It also needs more than a re-pointed URL, because this move is the moment the work stopped being planned. Finish it there, in the same commit; the states and the archiving rules are **`roadmap`**'s:
+A search scoped to a docs subtree can miss a roadmap elsewhere. Inspect every established
+roadmap that links this work, not just a root file. Where the project keeps a roadmap,
+finish in the same commit; **`roadmap`**
+owns ordering and removal, never copied source state:
 
-- **The shipped thread leaves the roadmap.** Done work does not linger as a checked box — the commit history is the record. A thread that stays behind reads as unfinished work forever.
-- **Anything specified-but-absent becomes a roadmap item, by name.** Step 1 surfaces it and this is where it lands; a subsystem that quietly never got built must not evaporate with the design doc that proposed it.
-- **A ruling that was retired rather than implemented** goes to the Retired Decisions doc the roadmap keeps, so nobody re-proposes it next quarter.
-- **Outstanding target verification gets a priority link too.** Preserve `UNMEASURED:` evidence in its source and name the verification step there. If only an unavailable target or owner can perform it, state that gate; do not imply that reading the code observed it running. A Vantage reference with a `done` stage role will not surface this work, so put unfinished verification in a live planning document and link it, not only in the graduated reference.
+- **The shipped entry leaves.** Git history records closed work; a retained entry reads as unfinished.
+- **Specified-but-absent work gets its own entry**, linked to a live design/plan, or with a first
+  step beneath the entry when too small for one. Never link the new `done` reference as its owner.
+- **Retired rulings retain their rationale.** Create a Retired Decisions doc if none exists, or
+  preserve a maintainer-facing trap as a warning in the reference's negative-space section.
+- **Outstanding verification keeps a live owner and next step.** Preserve `UNMEASURED:` in the
+  reference's prose verification line, but link a live planning source from at least one roadmap.
+  Use a ready-role stage for executable verification or a 🔒 question for a genuine owner-only
+  gate. A built-stage source with no questions would misleadingly appear under *Graduate*.
 
 ## Step 4 — Delete and commit
 
@@ -364,7 +382,7 @@ That second case is the whole return on writing these docs. Preserve the ability
 
 ### Rewritten, never annotated
 
-The sharp break from `design-doc`, where nothing is deleted and everything is annotated with dated postscripts. A system doc has no "how we got here" to preserve — it describes what is true now. Edit it into its new truth and let git hold the old one. A change big enough to need deliberation starts a **new design doc**, not a postscript here; when that design ships, it comes back through this skill and folds in.
+Like a design doc's description, and unlike its Decision Ledger, a system doc is rewritten in place. It has no ledger and no frozen body, so nothing in it is append-only. A system doc has no "how we got here" to preserve — it describes what is true now. Edit it into its new truth and let git hold the old one. A change big enough to need deliberation starts a **new design doc**, not a postscript here; when that design ships, it comes back through this skill and folds in.
 
 ### Re-verification is this skill's default mode
 
@@ -385,9 +403,9 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (frontmat
 
 **Accurate**
 
-- [ ] `stage: CURRENT` (or the local reference stage) owns lifecycle state; prose carries a verification date **and** a commit, without repeating the stage; step 1 was actually done
+- [ ] `stage: CURRENT` (or the repository's own word for the `done` role, declared in `[planning.stages]` where Vantage is configured) owns lifecycle state; prose carries a verification date **and** a commit, without repeating the stage; step 1 was actually done
 - [ ] Every claim about behavior was checked against the code
-- [ ] The design doc was `BUILT` with zero unanswered questions (including 🔒 blocked ones) before this started — not held back waiting for a cue that was never coming
+- [ ] The design doc's `stage:` was `BUILT` (the `built` role) and no `oq` directive was left in it — none open, 🔒 or ✅ awaiting compaction — before this started; in a Vantage repository that declares stages, `vantage-check index` listed it under Graduate. Not held back waiting for a cue that was never coming
 - [ ] An `UNMEASURED:` built claim came across with the doc rather than evaporating into a header that implies observation nobody made
 - [ ] Nothing unbuilt is described in present tense; anything specified-but-absent was called out, not dropped silently
 - [ ] Things the implementation added but the design never mentioned are written up
@@ -410,7 +428,7 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (frontmat
 - [ ] Principles kept their IDs and their rationale; invariants have their own section
 - [ ] Known traps and refuted objections survive as forward-facing `> [!WARNING]`s, not as history
 - [ ] The negative-space section survived
-- [ ] Zero alternatives tables, zero sequencing, zero Open Questions, zero postscripts
+- [ ] Zero alternatives tables, zero sequencing, zero Open Questions, zero postscripts; `rg -n 'vantage:\s*oq\b' <doc>` prints nothing (a `done`-role doc's leftover question is on no planning list and fails no rule), and no `next:` or `depends-on:` came across from the design
 - [ ] Rulings kept only where a maintainer would otherwise undo them, in a `## Why it's this way` appendix with original `OQ-N` IDs
 
 **Landed**
@@ -418,5 +436,5 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (frontmat
 - [ ] Every inbound reference in the repo re-points to the new path with a live anchor
 - [ ] Existing reference docs with overlapping scope were checked for stale or incomplete behavioral claims, and updated where needed
 - [ ] `rg -n 'OQ-[A-Z]*[0-9]'` was run over the **whole repo**, not just `docs/`, before deciding which rulings survive
-- [ ] The roadmap's thread for this work is closed out, and everything specified-but-not-built is a roadmap item by name
+- [ ] Where the project keeps a roadmap: its shipped entry is removed, and specified-but-absent or unverified work has its own live owner and entry
 - [ ] The design doc and completed `-plan` companion (if present) are deleted in the same commit, with their old paths named in the message

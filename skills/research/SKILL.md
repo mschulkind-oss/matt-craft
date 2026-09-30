@@ -12,7 +12,12 @@ Research is cumulative. Every round starts from what the project already knows a
 1. **Read first.** Skim `docs/research/` before any web search. If a domain doc exists, it is the starting point — not a blank page. If the KB already answers the question, stop there: report the answer and skip the web entirely.
 2. **Investigate.** Web search, source reading, and local experiments to fill the gaps the existing docs don't cover — only the gaps.
 3. **Synthesize back.** End the round by updating the evergreen domain doc so the next round starts ahead. A round that produces only chat output is a failed round; the doc is the deliverable.
-4. **Push what the round changed onto the roadmap.** A finding that rules an option out, or that opens a decision only the user can make, is invisible at the bottom of a domain doc. Wherever the project keeps a roadmap (`roadmap.md` at the root, or the local equivalent; see **`roadmap`**), the finding updates its source's next step and dependencies, and the roadmap links the source or the specific question with a priority reason — same commit as the doc update. Do not copy the question, leaning, status, or count into an attention table. Most rounds change nothing outside their own doc and need no roadmap edit; the ones that unblock or block work always do.
+4. **Review what the round changed on existing roadmaps.** Where a project keeps any
+   roadmap (any `roadmap.md`, subject to the tooling capabilities **`roadmap`** describes),
+   update the source's frontmatter `next` and actual dependencies, then review links and
+   priority reasons in the same commit. Committed work or an owner ruling needs a link
+   from at least one of them. Do not copy questions, leanings, state, or counts; do not
+   create a roadmap as a side effect. Most research rounds need no ordering edit.
 
 ## Two artifact kinds
 
@@ -29,4 +34,12 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
 - **Evaluations end in verdicts.** When comparing options, each gets an explicit disposition — "rejected: 5× the code for this scope", "shortlisted", "adopt for v1". A comparison table with no conclusion just pushes the decision onto the next reader.
 - **Dead ends are findings.** Record what was ruled out and why; otherwise the next round re-walks the same path.
 - **Sources are annotated.** A Sources / See also list gives one line of *why* per link, never a bare URL dump.
-- **Decisions only the user can make** use the Open Questions format from the `design-doc` skill (status emoji `💬`/`✅`, bold title, stakes, `_Leaning:_`, fill-in `**Answer:**` blockquote, and the `oq` directive that makes it answerable in one click) — in the research doc itself, or graduated into a design doc when the research turns into a design.
+- **Decisions only the user can make** use **`design-doc`**'s scaffold, answering, and
+  same-turn compaction. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns directive syntax and checks: every state
+  needs a directive, not just a 💬 question with a technical leaning. Keep questions here
+  only with an unset or open-role stage; `CURRENT` maps to `done` in **`design-doc`**'s
+  vocabulary and hides questions without warning. Otherwise move them into a live design,
+  moving directives and repairing inbound anchors. Research is *promoted* into design;
+  *graduation* is reserved for built design → system reference.
+- After a planning change, follow **`roadmap`**'s capability checks before `vantage-check index`; select `--roadmap <path>` when supported for multiple roadmaps and inspect the
+  result rather than treating an empty index as proof of no questions.

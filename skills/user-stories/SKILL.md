@@ -32,6 +32,16 @@ reference docs. `system-doc` writes what the system actually does, from the code
 the story stays in planning as the record of what was being aimed at, or is
 deleted with the rest of the planning artifacts for that feature.
 
+A story kept as that record gets the repository's `done`-role stage word
+(`SUPERSEDED` with **`design-doc`**'s mapping). That takes the story and
+its questions off every list of what needs a ruling, so before setting it, rule
+each live question or move it into the design that took over: a `done` stage
+hides a question, it does not answer it. Never give a story a `built`-role word.
+Vantage lists a built document with no questions under *Graduate*, which a story
+never does, and one with open questions under *Disagrees*. Where the repository
+declares no stages, no word has a role, so the questions have to be ruled or
+compacted before they leave the lists.
+
 Filename is a content noun (`inbox-triage.md`, `worktree-handoff.md`) — never a
 date, never prefixed with the tool that wrote it.
 
@@ -39,24 +49,34 @@ date, never prefixed with the tool that wrote it.
 
 Gaps are this document's most valuable output and its most easily stranded:
 findings buried inline in a narrative that nobody re-reads once it is written.
-Close the loop on the roadmap in the same commit, wherever the project keeps one
-(`roadmap.md` at the root, or the local equivalent) — the states and the
-archiving rules belong to **`roadmap`**:
+Review existing roadmaps in the same commit; **`roadmap`** owns entries, ordering, removal,
+and Vantage discovery/pinning. A project with none does not get one from this skill.
 
-- **A gap accepted as work** becomes its own roadmap item, linking the story that
-  found it. Not every gap — a gap is a finding, and only some findings are work.
-- **An open question here** gets a priority link there — either the bare source document
-  or its question anchor — plus a reason for its place. Keep stakes, options, and leaning
-  here, not copied into an attention table. A heading link alone does not route questions
-  in Vantage. Source metadata owns stage, next action, and actual dependencies.
-- **The story doc itself** gets a thread while it is feeding an active design, so
-  the work it implies is visible without reading the narrative.
+- **A gap accepted as work** gets an entry linking the persona heading where it appears,
+  not the bare story: that would pull all the story's rulings to the gap's position.
+- **Open questions** need a link from at least one existing roadmap, bare to this story or
+  to the exact question anchor. Heading links show badges but route nothing. See
+  **`roadmap`**, *Vantage integration*, for routing and index capability checks; use
+  `--roadmap <path>` when supported for multiple roadmaps.
+- **The story's state** lives in top-level frontmatter: declared `stage`, one-line `next`,
+  and only actual `depends-on` waits. Stakes, options, and leanings stay here.
+- **While feeding an active design**, keep a bare roadmap link to the story. Once it is
+  retained only as a record, remove active entries and apply the terminal stage guidance above.
 
 ## Document Structure
 
 Every user story document follows this structure:
 
 ```markdown
+---
+title: "User Stories: [Topic]"
+status: draft
+stage: SKETCH   # a word the repo declares under [planning.stages], if it declares any
+next: "Rule OQ-1 — [what waits on it]"
+depends-on:     # only what the story actually waits on; omit the key when nothing
+  - ../design/[topic].md
+---
+
 # User Stories: [Topic]
 
 [1-3 sentences framing what this document explores. Not a spec —
@@ -243,9 +263,9 @@ Every document ends with open questions. These are **unresolved design decisions
 
 Use status emojis at the start of each question title for immediate scanning:
 - 💬 **Open Question:** Active decision awaiting user ruling.
-- 💬 🤷 **Deferred Question:** Pure subjective user preference where agent has no technical recommendation.
-- ✅ **Answered / Resolved:** Decided question (recorded in place with resolution date).
-- 🔒 **Blocked:** Blocked on an upstream decision or external input before it can be answered.
+- 💬 🤷 **Preference Question:** Awaiting a ruling on taste, not deferred; see **`design-doc`**'s emoji legend.
+- ✅ **Answered / Resolved:** A brief state awaiting same-turn compaction under **`design-doc`**'s answering protocol, never a resting state.
+- 🔒 **Blocked:** Blocked on an upstream decision, an experiment or other external input before it can be answered.
 
 ```markdown
 ## Open Questions
@@ -255,20 +275,18 @@ Use status emojis at the start of each question title for immediate scanning:
 
    <!-- vantage: oq id=OQ-1 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
-   _Leaning:_ Back of the queue — the fix might interact with things
-   that merged while it was out.
+   _Leaning:_ Back of the queue — the fix might interact with what merged while it was out.
 
    **Answer:**
    > _(empty — fill in when decided)_
 
-2. 💬 🤷 **OQ-2: Concurrent agents sharing the DB.** Multiple agents write to the
+2. 💬 **OQ-2: Concurrent agents sharing the DB.** Multiple agents write to the
    DB simultaneously. SQLite WAL mode handles reads, but writes are
    serialized.
 
    <!-- vantage: oq id=OQ-2 leaning="A 5s busy timeout, so a contended write waits instead of failing." -->
 
-   _Leaning:_ Set a busy timeout of 5 seconds to avoid "database is
-   locked" errors under load.
+   _Leaning:_ A 5s busy timeout, so a contended write waits instead of failing.
 
    **Answer:**
    > _(empty — fill in when decided)_
@@ -280,13 +298,12 @@ Use status emojis at the start of each question title for immediate scanning:
 - Context and reasoning on the following lines (plain text)
 - `_Leaning:_` (italic) — your current best guess, with brief rationale
 - **`Answer:`** on its own line, followed by a blockquote
-- An **`oq` directive** on every 💬 question that states a leaning, indented inside the list item with blank lines around it, carrying the id and the leaning restated in words. Without it the question renders with nothing for the reviewer to click, and `vantage-check` reports it as an error. See the **`design-doc`** skill, which owns this format.
-- Blocked questions also get an id-only directive; answered questions retain theirs until compaction. Without it Vantage cannot count the question. Neither state offers the one-click leaning button.
+- Every question has an `oq` directive, in 💬, preference, 🔒, and ✅ states. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns syntax and checks, including matching the visible leaning to `leaning=` and checking missing directives by eye. **`design-doc`** owns the scaffold, answering, and compaction.
 - The blockquote starts with `_(empty — fill in when decided)_` as placeholder
 - The human fills in their answer in the blockquote **without erasing anything**
-- When processed: flip `💬` to `✅`, append `— RESOLVED (<date>)` to the title. When settled or when compacting, migrate the ruling into the story body, preserve any refuted traps as warnings, and compact into a Decision Ledger table.
+- Process every ruling in the same turn: record the answer, briefly mark ✅ with its resolution date, fold the ruling into the story, preserve traps as warnings, and compact under **`design-doc`**'s protocol. Keep the id in its ledger row and repoint every inbound question-anchor link to `#decision-ledger` in the same commit, including roadmaps. Drop a ruled roadmap entry if nothing remains to decide. Until compaction, a routed ✅ question remains under *Needs you*.
 
-**Answered example:**
+**Answered example** (only the brief state before same-turn compaction):
 
 ```markdown
 3. ✅ **OQ-3: Merge commit message format — RESOLVED (2026-08-16).** What should the merge queue put in
@@ -301,6 +318,18 @@ Use status emojis at the start of each question title for immediate scanning:
    > Use the format: "Merge: {feature} (PR #{id})" with feature name,
    > priority, and workstream in the body. Skip approver — it's in the
    > PR record already.
+```
+
+**Blocked example:**
+
+```markdown
+4. 🔒 **OQ-4: Retry budget.** How many attempts before failing the PR?
+   Waits on the load test, so there is no leaning yet.
+
+   <!-- vantage: oq id=OQ-4 -->
+
+   **Answer:**
+   > _(empty — fill in when decided)_
 ```
 
 ## Writing Style & Formatting
@@ -349,8 +378,10 @@ Before finalizing a user stories document:
 - [ ] At least one story shows what happens when things go wrong
 - [ ] Paths the narrative skipped are answered, opened as questions, or delegated — no silent holes left to be guessed
 - [ ] Gaps are inline, not deferred to a separate section
-- [ ] Gaps accepted as work, and every open question, are on the roadmap — not stranded inline
-- [ ] Open questions have status emoji (💬/✅), leaning, and answer placeholder
+- [ ] Where the project keeps a roadmap, gaps accepted as work have an entry, and every open question is reached by a roadmap link (the bare story or its `#OQ-…` anchor, not a heading link) rather than stranded inline
+- [ ] Where Vantage is used: `vantage-check <this story>` reports nothing, and, after the capability check in **`roadmap`**, `vantage-check index` (with `--roadmap <path>` when supported for multiple roadmaps) shows none of this story's questions under *Unrouted*
+- [ ] Every question has a status emoji (💬, 💬 🤷, 🔒 or ✅), a stable `OQ-` id, an answer placeholder, and an `oq` directive, 🔒 and ✅ included; every 💬 question has a `_Leaning:_` line restated in its directive's `leaning=`
+- [ ] The frontmatter carries `stage` (a word the repo declares, if it declares any), `next`, and only real `depends-on` entries
 - [ ] At least one non-technical or minimal-complexity persona (a "Derek")
 - [ ] Numbers are real (not "several" or "a few")
 - [ ] The document title says what it explores, not what it specifies

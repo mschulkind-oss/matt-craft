@@ -13,19 +13,21 @@ The doc serves two readers in sequence: the user *now*, deliberating the design 
 
 **The objective is a document that is currently true and quickly readable** — not one that has lost nothing. Those two come apart the moment a question gets answered, and when they do, true-and-readable wins. Preserving the *decision* serves both readers; preserving the *deliberation* that produced it serves neither, and costs the next reader the time it takes to work out which of the four leanings on the page is the live one. Every rule below about compacting, overturning, and retracting is that one trade applied somewhere specific.
 
+The **`design-doc`** skill owns the question scaffold, emoji legend, answering protocol, and compaction. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns directive syntax and checks; **`roadmap`**, *Vantage integration*, owns planning-tool behavior and routing. Before any `index` invocation below, check capabilities as **`roadmap`** specifies; for multiple roadmaps use `--roadmap <path>` where supported.
+
 ## Default Behavior (When run by itself or on an existing doc)
 
 There are three operations on a design doc and they are different jobs: **drafting** it, **compacting** it as rulings land, and **auditing** its claims against the tree. Only drafting needs a prompt.
 
-If this skill is invoked without specific drafting instructions (e.g. `/design-doc` or "run design-doc on docs/design/foo.md"), the default action is to **compact, audit, and reconcile the design doc**:
+If this skill is invoked without specific drafting instructions (e.g. `/design-doc` or "run design-doc on docs/design/foo.md"), the default action is to **compact, audit, and verify the header of the design doc**:
 
 1. **Audit Open Questions:** Scan the doc for active questions (`💬`), answered questions (`✅`), and the Decision Ledger. An answered question still sitting in question form is a miss against [the compaction rule](#compaction-fires-on-answering-not-on-a-threshold), not a normal state — fix it here.
 2. **Execute Compaction:** For all settled/answered questions, fold the ruling into the normative body text (§X) and compact the verbose question block into the **Decision Ledger** table.
 3. **Audit the claims:** Run [the audit pass](#the-audit-pass--overturn-dont-annotate) over everything the doc asserts about the tree. Skippable only when the doc was written this session against code that has not moved since.
-4. **Verify the header against the tree, not against itself.** The frontmatter stage, its supporting prose, and the **Needs your ruling** line are claims like any other, and these are the header claims nobody re-checks. One repo's sweep found ~20 status lines false against the code in both directions; a later census of the same tree found three docs claiming *ALL PHASES SHIPPED* / *EXECUTED* / *SHIPPED IN FULL* while carrying live `💬` questions, one of them stating in its own body that a doc with a live question cannot graduate. **Re-spelling what the line says is what produced that drift.** Check the state against the code, and check **Needs your ruling** against the ids of the `💬` questions actually left in the file. [`references/status-lines.sh`](references/status-lines.sh) does both mechanically.
+4. **Verify the header against the tree, not against itself.** The frontmatter stage, its supporting prose, and the **Needs your ruling** line are claims like any other, and these are the header claims nobody re-checks. One repo's sweep found ~20 status lines false against the code in both directions; a later census of the same tree found three docs claiming *ALL PHASES SHIPPED* / *EXECUTED* / *SHIPPED IN FULL* while carrying live `💬` questions, one of them stating in its own body that a doc with a live question cannot graduate. **Re-spelling what the line says is what produced that drift.** Check the state against the code (no script can do this), and check **Needs your ruling** against the questions actually left in the file. In a repository with Vantage, the count of record is the `oq` directives: `vantage-check index` (or `--format json`) lists each document's questions with their state, and those are the counts the badges and the planning page show. [`references/status-lines.sh`](references/status-lines.sh) checks only the prose conventions Vantage never reads: the ruling line, the `MEASURED:` clause, and `CURRENT` without a date. It counts questions by their emoji, so it misses a question written without one and counts one that has no directive.
 5. **Verify frontmatter status:** the second axis, in Vantage's closed set — `accepted` once zero unanswered questions remain, including 🔒 blocked ones, `in-review` or `draft` while any is open. See [the two axes](#frontmatter-is-a-second-axis-not-a-second-spelling).
-6. **Name the graduation candidates.** A `BUILT` doc with zero unanswered questions (including 🔒 blocked ones) is ready for **`system-doc`** — [reaching built is the whole cue](#graduation-is-the-cue-and-there-is-no-second-one). List them by name; a candidate nobody names sits.
-7. **Surface Live Decisions:** Report remaining `💬` questions needing user attention.
+6. **Name the graduation candidates.** A `BUILT` doc with no question left in question form (no 💬, no 🔒, every ✅ compacted) is ready for **`system-doc`** — [reaching built is the whole cue](#graduation-is-the-cue-and-there-is-no-second-one). List them by name; a candidate nobody names sits.
+7. **Surface Live Decisions:** Report remaining `💬` questions needing user attention. In a repository with Vantage, run `vantage-check index` and report this doc's entries under *Needs you*, *Unrouted* (the roadmap has not placed them) and *Disagrees*. The user can answer all of them from the planning page (`g p`, at `/.vantage/planning`), where **Copy answers** hands every answer back in one trip.
 
 ## When to use this skill
 
@@ -103,7 +105,17 @@ It lands beside the design, same basename plus `-plan` — `docs/design/<topic>-
 > [!IMPORTANT]
 > **No design decision is ever made in the sketch.** If writing an entry means choosing behavior — something a reasonable implementer could do differently and get a system that behaves differently — it is not a sketch entry. It is an `OQ-N` here. The sketch holds settled-but-boring material; it is never where a decision hides.
 
-**Open questions are the growth mechanic.** A sketch entry resting on an unruled question carries the link:
+**Open questions are the growth mechanic.** A sketch entry resting on an unruled
+question carries a prose link and declares the wait in `depends-on` frontmatter:
+
+```yaml
+depends-on: [rate-limiting.md#OQ-4]
+```
+
+That question-specific dependency puts the sketch under *Waiting* while the question
+is open. After compaction, the retained ledger id keeps the dependency valid and
+stops the wait; repoint the prose link to `#decision-ledger` because its old anchor
+is gone. See **`roadmap`** for dependency semantics.
 
 ```markdown
 Blocked on [OQ-4](rate-limiting.md#OQ-4) — the retry policy shapes this.
@@ -132,7 +144,7 @@ That is the job **In short** keeps failing, and the reason is in the old instruc
 | **The shape** | The named components and how they relate — the architecture in one line |
 | **Cost** | What this breaks, deletes, or forecloses |
 | **Start at** | The one section carrying the load, as a link; everything else falls out of it |
-| **Needs your ruling** | Live `OQ-N` links, or **None** |
+| **Needs your ruling** | Live `OQ-N` links, or **None**. A hand-kept copy of what Vantage's badge and `vantage-check index` compute from the `oq` directives; nothing in Vantage reads it, so it stays true only where `status-lines.sh` checks it |
 | **Reads with** | Sibling docs and the companion sketch, one parenthetical each saying why |
 
 **Ceiling: one screen, call it 20 lines.** Past that the fix is cutting, never reflowing — anything that will not fit a slot is body material or sketch material, and both have somewhere to be.
@@ -166,7 +178,7 @@ migration path is written.
 
 **Start at [§3](#3-two-axes-welded-into-one-enum)** — the split. The rest falls out of it.
 
-**Needs your ruling:** [OQ-2](#oq-2), [OQ-5](#oq-5).
+**Needs your ruling:** [OQ-2](#OQ-2), [OQ-5](#OQ-5).
 
 **Reads with:** [`configuration-surface-plan.md`](configuration-surface-plan.md)
 (the implementation sketch — incomplete while OQ-2 is open),
@@ -181,7 +193,7 @@ The stage answers ***what does this doc owe someone?*** Use the words below unle
 repository has an established vocabulary. Store the word once in top-level `stage`
 frontmatter; the prose `**Status:**` line carries its date, reasons, commit, and evidence,
 not the word again. This keeps the document readable in plain Markdown while giving tools
-one authoritative value. Legacy prose-only headers may be migrated when touched.
+one authoritative value. Vantage reads the stage only from `stage:`, so a legacy prose-only header is invisible to its planning index: no stage in the badge, and never listed under *Ready*, *Graduate* or *Disagrees*. Move the word into `stage:` whenever you touch the doc.
 
 | Word | What is owed | Stamp |
 | :--- | :--- | :--- |
@@ -196,10 +208,12 @@ one authoritative value. Legacy prose-only headers may be migrated when touched.
 
 **`CURRENT` is the word for a doc that is not a proposal,** and the missing one costs more than it looks: 21 of those 87 docs had no status line at all, and most were evergreen — an index, a roadmap, a runbook, a living record. Nothing on the proposal ladder fits them, so their authors wrote nothing. It is also why `STORIES`, `INVENTORY` and `HANDOFF` turned up in the lifecycle slot.
 
+**With the mapping below, `CURRENT` is `done`: it hides all questions without warning.** Rule or move live questions into an open-stage planning source before using it; leave a roadmap's own stage unset. See **`roadmap`**, *Vantage integration*.
+
 **`CURRENT` takes no date.** An evergreen doc has no moment to stamp, and a date on a living record is a claim nobody re-checks — worse than none, because it reads as a verification that never happened.
 
 > [!NOTE]
-> A **`system-doc`**'s `CURRENT as of 2026-08-30, verified against a1b2c3d` is not a counterexample. That is a **verification stamp** — a claim about work someone actually did, bounded by the commit, and the most valuable line in a reference doc. Do not strip it. The rule here is about a *lifecycle* date on an evergreen planning doc, which claims nothing and expires anyway.
+> A **`system-doc`**'s `Verified 2026-08-30 against a1b2c3d` is not a counterexample. That is a **verification stamp** — a claim about work someone actually did, bounded by the commit, and the most valuable line in a reference doc. Do not strip it. The rule here is about a *lifecycle* date on an evergreen planning doc, which claims nothing and expires anyway.
 
 **No percentages.** `MOSTLY BUILT` and `LARGELY IMPLEMENTED` both existed in that corpus; both are `DECIDED`. How much shipped is prose, and prose is better at it — *"nine of ten rulings built; the macOS backend is the tenth"* tells a reader more than either word.
 
@@ -233,34 +247,72 @@ CI job has ever exercised it.
 | `status` frontmatter | Is the argument closed? | `draft`, `in-review`, `accepted`, `deprecated` in Vantage |
 | `**Status:**` prose | What evidence and date support that stage? | Dates, reasons, commits, measurement clause |
 
-`stage: BUILT` with `status: in-review` can describe code in the tree that still owes a
-ruling. Do not erase that distinction; Vantage's planning checks may flag it as a disagreement
-worth resolving. A lifecycle word never goes in `status` just to make it visible.
+`stage: BUILT` with `status: in-review` is consistent only while no question is open: the
+code is in the tree and the argument is still under review. Nothing in Vantage compares
+`status` with `stage`. A ruling still owed is an open `OQ-N`, and then `BUILT` is a
+disagreement: `planning/stage-disagrees` (a warning) fires when a `ready`- or `built`-role
+stage sits over a 💬 (or unmarked) question, and the index lists the doc under *Disagrees*.
+A 🔒 or ✅ question does not trigger it, and a `BUILT` doc with no questions is listed under
+*Graduate* whatever its `status` says. Keep an open-role stage and say in the prose status
+line what is built, or get the ruling. A lifecycle word never goes in `status` just to make
+it visible.
 
 Set `next` to one concrete next step and `depends-on` to actual doc-relative dependencies,
 optionally with a live question anchor. Keep detailed gates and evidence in the body.
-For Vantage repositories, inspect or declare `[planning.stages]` in `.vantage.toml`, mapping
-repository words to `open`, `ready`, `built`, or `done` (no longer a live proposal).
+For Vantage repositories using this vocabulary, declare all seven words in `.vantage.toml`,
+mapping each to `open`, `ready`, `built`, or `done` (no longer a live proposal); declaring
+fewer fails every `SKETCH` plan or `CURRENT` reference on `planning/stage-vocabulary`:
+
+```toml
+[planning.stages]
+SKETCH = "open"
+DESIGN = "open"
+DECIDED = "ready"
+BUILT = "built"
+GRADUATED = "done"
+SUPERSEDED = "done"
+CURRENT = "done"
+```
+
+Without the table, `stage` goes unchecked (any word passes) and the planning index has no
+*Ready*, *Graduate* or *Disagrees*.
 Do not hide unanswered questions by assigning their document the `done` role. See
 **`roadmap`** for priority ownership and **`vantage-docs`** for tooling.
 
 ### Graduation is the cue, and there is no second one
 
-`BUILT` with zero unanswered questions (including 🔒 blocked ones) means hand off to **`system-doc`** — now, not at some later review. ~40 docs in that corpus qualified and sat, waiting for a cue that does not exist, until a whole restructure was needed to route them.
+`BUILT` with no question left in question form (no 💬, no 🔒, every ✅ compacted) means hand off to **`system-doc`** — now, not at some later review. ~40 docs in that corpus qualified and sat, waiting for a cue that does not exist, until a whole restructure was needed to route them.
 
-The fact that settles it took a census to notice and one line to state: **the evergreen tree has exactly one state.** 41 of 41 reference docs in that repo carried `status: current`. There is no "built but not yet current" for a doc to wait in, so reaching built *is* the cue, necessarily. Nothing else is coming.
+An evergreen reference has no intermediate proposal state. The former spelling
+`status: current` is not valid Vantage status metadata: use `stage: CURRENT`,
+with `status:` restricted to `draft`, `in-review`, `accepted`, or `deprecated`.
 
-That makes it checkable rather than cultural, which is the only version that survives: [the default audit](#default-behavior-when-run-by-itself-or-on-an-existing-doc) lists the candidates by name, and [`references/status-lines.sh`](references/status-lines.sh) finds them without an agent in the loop.
+[The default audit](#default-behavior-when-run-by-itself-or-on-an-existing-doc) names
+candidates. With declared stages and a checker whose help lists `index`, the
+planning index's *Graduate* section is authoritative; see **`roadmap`**, *Vantage
+integration*. Elsewhere the shell script's `GRADUATE` notice is a fallback.
 
 ### Land the check in the repository
 
 **A rule that lives only in a skill is a rule no repo can check.** This file is user-level, outside every repository it governs; for months nothing in that tree could enforce the vocabulary, and nothing did — 79 of 87 docs were off-vocabulary before anyone counted.
 
-So the last step of applying this vocabulary to a corpus is to **write the rule into the repository, in a form that can be re-run.** The shipped script recognizes the seven words above, reads `stage` first, supports legacy prose-only headers during migration, and reports a lifecycle word duplicated in prose. If the repo uses different words, adapt its `VOCAB` and word-specific checks rather than forcing the repo to adopt ours. Use Vantage's planning checks for declared stage mappings and dependencies; the shell check is a small convention check, not a YAML parser or the planning index. Copy [`references/status-lines.sh`](references/status-lines.sh) in beside the repo's other corpus checks and wire it into whatever already runs them — a `just` recipe, a test file, CI. What worked was a numbered check with literal shell commands sitting next to the checks that were already there; a prose convention in a `CONTRIBUTING.md` would have rotted exactly the way the skill's copy did.
+Land the rule in a re-runnable repository gate. With Vantage, declare the complete
+stage mapping above and check the planning tree. First verify the installed
+checker's `help` lists `index` and the `planning/*` rules; see **`roadmap`**,
+*Vantage integration*, for capability checks and `--roadmap <path>` selection.
+
+Copy [`references/status-lines.sh`](references/status-lines.sh) only for the prose
+conventions Vantage does not read: measurement clauses, lifecycle dates, duplicated
+stage words, and **Needs your ruling**. Keep its `VOCAB` aligned with the repository
+mapping. It is a simple-scalar convention check, not a YAML parser or code audit;
+it counts emoji, not directives, so the planning index wins when they disagree.
+Without Vantage it is the fallback gate, including legacy prose-only headers during
+migration. Adapt word-specific checks if the repository uses other words. Keep
+reference trees out of its paths: their verification dates are not lifecycle dates.
 
 ```console
 $ sh references/status-lines.sh docs/design docs/plans
-GRADUATE  docs/design/boundary-broker.md  (BUILT, zero unanswered questions — hand off to system-doc)
+GRADUATE  docs/design/boundary-broker.md  (BUILT, no questions left — hand off to system-doc)
 NODATE    docs/design/glossary-plan.md  (CURRENT takes no date)
 UNSTAMPED docs/design/mac-backend.md  (BUILT with no MEASURED:/UNMEASURED: clause)
 RULING    docs/design/rate-limiting.md  (Needs your ruling says None, 2 live: OQ-4, OQ-7)
@@ -351,9 +403,9 @@ During active design deliberation, end the document with an **Open Questions** s
 
 Use status emojis at the start of each question title for immediate scanning:
 - 💬 **Open Question:** Active decision awaiting user ruling.
-- 💬 🤷 **Deferred Question:** Pure subjective user preference where agent has no technical recommendation.
+- 💬 🤷 **Preference Question:** Awaiting a ruling on taste, with no technical grounds to lean. It is open, not deferred; use 🔒 for a genuine wait.
 - ✅ **Answered / Resolved:** Decided question (awaiting compaction).
-- 🔒 **Blocked:** Blocked on an upstream decision or external input before it can be answered.
+- 🔒 **Blocked:** Blocked on an upstream decision, an experiment or other external input before it can be answered.
 
 Per-question format:
 
@@ -373,8 +425,7 @@ Per-question format:
 
    <!-- vantage: oq id=OQ-1 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
-   _Leaning:_ Back of the queue — the fix might interact with things
-   that merged while it was out.
+   _Leaning:_ Back of the queue — the fix might interact with what merged while it was out.
 
    **Answer:**
    > _(empty — fill in when decided)_
@@ -383,7 +434,7 @@ Per-question format:
 
    <!-- vantage: oq id=OQ-2 leaning="Match system — pure preference, and the OS already knows." -->
 
-   _Leaning:_ Pure subjective preference.
+   _Leaning:_ Match system — pure preference, and the OS already knows.
 
    **Answer:**
    > _(empty — fill in when decided)_
@@ -394,14 +445,14 @@ Format rules:
 - **Emoji prefix + stable ID + bold title** on the first line — status emoji (💬, 💬 🤷, ✅, 🔒), stable ID, and a bold sentence fragment or direct question.
 - Context on the following lines, including **what the answer decides or blocks** ("this is the closure question"; "determines whether the daemon ever holds auth state"). A question with no stakes attached shouldn't be in the list.
 - **Choices belong on separate lines.** If the question offers A/B/C (or any named alternatives), put each in its own indented bullet under the question, with a bold label, a short description, and the material trade-off. Leave a blank line before and after the nested list so it stays inside the question in Markdown. Never run `A: … B: … C: …` together in a paragraph — not in the question, context, or leaning. Keep the stakes and options easy to scan before the answer block; don't bury the choice in a long introductory sentence. For a simple two-way question, plain prose is fine if it stays readable.
-- `_Leaning:_` — your current best guess with brief rationale. Always have one; "I genuinely don't know" or deferring to user preference (🤷) is itself a leaning worth stating. **A leaning is replaced, never versioned.** There is no "Leaning (second version)" and no "Leaning (fourth version, and it is review's)" — a leaning is what you think *now*, so when it changes it changes and the old one goes. If *why* it changed is load-bearing, that reason is a fact about the system: state it in the body as one. The leaning is not an autobiography of the design.
+- `_Leaning:_` — your current best guess with brief rationale. Every open question has one; a 🔒 blocked question need not. For an open question, "I genuinely don't know" or deferring to user preference (🤷) is itself a leaning worth stating. **A leaning is replaced, never versioned.** There is no "Leaning (second version)" and no "Leaning (fourth version, and it is review's)" — a leaning is what you think *now*, so when it changes it changes and the old one goes. If *why* it changed is load-bearing, that reason is a fact about the system: state it in the body as one. The leaning is not an autobiography of the design.
 - `**Answer:**` on its own line, then a blockquote starting as `_(empty — fill in when decided)_`.
-- **An `oq` directive on every 💬 question that states a leaning**, indented inside the list item with blank lines around it, carrying the question's id and the leaning restated in words. Without it the question renders with no button for the reviewer to click, and `vantage-check` reports it as an error. A 🔒 question gets an id-only directive, with no leaning required; a ✅ question keeps its directive until compaction. Those states get no one-click leaning button, but the directive is still required for counting and links.
+- **An `oq` directive on every question, whatever its state**, including preference, blocked, and answered questions until compaction. Apply **`vantage-docs`**, *Open Questions & Decision Ledgers*: it owns syntax, leaning consistency, attachment, and the missing-directive checks. A green check does not prove every question has a directive.
 - Stable IDs are mandatory so plans, sibling docs, and code comments can reference them as blockers — the id is also the question's anchor, so it is the letters `OQ`, a hyphen, an optional short uppercase prefix, then digits. Prefix the ids in both documents whenever two docs reference each other's questions; a bare number cannot say which document's fourth question you meant.
 - **Cite a question as a link, never as bare prose** — to its own id while it is in flight, to the owning document's Decision Ledger once it is compacted. Same for `§` section numbers and for filenames. See the **`vantage-docs`** skill; `vantage-check`'s `ref/*` rules are errors.
 
 ### Answering Protocol
-The user fills in the blockquote without erasing the question context. When the agent processes the answer — all of this in the same turn:
+The user answers in place. Either they fill in the blockquote without erasing the question context, or, in Vantage, they file a review comment on the question (**Take this leaning** or **Answer…**, in review mode or on a planning-page card), which reaches the agent through Copy or the planning page's **Copy answers**. A comment is as much a ruling as a filled blockquote: record it as the Answer, process it as below, and reply through the review inbox. When the agent processes the answer — all of this in the same turn:
 - Flip `💬` to `✅`, append `— RESOLVED (<date>)` to the title, and record the answer.
 - Fold the ruling into the body section it governs, then compact the question into the Decision Ledger ([below](#compaction-fires-on-answering-not-on-a-threshold)). The `✅` state lives between these two bullets and nowhere else.
 - If the answer rejects your leaning, the leaning goes — it was a guess and it was wrong. What survives is anything the user's reasoning established as a *fact about the system*, and that belongs in the body, in the present tense, framed as a fact rather than as the correction of one.
@@ -423,7 +474,7 @@ Thresholds — "compact once answered outnumber open", "once the OQ section pass
 Two sweeps survive, and both are recovery rather than routine:
 
 1. **Standalone invocation:** running `/design-doc` with no drafting prompt — compacts whatever the two-edit rule missed, and runs [the audit pass](#the-audit-pass--overturn-dont-annotate).
-2. **Last question closed:** when the final `💬` is answered the doc changes genre, from a thing being decided into a description of a system. Compact, verify `status: accepted`, and update the roadmap in the same commit.
+2. **Last question closed:** when the final `💬` is answered the doc changes genre, from a thing being decided into a description of a system. Compact, verify `status: accepted`, and, where the project keeps a roadmap, review it in the same commit. Its badge updates itself, so edit it only if the entry's position, reason or links must change.
 
 ### The Decision Ledger Format
 Replace verbose answered OQ blocks with a concise, greppable table:
@@ -457,7 +508,12 @@ Replace verbose answered OQ blocks with a concise, greppable table:
    $ uvx vantage-check docs/          # the doc half: link/dead-section-anchor
    ```
 
-   `vantage-check` finds a dead `#OQ-N` in a sibling doc, and only if you remember to run it there. **A rule id cited from a source comment is invisible to every markdown tool there is.** One sprint deleted 49 `oq` directives; 28 of those ids resolved to nowhere afterwards and 9 inbound references were left stale. Separately, a graduation had to preserve seven ids in a `## Why it's this way` appendix precisely *because* source comments cited them — once the design doc is deleted that appendix is the only place they resolve at all.
+   Run the checker on every referring document; it catches dead anchors only there.
+   A question id cited in a source comment is invisible to Markdown tools, so the
+   unscoped search is mandatory. Keep the id in the ledger row. Leave a
+   `depends-on` question fragment intact: the retained id satisfies the dependency
+   and stops waiting after compaction; changing it to the ledger heading would wait
+   on the whole document instead. **`roadmap`** owns that dependency behavior.
 
 2. **What compaction is allowed to DESTROY:**
    - Superseded agent leanings and deliberation drafts (git history preserves how you got there).
@@ -538,17 +594,12 @@ Review both in the same commit; do not copy stakes, leanings, stages, or questio
 into the roadmap. If only source state changes, its existing priority link may need no edit.
 Do not create a roadmap as a side effect when the project has none.
 
-| What happened here | Review in the roadmap |
-| :--- | :--- |
-| New committed design | Add a descriptive priority link and reason |
-| New question | Link its owning doc bare, or its live question anchor, at the intended position |
-| Question compacted | Repair anchor links to the ledger; keep unfinished work visible |
-| Design settled, plan completed against the tree | Link the build hand-off and reconsider sequencing |
-| Doc split, renamed, superseded, or graduated | Repair links; remove closed work, keep unfinished follow-ups |
-
-A link to a heading does not route the document's questions in Vantage. A bare document
-link reaches all its questions; a question-anchor link reaches only that question. Keep
-questions and answers in their source rather than cloning them into an attention table.
+See **`roadmap`**, *Doc changes and roadmap review belong together*, for the source-change
+review table and *Vantage integration* for routing. New committed work needs a
+link from at least one existing roadmap; heading-only links do not route rulings,
+although their badges look current. After changing questions, stages, or links,
+inspect the index for *Unrouted* and *Disagrees*, selecting `--roadmap <path>` when
+supported and working with multiple roadmaps. Do not duplicate question scaffolds.
 
 **Ready is a source claim, not a roadmap decoration.** A cold agent must be able to build
 from the design and plan without guessing required behavior. If agent investigation can
@@ -557,7 +608,7 @@ See [the gap test](#the-gap-test).
 
 ## Style & Formatting
 
-Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML frontmatter, callout alerts, Mermaid diagrams, KaTeX math, tables, line anchors), for its **Defined Terms** rules, and for its **Open Questions & Decision Ledgers** section — which owns the `oq` directive, the id grammar, and the rule that a reference is a link.
+Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML frontmatter, callout alerts, Mermaid diagrams, KaTeX math, tables, line anchors), for its **Defined Terms** rules, and for its **Open Questions & Decision Ledgers** section — which owns directive syntax and checks, the id grammar, and the rule that a reference is a link. This skill owns the question scaffold, emoji legend, answering, and compaction.
 
 - **Design docs are where terms get coined**, so the defining discipline binds hardest here. Naming a new component, mode, or state *is* coining a term: define it at first use, mark it `*(coined here)*`, and say what it is **not**. A name that enters the tree undefined is quoted back by every later doc as though it were standard vocabulary, and by then nobody can say where it came from. When a coined term outlives this doc — a sibling doc picks it up — it graduates to the glossary and both link there.
 - **First person, opinions owned.** "My read", "the thing that surprised me — and my first reading of it was wrong." A design doc with no author viewpoint is a spec, and worse for it.
@@ -577,14 +628,15 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
 - [ ] A `stage: BUILT` claim carries `MEASURED:` or `UNMEASURED:`, and says which honestly
 - [ ] **Needs your ruling** names exactly the live `💬` ids, or **None** with none live
 - [ ] Frontmatter `status:` is one of Vantage's four and answers the other question; `accepted` verified to have zero unanswered questions, including blocked ones
-- [ ] `BUILT` with zero unanswered questions was named as a graduation candidate, not left to a later review
-- [ ] Altitude holds: components/algorithms/invariants, no per-file edit plans outside a fenced section
+- [ ] `BUILT` with no question left in question form was named as a graduation candidate, not left to a later review
+- [ ] Altitude holds: components/algorithms/invariants, and no per-file edit plans; that material is in the companion sketch
 - [ ] Completeness holds: degenerate inputs, failure paths, ordering, defaults with units, triggers, pre-existing state, one-writer rules, and observable done-conditions are all stated
 - [ ] Every question an implementer must answer is answered, opened as an `OQ-N`, or explicitly delegated — none left silent
 - [ ] Claims about existing code carry file:line evidence
 - [ ] A negative-space section says what this does NOT cover
 - [ ] Alternatives considered, each with an explicit verdict
-- [ ] Live Open Questions have status emoji (💬), stable ID, bold title, stakes, leaning, empty Answer blockquote, and an `oq` directive carrying the id and the leaning text
+- [ ] Live Open Questions have status emoji (💬), stable ID, bold title, stakes, leaning, empty Answer blockquote, and an `oq` directive carrying the id and the same leaning text as the prose `_Leaning:_`
+- [ ] Every 🔒 question carries an id-only `oq` directive, and every ✅ one keeps its directive until compaction; no rule reports a missing one
 - [ ] Every lettered or named choice in Open Questions has its own indented bullet and trade-off; no A/B/C alternatives run together in prose
 - [ ] `uvx vantage-check <doc>` is clean — in particular every section number, question id and filename in prose is a link (`ref/*`)
 - [ ] Settled decisions are compacted into the Decision Ledger + normative body text (with refuted objections preserved as warnings)

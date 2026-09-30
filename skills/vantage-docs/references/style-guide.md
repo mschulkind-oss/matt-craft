@@ -4,16 +4,24 @@
 > **This is a snapshot, not the source of truth.** Run
 > `uvx vantage-check style-guide` and read that instead whenever you can — it
 > is generated from the renderer's own source and is correct for the Vantage
-> version in front of you. Read this file only when the command cannot run
-> (no `uvx`, no network, no binary on `PATH`).
+> version in front of you. Read this file when the command cannot run
+> (no `uvx`, no network, no binary on `PATH`), or its output lacks
+> *Planning documents*. The local directive correction below also supplements
+> older printed guidance that limits directives to open questions with leanings.
 >
 > Captured from the local Vantage source at commit **4c6e8b7c** on 2026-09-29.
 > The published checker still prints the older guide; this snapshot includes the
-> planning-index conventions from the checkout. Never hand-edit the guide body:
+> planning-index conventions from the checkout. Normally regenerate the guide body rather than hand-edit it:
 > regenerate from that checkout's `STYLE_GUIDE` export (or a checker built from it),
 > re-adding this header. Prefer a checker supporting these conventions; an older
 > published guide is not evidence that the newer syntax is invalid.
-> The sole snapshot adaptation replaces the upstream absolute-path example's
+> Local correction: the directive rule now requires a directive on **every**
+> question state and explains partial checker enforcement. The upstream
+> `packages/vantage-md/src/styleGuide.ts` generator still needs this repair;
+> preserve the correction until regenerated output includes it. Multi-roadmap
+> discovery is capability-dependent; consult **`roadmap`** rather than treating
+> this older snapshot's single-path example as mandatory pinning.
+> The portable snapshot adaptation replaces the upstream absolute-path example's
 > environment-specific root with `/path/to`, keeping it portable and export-safe.
 > Apply that substitution again when regenerating.
 >
@@ -164,7 +172,8 @@ The steps below predate the rewrite.
 - **In a list, indent the directive inside the item**, with blank lines around it (below). At the start of a line between two items it ends the list and starts a second one, which changes the numbering and the spacing in every renderer — the one thing a directive must never do.
 - **An open question's id is `OQ-` then an optional short uppercase prefix then digits** — `OQ-9`, `OQ-TP6`, `OQ-A03`. The prefix is what keeps ids distinct once one document references another's questions, so use one in both whenever they cross-reference. `vantage-check` reports anything outside that shape as `vantage/oq-id-format`, and the same id twice in one document as `vantage/oq-id-duplicate` — both are silent otherwise, because the id becomes the block's anchor and a refused or duplicated one simply goes nowhere.
 - **A reference is a link, or it is a lie.** An `OQ-` id, a `§N` section number and a filename all read like pointers, and written as bare prose none of them can be followed or checked — which is exactly why a stale one is never caught. Link the question to its anchor (`[OQ-4](#OQ-4)`, or the Decision Ledger once it is compacted), the section to its heading, the filename to the file. `vantage-check` reports all three (`ref/*`) as errors, and checks that the link points at the thing the reference names rather than merely at something. Writing a specimen rather than a reference? Put it in a fenced block, which the rules never read.
-- **Every open question (💬) with a stated leaning gets an `oq` directive.** The convention's prose — the emoji, the `OQ-N` id, the `_Leaning:_` line, the fill-in `**Answer:**` — produces no button on its own. Writing the convention and stopping there is the most common way this feature goes missing: the questions look complete, review mode is on, and there is nothing to click. **`vantage-check` reports it as an error** (`vantage/oq-missing`), because a question awaiting a ruling that the reviewer cannot file is not a style preference. Mark it 🔒 if it is blocked on something upstream and cannot be answered yet, or ✅ once it is decided, and keep the directive in both states: a 🔒 question gets one too, with no `leaning` needed (below). Neither state gets the one-click button in review mode, since a blocked question cannot be answered yet and a decided one has been ruled, and that is expected: the directive is still what makes the question count. A question without a directive does not exist to Vantage's planning index (its model of a repository's plans), so nothing counts it, badges it or lists it as waiting. The directive goes when the question is compacted into the Decision Ledger, and not before.
+- **Every question gets an `oq` directive, whatever its state**: 💬 open, 💬 🤷 preference, 🔒 blocked, and ✅ answered until compaction. Indent it inside the list item with blank lines around it and content after it; a trailing directive attaches to nothing (`vantage/orphan`). Its id provides the case-sensitive question anchor. An open question's `leaning="…"` restates the visible leaning: that text is what **Take this leaning** files as a comment (without the attribute it files only "Take the stated leaning."). A blocked question gets the id alone; answered questions keep their directive until same-turn compaction. Neither state offers the one-click leaning button. The index counts questions only through directives: missing ones silently lose badge counts and planning-page cards. **Only one omission is checked** (`vantage/oq-missing`): a 💬 list-item question with an id and `_Leaning:_` line. Check missing directives on 🔒, ✅ and leaning-less questions by eye. Compaction removes the directive and anchor; repair inbound links to the ledger, retaining dependency question ids that survive in its rows.
+
 - **A `leaning` restates the leaning; it is never "yes".** The one-click button in review mode files that text as a review comment, and the comment is all the agent reading it has — nobody remembers which button was clicked. `leaning="Yes"` beside a two-branch question is a support ticket.
 
 ```markdown
@@ -172,7 +181,7 @@ The steps below predate the rewrite.
 
    <!-- vantage: oq id=OQ-9 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
-   _Leaning:_ Back of the queue.
+   _Leaning:_ Back of the queue — the fix might interact with what merged while it was out.
 
 2. 🔒 **OQ-10: The retry budget.**
 

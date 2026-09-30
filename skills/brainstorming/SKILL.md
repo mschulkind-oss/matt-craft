@@ -63,12 +63,12 @@ The shape that works, top to bottom. Not every entry needs every part, but the o
 
 ## Doc structure
 
-- **An overview table up front**, one row per idea, with stable numbers. Columns should include whatever the ranking axis is — cost, fit, status. A reader must be able to see the whole space in one screen before any detail.
+- **An overview table up front**, one row per idea, with stable numbers. Columns should include whatever the ranking axis is — cost, fit, status. A reader must be able to see the whole space in one screen before any detail. Once the catalog is split into per-idea files, a file that carries its own `status` or `stage` frontmatter owns that word: the index row links the file rather than repeating the word in a column, because the copy is the one that goes stale (in Vantage the link's badge shows the file's value).
 - **Stable IDs.** Ideas are referenced across sessions and sibling docs by number. Never renumber; retire an entry in place rather than compacting the list and shifting everything.
 - **Detailed entries below**, in the overview's order.
 - **An axioms or principles section** — the standing rules every idea is checked against, numbered so entries can cite them. These accumulate as the space gets understood; adding one is a real result.
 - **An Open Threads section.** See below.
-- **Scaling rule:** past ~a dozen entries, or when entries pass ~200 lines, split into **one file per idea plus an index** — the index keeps the overview table and one-line hooks, the files carry the full entries. The per-idea files are linked everywhere else by path; inbound anchor links must be rewritten at split time, not left dangling. A duplicate-content window (old monolith + new files) is fine mid-migration, but end the task with the monolith rewritten as the index.
+- **Scaling rule:** past ~a dozen entries, or when entries pass ~200 lines, split into **one file per idea plus an index** — the index keeps the overview table and one-line hooks, the files carry the full entries. The per-idea files are linked everywhere else by path; inbound anchor links must be rewritten at split time, not left dangling, and so must the roadmap links that *route* a question (put it into the roadmap's order; see **`roadmap`**). A bare roadmap link to the old monolith now routes only the questions the index still holds, so each question that moved into a per-idea file needs its own `#OQ-…` link or a bare link to that file, or it lands under *Unrouted*. Move each `oq` directive rather than copying it: a question left in both copies during the duplicate-content window is listed twice. A duplicate-content window (old monolith + new files) is fine mid-migration, but end the task with the monolith rewritten as the index.
 
 ## Exploratory mode: the browsable catalog
 
@@ -89,7 +89,12 @@ Unresolved things get written down as unresolved, in their own section, each wit
 - Untested assumptions the whole plan rests on — flag these hardest; an unverified dependency that gates everything is the most valuable line in the doc
 - Whole dimensions nobody has considered yet
 
-The two things never to do: silently drop a thread because it was awkward, and write a thread up as settled when the user has not actually ruled on it. If a question genuinely needs the user's decision, use the Open Questions format from the **`design-doc`** skill (💬 status emoji, stable ID, stakes, `_Leaning:_`, empty `**Answer:**` blockquote, and the `oq` directive that makes it answerable in one click).
+The two things never to do: silently drop a thread because it was awkward, and write a thread up as settled when the user has not actually ruled on it. If a question genuinely needs the user's decision, apply **`design-doc`**'s scaffold,
+answering, and compaction protocol. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns directive syntax and checks:
+every question needs one, including preference, blocked, and briefly answered questions.
+Missing directives can silently disappear from the index; the directive is not just a button.
+Agent-owned investigation, costing, and known-broken work are not owner questions.
+
 
 ## Reference works
 
@@ -119,7 +124,19 @@ Living document, revisited often. Each pass should leave it **better, not just l
 - **Sharpen, don't append.** New understanding rewrites the entry it affects. Endless appending is how these docs die.
 - **Re-cost when the constraints change.** A discovered budget means every existing entry needs a number it did not have before. Do that pass; do not leave half the catalog uncosted.
 - **Prune.** Displaced and dead ideas get marked as such in place, with the reason. Retire them, don't delete them — the reason an idea failed stops it coming back.
-- **Promote what is ready.** When an idea is chosen and is going to be built, it graduates to a design doc (`design-doc`) and the brainstorm entry becomes a stub pointing at it — **and it appears on the roadmap** in the same commit, wherever the project keeps one (`roadmap.md` at the root, or the local equivalent; see **`roadmap`**). A promotion invisible from the roadmap is an idea that got a document and no queue position. The rule runs both ways: an idea still being costed here does *not* belong on the roadmap, and an owner-only ruling gets a priority link to this source or its question anchor, with a reason for its place. Keep its stakes and leaning here, not copied into the roadmap; if useful agent investigation remains, name that as the source's next step first.
+- **Promote what is ready.** Chosen work is *promoted* into a **`design-doc`**, not graduated
+  (graduation means built → system reference). Leave a linked stub here; link the new design
+  from at least one existing roadmap in the same commit. A project without one gets none.
+  - Move each question and its directive, never copy it. Record the move in the ledger and
+    repoint every inbound question-anchor link, including roadmap links; the old anchor dies.
+  - A still-costed idea is not committed work. For an owner ruling, prefer its exact question
+    anchor rather than the entry heading, which routes nothing. **`roadmap`** owns routing,
+    discovery/pinning, and index verification; use `--roadmap <path>` where supported for
+    multiple roadmaps, rather than assuming a root-only file.
+  - Keep stakes and leaning here. Put the single most useful agent investigation in this
+    file's one-line `next:`; a file has one next step, not one per idea.
+  - While any idea or question is live, use an open-role stage (`SKETCH` with **`design-doc`**'s
+    mapping) or leave it unset. A `done` role hides questions, it does not answer them.
 
 ## Fan-out production
 
@@ -146,7 +163,7 @@ Brainstorms invent vocabulary faster than any other doc — naming the turn is h
 - [ ] New entries say what they displace, or say explicitly that they add
 - [ ] At least one thing in the doc says what will *not* work, and why
 - [ ] Open Threads section exists and includes the untested assumptions
-- [ ] Promoted ideas and user-blocking threads are on the roadmap; nothing still being costed here is
+- [ ] Where the project keeps a roadmap: promoted ideas are on it, and every question awaiting the user is routed there by its `#OQ-…` anchor or a bare link to the file holding it, never by a heading link; nothing still being costed here has a roadmap entry. After **`roadmap`**'s capability check, `vantage-check index` (with `--roadmap <path>` when supported for multiple roadmaps) shows none of this doc's questions under *Unrouted*
 - [ ] References name the mechanism and what is portable, not just the title
 - [ ] A recommendation exists — the doc picks something
 - [ ] *Exploratory mode:* every entry has pickable Options & Variants and a living parking lot; the category mix is audited, not just the entries
