@@ -45,8 +45,10 @@ archiving rules belong to **`roadmap`**:
 
 - **A gap accepted as work** becomes its own roadmap item, linking the story that
   found it. Not every gap — a gap is a finding, and only some findings are work.
-- **An open question here** is a `💬` **Attention Required** item there, carrying
-  the same stakes and leaning. The user answers questions from the roadmap.
+- **An open question here** gets a priority link there — either the bare source document
+  or its question anchor — plus a reason for its place. Keep stakes, options, and leaning
+  here, not copied into an attention table. A heading link alone does not route questions
+  in Vantage. Source metadata owns stage, next action, and actual dependencies.
 - **The story doc itself** gets a thread while it is feeding an active design, so
   the work it implies is visible without reading the narrative.
 
@@ -279,6 +281,7 @@ Use status emojis at the start of each question title for immediate scanning:
 - `_Leaning:_` (italic) — your current best guess, with brief rationale
 - **`Answer:`** on its own line, followed by a blockquote
 - An **`oq` directive** on every 💬 question that states a leaning, indented inside the list item with blank lines around it, carrying the id and the leaning restated in words. Without it the question renders with nothing for the reviewer to click, and `vantage-check` reports it as an error. See the **`design-doc`** skill, which owns this format.
+- Blocked questions also get an id-only directive; answered questions retain theirs until compaction. Without it Vantage cannot count the question. Neither state offers the one-click leaning button.
 - The blockquote starts with `_(empty — fill in when decided)_` as placeholder
 - The human fills in their answer in the blockquote **without erasing anything**
 - When processed: flip `💬` to `✅`, append `— RESOLVED (<date>)` to the title. When settled or when compacting, migrate the ruling into the story body, preserve any refuted traps as warnings, and compact into a Decision Ledger table.
@@ -288,6 +291,8 @@ Use status emojis at the start of each question title for immediate scanning:
 ```markdown
 3. ✅ **OQ-3: Merge commit message format — RESOLVED (2026-08-16).** What should the merge queue put in
    the commit message?
+
+   <!-- vantage: oq id=OQ-3 leaning="Include feature name, priority, approver, and a reference to the PR record." -->
 
    _Leaning:_ Include feature name, priority, approver, and a reference
    to the PR record.

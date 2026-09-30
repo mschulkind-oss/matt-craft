@@ -12,7 +12,7 @@ Vantage renders Markdown with full GitHub Flavored Markdown (GFM) fidelity, KaTe
 [§1](#1-formatting) points at the formatting conventions — it does not restate them. [§2](#2-open-questions--decision-ledgers) and [§3](#3-defined-terms) are the substantive conventions every doc in the tree follows regardless of kind: how decisions are recorded, and how terms are defined. [§4](#4-vantage-check--read-it-first-run-it-last) is the tool, and it bookends the work:
 
 > [!IMPORTANT]
-> **Before writing** — run `uvx vantage-check style-guide` and read what it prints. It is the canonical formatting conventions, straight from the renderer's own source. This skill deliberately does not restate them ([§1](#1-formatting)); if the command cannot run, read [`references/style-guide.md`](references/style-guide.md).
+> **Before writing** — run `uvx vantage-check style-guide` and read what it prints. It is the canonical formatting conventions, straight from the renderer's own source. This skill deliberately does not restate them ([§1](#1-formatting)); for unreleased changes use a checker built from the project checkout. If the command cannot run, read [`references/style-guide.md`](references/style-guide.md).
 >
 > **After writing** — run `uvx vantage-check <file>` and fix what it reports.
 
@@ -45,13 +45,31 @@ That covers document structure, relative links and line anchors, frontmatter, Me
 > if something here is missing, the fix is upstream in the guide the command
 > prints, and this file picks it up for free.
 
-### The two rules that are ours, not Vantage's
+### Writing rules and planning ownership
 
-The printed guide is about what the renderer can do. These two are about how we write, and the checker has no opinion on either:
+The renderer defines syntax; these rules define how we write:
 
-- **Vertical space over density:** Do not crunch explanations into dense blocks. Give context room to breathe with line breaks and formatted lists.
-- **Section size limits:** If an inline section or sub-point exceeds several formatted paragraphs, split it into a dedicated document and link it.
-- **Frontmatter `status:` is an axis, not a second spelling of the prose `**Status:**` line.** They answer different questions and both are worth having: the frontmatter one answers *is the argument closed?* in Vantage's closed four; the prose line answers *what does this doc owe someone?* in the vocabulary **`design-doc`** defines. So `BUILT` over `in-review` is a legal and informative pair — in the tree, and still owing one ruling — and squashing them into one value loses that. Two rules follow: a lifecycle word never goes in the frontmatter slot, where anything outside the four **silently renders no chip**; and the document's *genre* — `STORIES`, `INVENTORY`, `HANDOFF` — goes in `tags:` or the title and never in either.
+- **Vertical space over density:** give context room to breathe with lists and line breaks.
+- **Section size limits:** move sections longer than several formatted paragraphs to a
+  dedicated document and link them.
+- **One home per planning fact:** source documents own `status`, `stage`, `next`, and
+  `depends-on` as top-level frontmatter. The roadmap owns relative priority and its
+  rationale, not copied counts or state. See **`roadmap`** for the portable annotated-list
+  shape and **`design-doc`** for the stage vocabulary.
+- **Two axes:** `status` says whether the argument is closed (`draft`, `in-review`,
+  `accepted`, `deprecated`); `stage` says what the document owes someone, in the repo's
+  vocabulary. Put neither genre words nor lifecycle stages in `status`. Keep prose
+  `**Status:**` lines for dates, reasons, and evidence, not a second copy of `stage`.
+- **Renderer-independent content:** headings, descriptive links, ordering reasons, visible
+  question markers, and body text must stand without Vantage badges or comments. A static
+  export and GitHub have no planning badges; do not compensate with copied status tables.
+
+For a Vantage-enabled repository, read the printed guide's planning conventions too:
+`[planning]` selects the scan and roadmap, `[planning.stages]` maps exact repository stage
+words to `open`, `ready`, `built`, or `done`, and `vantage-check index` shows the derived
+planning state. A `done` role removes the document's questions from the active queue; it
+is not a way to hide unfinished work. Tool support is version-dependent — report when the
+installed checker lacks it rather than treating absence as a clean index.
 
 > [!NOTE]
 > **Wrap release-note prose like the rest of the file.** GitHub turns each newline in a release body into a line break, so `publish.yml` runs `changelog-section.sh --unwrap` to join each paragraph and list item onto one line. Do not write long lines to compensate, and do not use a bare newline to force a break — that gets joined too. A break that must survive needs two trailing spaces or a `\`.
@@ -65,7 +83,7 @@ When surfacing and recording design decisions:
   - 💬 🤷 **Deferred Question:** Pure subjective user preference where agent has no technical leaning.
   - ✅ **Answered / Resolved:** Decided question awaiting compaction.
   - 🔒 **Blocked:** Blocked on upstream decisions or experiments.
-  Format: stable ID (`OQ-N`), bold title + stakes, `_Leaning:_`, fill-in blockquote `**Answer:**`, and an `oq` directive carrying the id and the leaning text.
+  Format: stable ID (`OQ-N`), bold title + stakes, `_Leaning:_`, fill-in blockquote `**Answer:**`, and an `oq` directive carrying the id. Open questions with a leaning also carry the leaning text; blocked questions need no leaning. Keep the directive in ✅ answered and 🔒 blocked states until compaction, so the planning index can still see them. Neither state gets the one-click leaning button.
 
   > [!IMPORTANT]
   > **Three parts of that scaffolding are checked, all at error severity** (Vantage 0.5.9). The printed style guide ([§1](#1-formatting)) states them in full; what they cost you here:
@@ -226,6 +244,7 @@ uvx vantage-check style-guide             # BEFORE writing: the canonical conven
 uvx vantage-check docs/design/api.md      # AFTER writing: does this actually render?
 uvx vantage-check docs/ userguide/        # directories, walked for .md and .markdown
 uvx vantage-check help                    # commands, options, and every rule id
+uvx vantage-check index                   # planning state in supporting versions
 ```
 
 `check` is the default command, so a bare path list runs it. With **no arguments at all it prints help rather than checking anything** — always pass a path.
@@ -234,9 +253,10 @@ uvx vantage-check help                    # commands, options, and every rule id
 
 **Run `uvx vantage-check style-guide` and read the output before you write or edit a Vantage document.** It is not a summary of this skill and not an optional extra: it is the conventions as the renderer itself states them, generated from the same source the viewer uses, so it is correct for the Vantage version actually in front of you.
 
-Two reasons it is a step and not a formality:
+Three reasons it is a step and not a formality:
 
-- **This skill is a copy, and copies lag.** Where the two disagree, the printed guide wins — it moves with the renderer, this file moves when someone remembers to edit it.
+- **This skill is a copy, and copies lag.** For the same version, the printed guide wins — it moves with the renderer, this file moves when someone remembers to edit it. Do not let an older published guide override a newer checkout's documented behavior.
+- **The published wheel can lag a local checkout.** Read a project-built checker when available. For unpublished conventions not in the installed binary, consult the shipped snapshot and disclose which version was checked; do not claim an older checker verified new planning behavior.
 - **Some of it you cannot check by eye.** Vantage's `<!-- vantage: … -->` directives (`section`, `block`, `oq`, and their closed vocabulary of tones and badges) and the reserved `vantage:` frontmatter key are *silently inert* when wrong — nothing breaks, and nothing styles either. Reading the vocabulary first is the cheap way to get them right; `check`'s `vantage/*` rules are the only way to find out afterwards.
 
 If the command is unavailable, read [`references/style-guide.md`](references/style-guide.md) — the same text, snapshotted, shipped inside this skill so it is there when the network is not. Say in your hand-off that you worked from the snapshot.
@@ -299,13 +319,14 @@ Configuration is optional. A `.vantage.toml` at the **repository root** (never i
 
 ### What it checks
 
-Four families, and the split is the point:
+Five families in planning-index versions, and the split is the point:
 
 | Family | The question it answers |
 | :--- | :--- |
 | `link/*` | Does this relative link, line anchor or section anchor resolve *in this repo*? Leading slashes, `file://` and drive letters, missing targets, `#L42` past end-of-file, and `#section` anchors matching no heading — the last with a `Did you mean …?` suggestion, computed with the renderer's own slugger. |
 | `frontmatter/*`, `mermaid/*`, `katex/*`, `render/*` | Do the viewer's own parsers accept this? The checker imports Vantage's render pipeline rather than reimplementing it, so a block fails for exactly the reason the browser would, in that parser's words. `render/pipeline` is the end-to-end backstop. |
 | `ref/*` | *Should this have been a link at all?* An `OQ-` id, a `§N` number or a doc-relative filename written as prose ([§2](#2-open-questions--decision-ledgers)). A reference that is not a link cannot go dead, so no other rule can ever notice it went stale — which is the whole point of the family. |
+| `planning/*` | Do dependencies resolve and stages match the declared vocabulary? Does a ready/built claim disagree with open questions? With the opt-in unrouted rule enabled, does the roadmap reach each open question? |
 | `vantage/*` | Is Vantage's own `<!-- vantage: … -->` markup, and the reserved `vantage:` frontmatter key, well-formed? Wrong ones are **silently inert** — no error anywhere — so these rules are the only thing that will ever tell you a directive styled nothing. |
 
 Links and directives come from the *parsed* document, never a text search, so `[Doc](/docs/x.md)` inside a code fence is a code sample rather than a finding. A link to a directory is fine: Vantage routes those to a listing.

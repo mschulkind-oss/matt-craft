@@ -52,7 +52,7 @@ The instruction that follows: **never twist the code to match the plan.** An ove
 
 In this order. Drop any section that would be empty rather than padding it.
 
-**Header.** The design doc link, a status, and the commit the plan was written against — `Written against a1b2c3d, 2026-09-01`. That stamp is the entire staleness defense: an implementer arriving 200 commits later knows exactly how far to trust the map.
+**Header.** The design doc link, top-level `status`, `stage`, `next`, and actual `depends-on` paths, plus the commit the plan was written against — `Written against a1b2c3d, 2026-09-01`. That stamp is the entire staleness defense: an implementer arriving 200 commits later knows exactly how far to trust the map.
 
 **The map.** One table, one row per file that changes: path → what changes there, new files marked new. This is the material `design-doc` deliberately refuses, and this is where it lives. A map, not a diff.
 
@@ -94,9 +94,15 @@ An unmarked choice reads as consequential, and that is exactly where the deliber
 ## Example (abridged)
 
 ```markdown
+---
+status: accepted
+stage: DECIDED
+next: "Build the bucket and unit tests; stop at the targeted test gate"
+---
+
 # Plan: token bucket for the poller
 
-**Design:** [`rate-limiting.md`](rate-limiting.md) · **Status:** ready ·
+**Design:** [`rate-limiting.md`](rate-limiting.md) · **Status:** completed against the tree ·
 Written against `a1b2c3d`, 2026-09-01.
 Precedence: the design wins on behavior, the tree wins on fact, this file
 is advice and is the first thing to be wrong.
@@ -145,7 +151,7 @@ Lands beside the design it serves, same basename plus `-plan`: `docs/design/<top
 
 ### It opens as a sketch
 
-The file exists from early in the design, not from hand-off. While the design is still being argued it is a **sketch** — `**Status:** SKETCH — incomplete, and unstable while questions are open.` — and it has exactly one job: hold the implementation material that would otherwise clutter the design doc. Dependency and library notes, schema and signature sketches, migration mechanics, packaging, sequencing below the design's altitude.
+The file exists from early in the design, not from hand-off. While the design is still being argued it is a **sketch** — `stage: SKETCH` in frontmatter, with a dated prose status line saying it is incomplete and unstable while questions are open — and it has exactly one job: hold the implementation material that would otherwise clutter the design doc. Dependency and library notes, schema and signature sketches, migration mechanics, packaging, sequencing below the design's altitude.
 
 Two rules govern it, and **`design-doc`** owns both:
 
@@ -167,13 +173,19 @@ Do it **close to hand-off**, because it rots at the speed of the tree. Promoting
 - **Traps that turned out to be real** → the system doc's warnings (see **`system-doc`**). They are now permanent knowledge about the system.
 - **What the plan got wrong** → the retro below.
 
-### The roadmap tracks which of the three it is
+### The source owns state; the roadmap owns order
 
-Those three states are exactly what the roadmap reports, and the roadmap is what the user reads. Move the item in the **same commit** as the plan change, whenever the project keeps one (`roadmap.md` at the root, or the local equivalent) — states and archiving belong to **`roadmap`**:
+Keep `stage`, `next`, and actual `depends-on` paths in this file's frontmatter. Review the
+roadmap in the **same commit** whenever links, sequencing rationale, or remaining scope
+change; do not copy plan state or blockers into a second table. See **`roadmap`**.
 
-- **Opened as a sketch** → the item is *not* `📦`, however much the file already contains. A sketch is not a hand-off; it stays `💬` or `🏗️` until the design settles.
-- **Promoted against the tree** → `📦`, linking this plan and the design. This is the transition that makes an item buildable cold, and the one most often left unwritten.
-- **Work landed, plan deleted** → the item leaves the roadmap (archiving protocol), and anything the plan named but nobody built becomes its own item rather than evaporating with the file.
+- **Opened as a sketch:** set `stage: SKETCH`, name refinement as the next action, and link
+  the design gates. This is not a build hand-off, even if it has a priority position.
+- **Promoted against the tree:** set the repository's ready stage (default `DECIDED`),
+  record the written-against commit, and name the first build step in `next`. Review the
+  roadmap link to this hand-off and its order, not a duplicated ready label.
+- **Work landed, plan deleted:** remove closed work from the roadmap and give specified-but-
+  absent or unverified work its own source and next step rather than letting it evaporate.
 
 ## Whether this is working
 
@@ -213,5 +225,5 @@ Follow **`vantage-docs`** for Markdown formatting. Otherwise this genre inverts 
 - [ ] Norms named only where this change touches them, by enforcing command where one exists
 - [ ] Cheap choices marked cheap; expensive ones marked stop-and-ask
 - [ ] No behavior claims that belong in the design doc
-- [ ] The roadmap item matches this file's state — never `📦` while the status line says `SKETCH` — moved in the same commit
+- [ ] Source metadata matches the plan's actual readiness; roadmap links and sequencing were reviewed in the same commit, without copied state
 - [ ] Under ~120 lines

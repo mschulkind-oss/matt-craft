@@ -11,7 +11,8 @@
 # For every tracked Markdown file under the given paths it checks:
 #
 #   NOSTATUS   no `**Status:**` line at all
-#   BADWORD    the first word is not one of the seven
+#   BADWORD    stage (or legacy prose word) is not one of the seven
+#   DUPSTAGE   stage is copied into the prose status line
 #   NEEDDATE   a dated word carries no ISO date
 #   NODATE     CURRENT carries a date (an evergreen doc has no moment)
 #   UNSTAMPED  BUILT with no MEASURED:/UNMEASURED: clause
@@ -77,6 +78,12 @@ while IFS= read -r doc; do
             gsub(/^[ \t"'"'"']+|[ \t"'"'"']+$/, "", fmstatus)
             next
         }
+        fm && /^stage:[ \t]*/ {
+            stage = $0
+            sub(/^stage:[ \t]*/, "", stage)
+            gsub(/^[ \t"'"'"']+|[ \t"'"'"']+$/, "", stage)
+            next
+        }
         fm { next }
 
         # Fences hold specimens, never claims: a doc that quotes this
@@ -86,6 +93,12 @@ while IFS= read -r doc; do
 
         /^\*\*Status:\*\*/ && status_line == ""  { status_line = $0; next }
         /^\*\*Needs your ruling/ && ruling == "" { ruling = $0; next }
+
+        # Blocked decisions still owe an answer, so they prevent graduation.
+        index($0, lock) && $0 ~ /OQ-[A-Z]*[0-9]+/ && !index($0, done) {
+            nblocked++
+            next
+        }
 
         # A live question carries both the emoji and an id. A bare emoji in
         # prose ("answer the remaining questions") is not a question.
@@ -110,6 +123,14 @@ while IFS= read -r doc; do
             word = rest
             sub(/[ \t].*$/, "", word)
             gsub(/[^A-Za-z]/, "", word)
+
+            # Frontmatter owns the stage. Legacy prose-only documents remain
+            # readable during migration, but a second lifecycle word is drift.
+            if (stage != "") {
+                if (word in ok_word)
+                    print "DUPSTAGE|keep stage only in frontmatter, not in **Status:**"
+                word = stage
+            }
 
             if (!(word in ok_word)) {
                 print "BADWORD|status \"" word "\" is not in the vocabulary"
@@ -150,8 +171,10 @@ while IFS= read -r doc; do
                 print "RULING|no Needs your ruling line, " nlive " live: " ids
             }
 
-            if (word == "BUILT" && nlive == 0)
+            if (word == "BUILT" && nlive == 0 && nblocked == 0)
                 print "GRADUATE|BUILT, zero live questions — hand off to system-doc"
+            if (word == "BUILT" && nblocked > 0)
+                print "RULING|BUILT while " nblocked " blocked question(s) still owe an answer"
             if (word == "BUILT" && nlive > 0)
                 print "RULING|BUILT while " nlive " question(s) are still live: " ids
         }

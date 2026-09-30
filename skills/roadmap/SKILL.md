@@ -5,216 +5,195 @@ description: Use when creating, updating, reconciling, or compacting a project's
 
 # Roadmap
 
-The roadmap is a **routing table with a priority order**: each committed piece of unfinished work,
-its next actor and action, and the doc that holds the details. It is not where the thinking lives,
-and it is not a record of what happened.
+A roadmap owns **priority and the reasons for that order**. Source documents own the work's
+state, next action, dependencies, decisions, and evidence. Write each fact once, where it
+belongs; the roadmap links to it rather than maintaining a second planning database.
 
 Default location: **`roadmap.md`** at the project root, unless the repo has an established one.
+Do not create one as a side effect of an unrelated doc task.
 
-A reader must get two things from it in under a minute:
+A reader must learn in under a minute **what matters next, why it comes first, and where to
+act**. This must work in plain Markdown, on GitHub, and in a static export — not only in Vantage.
+Badges are a convenience, never the content that makes the page useful.
 
-1. **What is outstanding.**
-2. **Where to spend the next hour.**
+## Ownership — one home per fact
 
-Everything below serves those two. A roadmap that has to be *read* rather than *scanned* has
-already failed, however accurate it is.
+| Fact | Home |
+| :--- | :--- |
+| Relative priority, sequencing rationale, cross-project trade-offs | Roadmap |
+| Lifecycle stage, next action, dependencies, verification stops | Source design, plan, or work document |
+| Questions, stakes, options, leaning, ruling | Question's owning document |
+| What shipped and how the roadmap changed | Git history |
 
-## The hard rules
+**No copied status chips, stage words, question counts, or counted status header.** A date
+records the reconciliation; it is not evidence that every linked proposal is ready or built.
+A roadmap link is not permission to implement: read the source's next step and gates first.
 
-These are the ones a long-lived roadmap breaks first, and they break silently.
+For work too small to justify a separate document, the roadmap may be its **only home**:
+write its concrete action, first stop, and evidence directly beneath the entry. Do not create
+an empty source doc just to have a link. If that work grows into a design or plan, move those
+facts there and leave the priority reason here.
 
-1. **One table line per item.** No paragraphs, no sub-bullets, no per-item callouts. If an item
-   needs a paragraph, the paragraph belongs in its doc and the row links it.
-2. **Never restate what the doc says** — not the question, the stakes, the options, or your
-   leaning. The row names the next action or decision and links it; a reader who wants the
-   argument clicks.
-3. **No history.** Not what a row used to say, not why it changed, not what a previous count was,
-   not a correction of an earlier correction. `git log -p -- <roadmap>` is the record. A sentence
-   beginning *"this row used to say"* is always a deletion.
-4. **No done items.** There is no ✅. Work that closes leaves the file the day it closes.
-5. **Counts are derived, never carried forward.** Re-derive every number from the docs each run.
-   A count copied from the previous version of the file is how the file starts lying.
-6. **Budget: under ~200 lines.** Past 300 the file is the problem, not the project. If the rows
-   genuinely do not fit, the project needs triage — say so in one line at the top rather than
-   growing the file.
+## The shape — an annotated priority list
 
-> [!IMPORTANT]
-> The failure these prevent is not ugliness, it is **staleness**. A file nobody can scan is a file
-> nobody reconciles, and its rows go on describing questions that were answered weeks ago. Expect
-> to find, on any roadmap that has grown past its budget, at least one row whose own doc says in as
-> many words that it is resolved.
+1. **Header:** title, last reconciled date, and a short scope statement.
+2. **Ordering basis:** explain what takes precedence. Default: verified live defects,
+   work that unblocks other work, then smaller independent steps. Call something a defect
+   only after finding it in the tree; link the evidence, not an earlier roadmap claim.
+3. **Ordered entries:** a descriptive link identifying the work or decision, plus a
+   one-clause reason for its place. A filename alone is not a useful label.
+4. **Optional context beneath an entry:** one short paragraph or a few bullets holding
+   only roadmap-owned material — why these efforts are sequenced together, what is being
+   traded off, or an external unblock condition with no other home. Move detailed thinking
+   to its source, but do not ban all prose or reduce the page to bare links.
+5. **Boundaries:** briefly identify candidate work not yet committed to and questions
+   intentionally outside this queue, with links where useful.
 
-## The shape
-
-### 1. Header
-
-A **counted** status line and the date — tally the actual rows, never assert. Then three sentences
-stating what the file is and is not, so the next agent editing it inherits the rules above.
-
-### 2. Actionable (▶️)
-
-**The primary agent queue.** If an agent can make useful progress now without a new user ruling,
-put the next step here — including investigation, research, experiments, writing or revising a
-design, planning, implementation, and verification. **Actionable does not mean ready to implement.**
-A missing answer is often the work: research it, test it, or prepare a recommendation before asking
-for a ruling. Do not invent a ruling or implement past a genuine owner gate.
+Prefer **one ordered list**. Use sections only when they add navigational value, such as a
+separate external-wait list; document order is priority order, including across sections.
+Do not recreate a status dashboard with mandatory Actionable / Needs you tables. Put the
+links that actually set priority before background links: their order matters to Vantage too.
 
 ```markdown
-| # | Next agent action | Doc | Stops at |
-|---|---|---|---|
-| **1** | Research the two options and recommend one | [Design](doc.md) | User rules [the choice](doc.md#question) |
-| **2** | Implement the agreed slice | [Plan](plan.md) | Run tests and verify on target |
+# Roadmap
+
+**Reconciled:** 2026-09-29
+
+Prioritize the live data-loss defect, then the shared contract that unblocks both clients.
+This page owns ordering; each linked document owns its next action and stopping conditions.
+
+1. [Prevent duplicate imports](docs/design/imports-plan.md) — first because retries can
+   overwrite a user's edits.
+
+2. [Choose the storage contract](docs/design/storage.md#OQ-S2) — before either client,
+   because changing it after both land doubles the migration work.
+
+   Keep the two client efforts behind this choice rather than optimizing each separately.
+
+3. [Build the offline client](docs/design/offline-plan.md) — ahead of sync polish because
+   local recovery is useful even when the server is unreachable.
+
+## External waits
+
+4. [Compiler upgrade](docs/plans/compiler.md) — after the compatibility release, since the
+   lint gate cannot run against the new compiler yet.
 ```
 
-Each row names a **concrete next action**, not just a project or a status. Link the work's source;
-name the first actual stop in **Stops at** (a user ruling, external dependency, or verifiable done
-condition). An item can need the user *eventually* and still be ▶️ now. Keep it here while an agent
-can advance it, and move it to 💬 only when the next step truly belongs to the user. Split independent
-steps into separate rows so an owner-gated decision does not hide unrelated agent work. A build
-step must be implementable cold from its linked docs: resolve or explicitly delegate every
-necessary question. Otherwise the ▶️ action is to research or design, not to guess and build.
+**Plain-Markdown acceptance test:** hide all badges and HTML comments. The page must still
+identify the work, explain its order and trade-offs, and offer a clear place to act. A reader
+may click for current state and next action; they must not click just to learn why an item
+matters. More copied state is not the fallback for a missing renderer.
 
-**State the ordering basis in the file** so the order is checkable. Default: fix a verified live
-defect, then work that unblocks the most other work, then smaller independent steps. Call a row a
-defect only after finding it in the tree; cite `file:line`, not the previous roadmap's claim.
+**Budget: under ~200 lines.** Past 300, triage scope or move detail to its owner; do not keep
+history or expand a second set of question scaffolds. No done items or checked-off archive.
 
-When asked to **“take action on everything”**, work through every ▶️ row, not just build tasks.
-Advance each as far as evidence and delegated authority allow; update its doc and row as the next
-step changes. Do not silently skip research, and do not treat this as permission to make subjective
-owner decisions or perform destructive/external actions without the required confirmation. Report
-what advanced, what closed, and what now needs the user or an external condition.
+## Source planning metadata
 
-### 3. Needs you (💬)
+For planning documents, use top-level frontmatter (ordinary YAML, readable outside Vantage):
 
-```markdown
-| # | Decides | Doc | Live | Gate | Releases |
-|---|---|---|---|---|---|
-| **26** | The decision in one clause, not its background | [`doc-name`](path.md) · *in-review* | 4 | [`OQ-ID`](path.md#anchor) | **defect** — shipped, reproducible |
+```yaml
+---
+status: in-review
+stage: DESIGN
+next: "Rule OQ-S2 — the storage contract gates both clients"
+depends-on:
+  - ../research/storage.md
+---
 ```
 
-- **Decides** — what ruling this is. One clause.
-- **Doc** — the link, plus the doc's own status (`draft` / `in-review` / `accepted` /
-  `sketch, nothing built`), read off the doc rather than remembered.
-- **Live** — that doc's live open-question count, derived.
-- **Gate** — the single id to rule if the user rules only one thing. **This is the column that
-  turns a pile of questions into a next action**; a row without one has not been thought about.
-- **Releases** — exactly one of **defect** (something is wrong in shipped code today), **build**
-  (designed code is waiting on this ruling), or **doc** (nothing waits; the ruling closes
-  questions) — plus a short object.
+- **`status`** answers whether the argument is closed, using the repo's convention; Vantage
+  recognizes `draft`, `in-review`, `accepted`, and `deprecated`.
+- **`stage`** answers what the document owes someone, using the repository's own vocabulary.
+  Keep it here, not repeated in a prose status line. Prose carries dates, reasons, and evidence.
+- **`next`** holds one concrete next step as a line of plain text, including the first stop
+  when useful. Research, experiments, design, implementation, and verification all count.
+- **`depends-on`** holds actual document dependencies as doc-relative paths, optionally to
+  a live question anchor. Hardware or host conditions need prose in the source; do not invent
+  a missing file to encode them. A question needing an answer eventually is not necessarily
+  blocking useful agent work now.
+- **No `priority` key:** relative order belongs only in the roadmap.
 
-Follow the table with at most two short lists: **rule-together sets** (decisions that are
-unanswerable apart) and **small calls** that do not deserve a row.
+Do not guess past an owner-only decision. If an agent can narrow a choice, investigate a
+blocker, or verify a claim now, make that the source's next step instead of manufacturing a
+user bottleneck. Uncertainty about completion is not completion; keep verification work visible.
 
-- Where a decision is genuinely subjective, mark the row 🤷 rather than manufacturing a
-  recommendation. The leaning still lives in the doc, not here.
-- **No artificial "pick one" bottlenecks.** Never ask the user to sequence approved work — that is
-  yours. Ask only what you cannot decide. If an agent can still narrow the question, put that step
-  in ▶️ instead; 💬 is for the *next* action that only the user can take.
+## Vantage integration — optional tooling, not a content dependency
 
-### 4. Waiting (🔒) and Icebox (🧊)
+Follow **`vantage-docs`** for the installed version's conventions. A Vantage planning index
+is its derived model of the repository's planning documents, not a separate editable queue.
 
-Two columns: what it is blocked on, and what would clear it. 🔒 is an environment, hardware, or a
-measurement that an agent cannot obtain or work around now. 🧊 is genuine uncertainty about whether
-we want the thing — never a long cycle time, and never a queue that got too big. If an agent can
-investigate the blocker or clarify the proposal now, that next step is ▶️, not parked here.
+- A **bare document link** in the roadmap reaches all questions in that document.
+- A **live question-anchor link** reaches only that question.
+- A **heading link** reaches no questions, even though its badge shows the document's state.
+  Link a heading for detail, but add a bare document or question link when prioritizing rulings.
+- The first link reaching a question establishes its position. Check incidental preface and
+  boundary links so they do not accidentally give background work first priority.
+- Every question needs an `oq` directive, including 🔒 blocked and ✅ answered questions.
+  Keep it until compaction; a blocked question need not carry a leaning. The visible prose
+  must still describe its state and stakes without that Vantage-only comment.
+- Compaction removes the directive and its anchor. Repoint inbound links to the Decision
+  Ledger, then reconsider priority; a ledger link does not reach other live questions.
 
-### 5. What this file does not cover
+Where Vantage is used, inspect the existing `.vantage.toml` before changing configuration.
+Its optional `[planning]` table names the roadmap and scan perimeter; `[planning.stages]`
+maps exact, case-sensitive repository words to `open` (still being decided), `ready`
+(decided, not built), `built` (built), or `done` (no longer a live proposal). Do not mark
+unfinished work `done` to hide it: that role excludes its questions from the planning queue.
+Without declared stages, question/link reporting works, but stage-derived lists do not.
 
-One short section, with links: candidate work nobody has committed to, and live questions that
-block nothing. Close it with the rule that keeps the file small without losing anything — *committed
-work gets a row when there is a next action; a question gets a row when it blocks that work; both
-leave when the work closes.*
+```bash
+uvx vantage-check index                 # derived state, unrouted questions, roadmap order
+uvx vantage-check roadmap.md docs/      # links, metadata, and planning rules
+```
 
-## The emoji system
-
-Distinct metaphors, not a colour ramp, so the file stays scannable in greyscale.
-
-- ▶️ **Actionable** — a concrete next agent action, whether research, design, build, or verification.
-- 💬 **Needs you** — the next step is a decision only the user can make. (🤷 beside it: genuinely their preference.)
-- 🏗️ **In progress** in the active session.
-- 🔒 **Waiting** on hardware, a host, or a measurement.
-- 🛑 **Broken** — actively failing; if an agent can investigate or fix it, that work goes in ▶️.
-- 🧊 **Icebox** — unsure we want it.
-
-**Failsafe ambiguity:** uncertainty about completion is not completion. If an agent can verify on
-the target, verification is ▶️; if only the owner or unavailable hardware can, route it to 💬 or
-🔒 respectively. Never label unverified work done.
-
-**Vocabulary migrations:** substitute longest-match-first. A `🟡 ❓` → `💬 🤷` rule must run before
-a bare `🟡` → `💬` rule, or the compound splits and strands the old glyph on the most important
-rows.
+Use a version supporting `index`; if unavailable, reconcile manually and disclose that limit.
+An `index` exit of 0 means the report ran, not that its disagreements or unrouted questions
+are resolved; read the sections. Run it from the target repository: `--config` chooses the
+configuration, not the project to scan. Do not treat skipped/unreadable files or scan-limit
+failures as zero questions. The
+`planning/unrouted` check is opt-in; inspect the index even when a normal check passes.
 
 ## Reconciling — the default action
 
-Invoked by itself (`/roadmap`, "update the roadmap", "where are we at"): reconcile against the docs
-and the tree. **Derive, then diff** — reading the existing rows first is how their staleness gets
-inherited.
+Invoked by itself (`/roadmap`, "update the roadmap", "where are we at"): **derive, then diff**.
+Use the old roadmap as an index of sources to inspect, not evidence of their current state.
 
-1. **Count live questions per doc, mechanically.** Find the project's greppable open-question
-   marker and count with it; put the command in the file so the number is re-runnable. ⚠ Check the
-   pattern catches *every* spelling in use — a heading style or directive form it misses reads as
-   zero, which is indistinguishable from a closed doc.
-2. **Read each doc's status** from the doc.
-3. **Check rows whose doc shows no live questions** against the doc and tree. Remove closed work,
-   but keep unfinished research, build, or verification steps in ▶️; zero questions is not done.
-4. **Check recent commits and the working tree** for work that shipped, and for build orders whose
-   steps are now done.
-5. **Hunt 💬, 🔒, and 🧊 for agent actions** — research, narrowing a choice, experiments, partial
-   implementation, verification — and route each independent next step to ▶️. A remaining owner
-   gate belongs in 💬 only once the agent step is exhausted.
-6. **Re-verify every blocker.** "Blocked on a measurement / hardware / another ruling" is a claim
-   with a date on it; confirm it still holds.
-7. **Find unrouted work and questions** — committed work with no row, or docs carrying live
-   questions that no row names. Route the next action, or name out-of-scope questions under
-   *does not cover*.
-8. **Re-derive the counted header** from the rows you ended up with, and check every link and
-   anchor resolves.
+1. Read source docs and recent commits; check claims of build/completion against the tree.
+   Inspect working changes too. Zero open questions does not mean work is done.
+2. Reconcile each source's stage, next step, dependencies, and gates. Look for useful agent
+   actions buried behind apparent owner gates or external waits; split independent steps.
+3. Find committed work and live questions with no priority link. Add their source or specific
+   question, or explicitly record why they are outside this queue. Do not commit speculative
+   catalog entries to the build queue merely because they exist.
+4. Re-verify blockers and priority reasons. Order useful next efforts by the stated basis,
+   without asking the user to sequence already-approved work.
+5. Remove closed work; preserve unfinished implementation, verification, or graduation as
+   work with an owner and a next step. Explicitly rejected proposals keep their reasoning
+   in their owning doc or a Retired Decisions doc, not an active roadmap row.
+6. Check link targets and anchors, question coverage, first-link order, and the plain-Markdown
+   acceptance test. Update the reconciliation date only after doing the pass.
 
-## Compacting a sprawling roadmap
+When compacting a sprawling roadmap, rebuild from these sources rather than trimming stale
+rows. Report answered questions still labeled blocked, wrong copied counts, buried agent work,
+and missing priority links; those discoveries matter more than the reduction in lines.
 
-When the file has grown narrative, do not trim it row by row — **rewrite it into the shape above,
-from the docs**, using the old file only as an index of which docs to read. What is lost is
-history, which is what `git log` is for.
+## Doc changes and roadmap review belong together
 
-Then tell the user what the rewrite found: rows already answered in their own docs, counts that
-were wrong, agent work that was buried, questions nothing routed. Those findings are the argument
-that the compaction was needed, and they are invisible from inside the old file.
+In the **same commit**, update source metadata and review the roadmap's links, order, rationale,
+and remaining scope. Edit the roadmap only when one of those changes; a question count changing
+alone is not a reason to copy it here or churn the file.
 
-## Doc changes are roadmap changes
+| Source changed | Review here |
+| :--- | :--- |
+| Design or accepted story gap created | Add a priority link with a reason |
+| Question opened | Link its owner or its anchor; leave stakes and leaning there |
+| Question compacted | Repair dead anchors; keep unfinished work prioritized |
+| Design settled / plan promoted against the tree | Link the build hand-off; revisit sequencing, not copied state |
+| Research changes a dependency or rejects an option | Reconsider priority and any roadmap-only unblock condition |
+| Design built | Keep graduation or target verification if still owed |
+| Work closes and graduates | Remove the closed entry; give absent or unverified work its own next step |
 
-The roadmap is the index of the planning tree, and it is the half that goes stale silently: nobody
-re-reads a design doc to discover that the question blocking them was answered last week. **The
-roadmap edit belongs in the same commit as the doc change.**
-
-| The doc did this | The roadmap does this |
-| --- | --- |
-| A design doc is created (`design-doc`) | Route its next agent action to ▶️, or its genuinely owner-only ruling to 💬 |
-| A `💬` question opened | Researchable next step goes to ▶️; only an owner-only next step goes to 💬 |
-| A question answered and compacted | `Live` drops; remove the row only if the underlying work is done |
-| A design settles — zero `💬`, `status: accepted` | Unfinished implementation or verification goes to ▶️ |
-| An implementation plan opens as a `SKETCH` (`implementation-plan`) | Refining the sketch may be ▶️; it is not a build hand-off |
-| That plan is promoted against the tree | Build step goes to ▶️, linking the plan and design |
-| A brainstorm idea is promoted (`brainstorming`) | Route the next agent step or owner ruling; ideas still being costed do not enter the queue |
-| A user story records a gap accepted as work (`user-stories`) | Its own row, linking the story and naming the next actor |
-| A research round rules an option out or opens a decision (`research`) | Update the next action; move to 💬 only if agent work is exhausted |
-| A design ships and graduates (`system-doc`) | The row leaves; anything specified-but-not-built stays as its own ▶️ row |
-
-Two failure modes this exists to prevent, both of which look fine locally: **the answered question
-that still reads blocked**, which costs the user a turn to discover, and **the shipped design whose
-row never left**, which makes the counts lie.
-
-## Format
-
-- Follow the **`vantage-docs`** style guide, and run its checker on the result — tables, links,
-  anchors, and the open-question reference rules (every question id is a link *with a fragment*).
-- **Link aggressively.** Every row links its doc; every id links the question.
-- Tables over bullets, bullets over prose, and nothing over a paragraph.
-
-## Archiving Protocol
-
-Completed work leaves immediately. How it leaves depends on what it was:
-
-- **Features and fixes:** delete the row. The commit history is the record.
-- **Retired decisions:** when we decide explicitly *not* to build something, or reject an
-  architecture, move it to a "Retired Decisions" doc under `docs/`. Deleting it is dangerous — it
-  will be re-proposed, and the reasoning is what stops that.
+When asked to **take action on everything**, read all prioritized sources and advance every
+useful agent step, including research and verification. A priority list is not permission to
+make subjective owner decisions or take destructive/external actions without confirmation.
+Report what advanced, what closed, and what now needs the user or an external condition.

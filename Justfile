@@ -6,6 +6,7 @@ default:
 # Verify all skills pass the corpus validator
 test:
     ./scripts/check-skills skills
+    sh tests/status-lines.test.sh
 
 # Run vantage-check on documentation and skills
 check:

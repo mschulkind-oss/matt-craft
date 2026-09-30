@@ -14,7 +14,7 @@
 | **[`design-doc`](skills/design-doc/SKILL.md)** | Use when designing or revising a feature, system, or architecture that requires settled decisions and explicit Open Questions. |
 | **[`implementation-plan`](skills/implementation-plan/SKILL.md)** | Use when a settled design needs a concrete, file-by-file build hand-off grounded in the current repository tree. |
 | **[`research`](skills/research/SKILL.md)** | Use when investigating, evaluating, comparing, or looking into a topic, tool, library, or design space for a project. |
-| **[`roadmap`](skills/roadmap/SKILL.md)** | Use when tracking open questions and workstreams across multiple designs into a single high-level altitude view. |
+| **[`roadmap`](skills/roadmap/SKILL.md)** | Use when prioritizing unfinished work with readable ordering reasons while source documents own planning state. |
 | **[`system-doc`](skills/system-doc/SKILL.md)** | Use when documenting how an implemented system works, graduating a shipped design, or re-verifying a system reference. |
 | **[`user-stories`](skills/user-stories/SKILL.md)** | Use when exploring a product or feature through realistic narrative workflows and the gaps they expose. |
 | **[`vantage-docs`](skills/vantage-docs/SKILL.md)** | Use when authoring, formatting, reviewing, or render-verifying Markdown documentation for Vantage and GitHub. |
@@ -39,7 +39,7 @@ This suite encodes a disciplined document state machine for AI-assisted engineer
 
 1. **Explore (`/research`, `/brainstorming`, `/user-stories`):** Survey constraints, map edge cases, and evaluate options before committing to code.
 2. **Decide (`/design-doc`):** Capture architecture with explicit, machine-readable Open Questions and a decision ledger.
-3. **Track (`/roadmap`):** Aggregate open questions, rulings, and execution states across all active design docs. The roadmap acts as an altitude router—giving you a single-pane view of what needs a decision next across the whole project.
+3. **Prioritize (`/roadmap`):** Order unfinished work and explain why one effort precedes another. Source documents own their stage, next step, dependencies, and questions; the roadmap links them without copying state. Descriptive links and short annotations remain useful without Vantage's badges.
 4. **Plan (`/implementation-plan`):** Ground settled designs into task checklists tied directly to current repository paths.
 5. **Graduate (`/system-doc`):** Transition completed designs into permanent system references with freshness tracking.
 
@@ -51,7 +51,7 @@ While `matt-craft` skills work in any Markdown-compatible environment, they are 
 
 - **Invisible in Standard Markdown:** Skills embed review directives and decision metadata using standard HTML comments (e.g. `<!-- vantage: oq id=... leaning="..." -->`). On GitHub, VS Code, or standard Markdown viewers, these are completely invisible—your documents stay clean and readable.
 - **Interactive in Vantage:** When opened with Vantage, those hidden comments are parsed into interactive decision widgets, live status badges, and review threads without leaving your local terminal flow.
-- **Mechanical Link & Quality Verification:** The [`vantage-docs`](skills/vantage-docs/SKILL.md) skill and `uvx vantage-check` verify broken relative links, frontmatter validity, and term definitions automatically before you commit.
+- **Mechanical Link & Quality Verification:** The [`vantage-docs`](skills/vantage-docs/SKILL.md) skill and `uvx vantage-check` cover broken relative links and frontmatter validity before you commit. Term definitions still require author review.
 
 ---
 
@@ -94,6 +94,10 @@ The repository layout follows standard agent skill conventions:
 ---
 
 ## Development & Verification
+
+Edit public skills directly in this repository and commit them with a description
+of the actual change. Publication pushes those existing commits; it does not copy
+from another authoring tree or create commits during deployment.
 
 Skills in this repository are verified with:
 

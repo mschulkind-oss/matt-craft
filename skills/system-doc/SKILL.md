@@ -29,10 +29,10 @@ brainstorming → research → design-doc → implementation-plan → (build it)
 
 The fact that settles it took a census to find and one line to state: **the evergreen tree has exactly one state.** 41 of 41 reference docs in that repo carried `status: current`. There is no "built but not yet current" for a doc to wait in, so reaching built *is* the cue, necessarily.
 
-So the trigger is mechanical, and it is worth running as one: **a doc stamped `BUILT` with zero live `💬` questions is a graduation candidate.** `design-doc` ships a check that lists them.
+So the trigger is mechanical, and it is worth running as one: **a doc stamped `BUILT` with zero unanswered questions (including 🔒 blocked ones) is a graduation candidate.** `design-doc` ships a check that lists them.
 
 > [!WARNING]
-> A built claim carries a measurement clause — `MEASURED:` or `UNMEASURED:` — and an `UNMEASURED:` design doc graduates like any other, **carrying that fact with it.** Three docs in that census claimed built with zero runtime observation recorded, two of them describing a macOS backend no CI job has ever exercised. Reconciling against the code ([step 1](#step-1--reconcile-against-the-code)) proves the code exists; it proves nothing about whether anyone watched it run. Say which in the header, and say it in the roadmap.
+> A built claim carries a measurement clause — `MEASURED:` or `UNMEASURED:` — and an `UNMEASURED:` design doc graduates like any other, **carrying that fact with it.** Three docs in that census claimed built with zero runtime observation recorded, two of them describing a macOS backend no CI job has ever exercised. Reconciling against the code ([step 1](#step-1--reconcile-against-the-code)) proves the code exists; it proves nothing about whether anyone watched it run. Say which in the source header; prioritize any outstanding verification in the roadmap without copying the evidence there.
 
 Not this skill:
 
@@ -105,7 +105,7 @@ For the same reason: **no code blocks that are copies of code.** A snippet in a 
 
 ### Nothing with a date-shaped truth
 
-Performance measurements, current scale, "known issues", "recently added", team ownership. These rot on a schedule the doc can't track and don't survive their first quarter. They belong in a roadmap, a dashboard, or nowhere.
+Performance measurements, current scale, "known issues", "recently added", team ownership. These rot on a schedule the doc can't track and don't survive their first quarter. They belong in the source document for outstanding work, a dashboard, or nowhere; the roadmap links that work rather than copying its measurements.
 
 ### Structure the doc by half-life
 
@@ -200,7 +200,8 @@ This appendix is not a history section. Every row is forward-facing: it exists t
 
 ````markdown
 ---
-status: current
+status: accepted
+stage: CURRENT
 verified: 2026-08-30
 verified_commit: a1b2c3d
 covers:
@@ -211,7 +212,7 @@ tags: [broker, jail, approvals]
 
 # The boundary broker — approvals for what crosses the jail wall
 
-**Status:** CURRENT as of 2026-08-30, verified against `a1b2c3d`.
+**Status:** Verified 2026-08-30 against `a1b2c3d`.
 
 The broker is a long-lived daemon on the host side of the jail boundary. It
 holds requests that outlive the connection that made them, and routes the ones
@@ -235,7 +236,7 @@ Five things, all load-bearing:
 1. **The title names the thing.** Inverts the design-doc rule: no claims, no questions. Someone arriving from a grep hit needs to know what they've landed in.
 2. **A verification date and a commit.** The most valuable line in the doc, because it tells the reader how far to trust it — and because it makes re-verification a bounded diff instead of a re-read. Never restate it without redoing step 1.
 
-   `CURRENT` is the same word **`design-doc`** uses for an evergreen doc, where it deliberately takes **no date**. This is the exception and the reason is worth keeping straight: a lifecycle date on a living record claims nothing and expires on its own, while *this* date is a **verification stamp** — a claim about work someone actually did, bounded by the commit beside it. Do not let a vocabulary sweep strip it.
+   `stage: CURRENT` is the same lifecycle value **`design-doc`** uses for an evergreen doc, where it deliberately takes **no date**. Keep that value only in frontmatter. The prose date is different: a lifecycle date on a living record claims nothing and expires on its own, while *this* date is a **verification stamp** — a claim about work someone actually did, bounded by the commit beside it. Do not let a vocabulary sweep strip it.
 3. **`covers:` — the doc's declared perimeter.** The paths this doc claims to describe. This is what turns "is this doc stale?" from a judgement call into a command; see *Staying current*. Get it right: too narrow and real drift goes unnoticed, too broad and every unrelated commit cries wolf.
 4. **What it is, in one paragraph, present tense.**
 5. **Where the code lives** — component → *package*, with the key types named. The thing a design doc structurally cannot have (it predates the code) and the thing that makes a reference doc worth opening.
@@ -290,7 +291,7 @@ A grep scoped to `docs/` misses it — the roadmap sits at the repo root (`roadm
 - **The shipped thread leaves the roadmap.** Done work does not linger as a checked box — the commit history is the record. A thread that stays behind reads as unfinished work forever.
 - **Anything specified-but-absent becomes a roadmap item, by name.** Step 1 surfaces it and this is where it lands; a subsystem that quietly never got built must not evaporate with the design doc that proposed it.
 - **A ruling that was retired rather than implemented** goes to the Retired Decisions doc the roadmap keeps, so nobody re-proposes it next quarter.
-- **An `UNMEASURED:` claim becomes a roadmap item too.** Built-and-never-observed is a real state and it survives graduation intact; what it must not do is disappear into a reference doc that reads like every other one.
+- **Outstanding target verification gets a priority link too.** Preserve `UNMEASURED:` evidence in its source and name the verification step there. If only an unavailable target or owner can perform it, state that gate; do not imply that reading the code observed it running. A Vantage reference with a `done` stage role will not surface this work, so put unfinished verification in a live planning document and link it, not only in the graduated reference.
 
 ## Step 4 — Delete and commit
 
@@ -384,9 +385,9 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (frontmat
 
 **Accurate**
 
-- [ ] Status line carries a verification date **and** a commit; step 1 was actually done
+- [ ] `stage: CURRENT` (or the local reference stage) owns lifecycle state; prose carries a verification date **and** a commit, without repeating the stage; step 1 was actually done
 - [ ] Every claim about behavior was checked against the code
-- [ ] The design doc was `BUILT` with zero live `💬` questions before this started — not held back waiting for a cue that was never coming
+- [ ] The design doc was `BUILT` with zero unanswered questions (including 🔒 blocked ones) before this started — not held back waiting for a cue that was never coming
 - [ ] An `UNMEASURED:` built claim came across with the doc rather than evaporating into a header that implies observation nobody made
 - [ ] Nothing unbuilt is described in present tense; anything specified-but-absent was called out, not dropped silently
 - [ ] Things the implementation added but the design never mentioned are written up

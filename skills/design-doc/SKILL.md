@@ -22,9 +22,9 @@ If this skill is invoked without specific drafting instructions (e.g. `/design-d
 1. **Audit Open Questions:** Scan the doc for active questions (`💬`), answered questions (`✅`), and the Decision Ledger. An answered question still sitting in question form is a miss against [the compaction rule](#compaction-fires-on-answering-not-on-a-threshold), not a normal state — fix it here.
 2. **Execute Compaction:** For all settled/answered questions, fold the ruling into the normative body text (§X) and compact the verbose question block into the **Decision Ledger** table.
 3. **Audit the claims:** Run [the audit pass](#the-audit-pass--overturn-dont-annotate) over everything the doc asserts about the tree. Skippable only when the doc was written this session against code that has not moved since.
-4. **Verify the header against the tree, not against itself.** The status line and the **Needs your ruling** line are claims like any other, and they are the two claims nobody re-checks. One repo's sweep found ~20 status lines false against the code in both directions; a later census of the same tree found three docs claiming *ALL PHASES SHIPPED* / *EXECUTED* / *SHIPPED IN FULL* while carrying live `💬` questions, one of them stating in its own body that a doc with a live question cannot graduate. **Re-spelling what the line says is what produced that drift.** Check the state against the code, and check **Needs your ruling** against the ids of the `💬` questions actually left in the file. [`references/status-lines.sh`](references/status-lines.sh) does both mechanically.
-5. **Verify frontmatter status:** the second axis, in Vantage's closed set — `accepted` once zero unanswered `💬` questions remain, `in-review` or `draft` while any is open. See [the two axes](#frontmatter-is-a-second-axis-not-a-second-spelling).
-6. **Name the graduation candidates.** A `BUILT` doc with zero live `💬` questions is ready for **`system-doc`** — [reaching built is the whole cue](#graduation-is-the-cue-and-there-is-no-second-one). List them by name; a candidate nobody names sits.
+4. **Verify the header against the tree, not against itself.** The frontmatter stage, its supporting prose, and the **Needs your ruling** line are claims like any other, and these are the header claims nobody re-checks. One repo's sweep found ~20 status lines false against the code in both directions; a later census of the same tree found three docs claiming *ALL PHASES SHIPPED* / *EXECUTED* / *SHIPPED IN FULL* while carrying live `💬` questions, one of them stating in its own body that a doc with a live question cannot graduate. **Re-spelling what the line says is what produced that drift.** Check the state against the code, and check **Needs your ruling** against the ids of the `💬` questions actually left in the file. [`references/status-lines.sh`](references/status-lines.sh) does both mechanically.
+5. **Verify frontmatter status:** the second axis, in Vantage's closed set — `accepted` once zero unanswered questions remain, including 🔒 blocked ones, `in-review` or `draft` while any is open. See [the two axes](#frontmatter-is-a-second-axis-not-a-second-spelling).
+6. **Name the graduation candidates.** A `BUILT` doc with zero unanswered questions (including 🔒 blocked ones) is ready for **`system-doc`** — [reaching built is the whole cue](#graduation-is-the-cue-and-there-is-no-second-one). List them by name; a candidate nobody names sits.
 7. **Surface Live Decisions:** Report remaining `💬` questions needing user attention.
 
 ## When to use this skill
@@ -94,7 +94,7 @@ Delegating is a complete specification. Silence is not. Those three are the only
 
 Altitude says implementation material belongs in an **`implementation-plan`**. The trap is timing: that plan is written later, so while the design is being argued the material has nowhere to go — and it lands here, in the doc that was supposed to stay at altitude. Fix the timing. **Open the plan as a sketch the moment the first piece of it exists.**
 
-It lands beside the design, same basename plus `-plan` — `docs/design/<topic>-plan.md` — stamped `**Status:** SKETCH, 2026-09-05 — incomplete, and unstable while questions are open.` — the sketch sits in the planning tree and takes [a status line](#status--the-word-names-what-is-owed) like everything else there
+It lands beside the design, same basename plus `-plan` — `docs/design/<topic>-plan.md` — stamped with `stage: SKETCH` in frontmatter and `**Status:** 2026-09-05 — incomplete, and unstable while questions are open.` — the sketch sits in the planning tree and takes [a status line](#status--the-word-names-what-is-owed) like everything else there
 
 **What to push into it.** Anything that surfaced during design, is worth keeping, and the user does not need to rule on: dependency and library notes, a schema or signature sketch, migration mechanics, packaging and rollout detail, sequencing below the design's altitude, "check whether `X` still exists before relying on it."
 
@@ -126,7 +126,7 @@ That is the job **In short** keeps failing, and the reason is in the old instruc
 | Slot | What it says |
 | :--- | :--- |
 | **Title** | A claim or a question, never a bare noun — "Where review state lives — and why it keeps biting us" beats "Review State" |
-| **Status** | The vocabulary below, with an ISO date |
+| **Status** | Date and evidence supporting the frontmatter stage, without repeating it |
 | **In short** | The design as a claim, set as a blockquote — the thesis the body spends its length earning |
 | **Why it matters** | The concern that makes this worth doing; what the status quo costs |
 | **The shape** | The named components and how they relate — the architecture in one line |
@@ -140,9 +140,15 @@ That is the job **In short** keeps failing, and the reason is in the old instruc
 **Status** is [its own section below](#status--the-word-names-what-is-owed) — it is the line most read and most often false, so it gets the space. Re-stamp it on amendment rather than silently editing it. A **Scope note** naming what was split into a sibling doc joins the header when there was a split.
 
 ```markdown
+---
+status: in-review
+stage: DESIGN
+next: "Rule OQ-2 — the runtime boundary waits on it"
+---
+
 # Twenty-nine keys, and the three that lie
 
-**Status:** DESIGN, 2026-09-05. Nothing built. Evidence verified at `62db92c`.
+**Status:** 2026-09-05. Nothing built. Evidence verified at `62db92c`.
 
 > **In short.** `config.toml`'s `engine` key welds together two independent
 > axes — which model, and where its runtime runs. Splitting them is the whole
@@ -171,7 +177,11 @@ migration path is written.
 
 ## Status — the word names what is OWED
 
-The status line is the first thing a reader looks at, and it is the line most likely to be false. Both of those come from the same mistake: treating it as a position on a lifecycle ladder. A reader opening a planning doc is asking one question — ***is there something here for me?*** — and the word answers it by naming **what the doc owes someone.**
+The stage answers ***what does this doc owe someone?*** Use the words below unless the
+repository has an established vocabulary. Store the word once in top-level `stage`
+frontmatter; the prose `**Status:**` line carries its date, reasons, commit, and evidence,
+not the word again. This keeps the document readable in plain Markdown while giving tools
+one authoritative value. Legacy prose-only headers may be migrated when touched.
 
 | Word | What is owed | Stamp |
 | :--- | :--- | :--- |
@@ -193,19 +203,23 @@ The status line is the first thing a reader looks at, and it is the line most li
 
 **No percentages.** `MOSTLY BUILT` and `LARGELY IMPLEMENTED` both existed in that corpus; both are `DECIDED`. How much shipped is prose, and prose is better at it — *"nine of ten rulings built; the macOS backend is the tenth"* tells a reader more than either word.
 
-**Genre is not a status.** `STORIES`, `INVENTORY`, `HANDOFF` and `DESIGN + CATALOG` all appeared in the slot. What *kind* of document this is belongs in `tags:` or in the title. The status slot holds exactly one word from the table, and no document is exempt from having one — a missing status line is the same defect as a wrong one, arrived at by a different route.
+**Genre is not a status.** `STORIES`, `INVENTORY`, `HANDOFF` and `DESIGN + CATALOG` all appeared in the slot. What *kind* of document this is belongs in `tags:` or in the title. The `stage` slot holds one word from the repository vocabulary; genre belongs in tags or the title. Keep a prose status line for the evidence and explanation, without repeating the stage.
 
 ### A built claim carries a measurement clause
 
 "Built" and "built, and someone watched it run" are different facts, and in that corpus the synonym pair was quietly being used to smuggle the difference: three docs claimed built with **zero runtime observation recorded**, two of them describing a macOS backend no CI job has ever exercised — reading, on the page, identically to a design whose central claim had been measured against a control.
 
-So any `BUILT` line says which it is:
+So any `stage: BUILT` claim has supporting prose saying which it is:
 
 ```markdown
-**Status:** BUILT 2026-09-12 (`a1b2c3d`). MEASURED: 40-question list, 171 ms → 0.3 ms
+---
+stage: BUILT
+---
+
+**Status:** 2026-09-12 (`a1b2c3d`). MEASURED: 40-question list, 171 ms → 0.3 ms
 with the rule off, on the corpus in `docs/design/`.
 
-**Status:** BUILT 2026-09-12 (`a1b2c3d`). UNMEASURED: the macOS backend ships and no
+**Status:** 2026-09-12 (`a1b2c3d`). UNMEASURED: the macOS backend ships and no
 CI job has ever exercised it.
 ```
 
@@ -213,18 +227,26 @@ CI job has ever exercised it.
 
 ### Frontmatter is a second axis, not a second spelling
 
-The prose line and frontmatter `status:` answer different questions, and squashing them into one value loses the more interesting half:
-
-| | Question it answers | Vocabulary |
+| Field | Question it answers | Vocabulary |
 | :--- | :--- | :--- |
-| `**Status:**` line | What does this doc owe someone? | The table above |
-| `status:` frontmatter | Is the argument closed? | Vantage's closed four: `draft`, `in-review`, `accepted`, `deprecated` |
+| `stage` frontmatter | What does this doc owe someone? | The table above, or the repository's vocabulary |
+| `status` frontmatter | Is the argument closed? | `draft`, `in-review`, `accepted`, `deprecated` in Vantage |
+| `**Status:**` prose | What evidence and date support that stage? | Dates, reasons, commits, measurement clause |
 
-`BUILT` over `in-review` is then a legal and informative pair — in the tree, and still owing one ruling. Anything outside Vantage's four **silently renders no chip**, which is why 8 docs in that census were carrying frontmatter nobody could see. `decided` is not one of the four; `accepted` is the word.
+`stage: BUILT` with `status: in-review` can describe code in the tree that still owes a
+ruling. Do not erase that distinction; Vantage's planning checks may flag it as a disagreement
+worth resolving. A lifecycle word never goes in `status` just to make it visible.
+
+Set `next` to one concrete next step and `depends-on` to actual doc-relative dependencies,
+optionally with a live question anchor. Keep detailed gates and evidence in the body.
+For Vantage repositories, inspect or declare `[planning.stages]` in `.vantage.toml`, mapping
+repository words to `open`, `ready`, `built`, or `done` (no longer a live proposal).
+Do not hide unanswered questions by assigning their document the `done` role. See
+**`roadmap`** for priority ownership and **`vantage-docs`** for tooling.
 
 ### Graduation is the cue, and there is no second one
 
-`BUILT` with zero live `💬` questions means hand off to **`system-doc`** — now, not at some later review. ~40 docs in that corpus qualified and sat, waiting for a cue that does not exist, until a whole restructure was needed to route them.
+`BUILT` with zero unanswered questions (including 🔒 blocked ones) means hand off to **`system-doc`** — now, not at some later review. ~40 docs in that corpus qualified and sat, waiting for a cue that does not exist, until a whole restructure was needed to route them.
 
 The fact that settles it took a census to notice and one line to state: **the evergreen tree has exactly one state.** 41 of 41 reference docs in that repo carried `status: current`. There is no "built but not yet current" for a doc to wait in, so reaching built *is* the cue, necessarily. Nothing else is coming.
 
@@ -234,11 +256,11 @@ That makes it checkable rather than cultural, which is the only version that sur
 
 **A rule that lives only in a skill is a rule no repo can check.** This file is user-level, outside every repository it governs; for months nothing in that tree could enforce the vocabulary, and nothing did — 79 of 87 docs were off-vocabulary before anyone counted.
 
-So the last step of applying this vocabulary to a corpus is to **write the rule into the repository, in a form that can be re-run.** Copy [`references/status-lines.sh`](references/status-lines.sh) in beside the repo's other corpus checks and wire it into whatever already runs them — a `just` recipe, a test file, CI. What worked was a numbered check with literal shell commands sitting next to the checks that were already there; a prose convention in a `CONTRIBUTING.md` would have rotted exactly the way the skill's copy did.
+So the last step of applying this vocabulary to a corpus is to **write the rule into the repository, in a form that can be re-run.** The shipped script recognizes the seven words above, reads `stage` first, supports legacy prose-only headers during migration, and reports a lifecycle word duplicated in prose. If the repo uses different words, adapt its `VOCAB` and word-specific checks rather than forcing the repo to adopt ours. Use Vantage's planning checks for declared stage mappings and dependencies; the shell check is a small convention check, not a YAML parser or the planning index. Copy [`references/status-lines.sh`](references/status-lines.sh) in beside the repo's other corpus checks and wire it into whatever already runs them — a `just` recipe, a test file, CI. What worked was a numbered check with literal shell commands sitting next to the checks that were already there; a prose convention in a `CONTRIBUTING.md` would have rotted exactly the way the skill's copy did.
 
 ```console
 $ sh references/status-lines.sh docs/design docs/plans
-GRADUATE  docs/design/boundary-broker.md  (BUILT, zero live questions — hand off to system-doc)
+GRADUATE  docs/design/boundary-broker.md  (BUILT, zero unanswered questions — hand off to system-doc)
 NODATE    docs/design/glossary-plan.md  (CURRENT takes no date)
 UNSTAMPED docs/design/mac-backend.md  (BUILT with no MEASURED:/UNMEASURED: clause)
 RULING    docs/design/rate-limiting.md  (Needs your ruling says None, 2 live: OQ-4, OQ-7)
@@ -374,7 +396,7 @@ Format rules:
 - **Choices belong on separate lines.** If the question offers A/B/C (or any named alternatives), put each in its own indented bullet under the question, with a bold label, a short description, and the material trade-off. Leave a blank line before and after the nested list so it stays inside the question in Markdown. Never run `A: … B: … C: …` together in a paragraph — not in the question, context, or leaning. Keep the stakes and options easy to scan before the answer block; don't bury the choice in a long introductory sentence. For a simple two-way question, plain prose is fine if it stays readable.
 - `_Leaning:_` — your current best guess with brief rationale. Always have one; "I genuinely don't know" or deferring to user preference (🤷) is itself a leaning worth stating. **A leaning is replaced, never versioned.** There is no "Leaning (second version)" and no "Leaning (fourth version, and it is review's)" — a leaning is what you think *now*, so when it changes it changes and the old one goes. If *why* it changed is load-bearing, that reason is a fact about the system: state it in the body as one. The leaning is not an autobiography of the design.
 - `**Answer:**` on its own line, then a blockquote starting as `_(empty — fill in when decided)_`.
-- **An `oq` directive on every 💬 question that states a leaning**, indented inside the list item with blank lines around it, carrying the question's id and the leaning restated in words. Without it the question renders with no button for the reviewer to click, and `vantage-check` reports it as an error. A 🔒 or ✅ question needs none.
+- **An `oq` directive on every 💬 question that states a leaning**, indented inside the list item with blank lines around it, carrying the question's id and the leaning restated in words. Without it the question renders with no button for the reviewer to click, and `vantage-check` reports it as an error. A 🔒 question gets an id-only directive, with no leaning required; a ✅ question keeps its directive until compaction. Those states get no one-click leaning button, but the directive is still required for counting and links.
 - Stable IDs are mandatory so plans, sibling docs, and code comments can reference them as blockers — the id is also the question's anchor, so it is the letters `OQ`, a hyphen, an optional short uppercase prefix, then digits. Prefix the ids in both documents whenever two docs reference each other's questions; a bare number cannot say which document's fourth question you meant.
 - **Cite a question as a link, never as bare prose** — to its own id while it is in flight, to the owning document's Decision Ledger once it is compacted. Same for `§` section numbers and for filenames. See the **`vantage-docs`** skill; `vantage-check`'s `ref/*` rules are errors.
 
@@ -470,7 +492,7 @@ Replace verbose answered OQ blocks with a concise, greppable table:
    - If you are a fresh agent compacting a doc you didn't write: **read the git log and diffs first**. A refuted objection ("verified against code at file.go:123") looks like historical archaeology in a diff, but it is actually the reason the ruling is safe. Do not over-delete — and note that the trap test above cuts both ways: it is what tells you a refuted objection is load-bearing, and equally what tells you a corrected line number is not.
 
 5. **Frontmatter Status Verification:**
-   - `status: accepted` is load-bearing. Before stamping `status: accepted`, verify mechanically that zero unanswered `💬` questions remain.
+   - `status: accepted` is load-bearing. Before stamping `status: accepted`, verify mechanically that zero unanswered questions remain, including 🔒 blocked ones.
 
 ---
 
@@ -510,19 +532,28 @@ These mechanisms are for a change of **status**, not a correction of a claim: th
 
 ## Roadmap sync — this doc is not the index
 
-A design doc is read by whoever already knows it exists. The **roadmap** is how everyone else finds out, and it is the thing that goes stale silently: a doc that moved from three open questions to zero, sitting under a roadmap line that still says *blocked on the user*, costs the user a whole turn to discover.
+The source document owns its `status`, `stage`, `next`, dependencies, question scaffolds,
+and evidence. The **`roadmap`** skill owns the priority list and its ordering reasons.
+Review both in the same commit; do not copy stakes, leanings, stages, or question counts
+into the roadmap. If only source state changes, its existing priority link may need no edit.
+Do not create a roadmap as a side effect when the project has none.
 
-So a change here is a change there, **in the same commit** — whenever the project keeps a roadmap (`roadmap.md` at the root, or the local equivalent). The states and the archiving rules are **`roadmap`**'s; don't create a roadmap as a side effect of a doc task, and if the project has none, say so once rather than inventing one.
+| What happened here | Review in the roadmap |
+| :--- | :--- |
+| New committed design | Add a descriptive priority link and reason |
+| New question | Link its owning doc bare, or its live question anchor, at the intended position |
+| Question compacted | Repair anchor links to the ledger; keep unfinished work visible |
+| Design settled, plan completed against the tree | Link the build hand-off and reconsider sequencing |
+| Doc split, renamed, superseded, or graduated | Repair links; remove closed work, keep unfinished follow-ups |
 
-| What happened here | What changes in the roadmap |
-| --- | --- |
-| New design doc | A thread exists for it, linking the doc |
-| A new `💬` question opened | An **Attention Required** item carrying the same stakes and leaning — the roadmap is where the user looks for questions, not the bottom of this file |
-| A question answered and compacted | That item leaves Attention Required |
-| Last `💬` closed, `status: accepted` | The thread moves to **Up Next** (📦), linking this doc and its plan |
-| Doc split, renamed, or superseded | Every roadmap link re-pointed |
+A link to a heading does not route the document's questions in Vantage. A bare document
+link reaches all its questions; a question-anchor link reaches only that question. Keep
+questions and answers in their source rather than cloning them into an attention table.
 
-**A `📦` claim is a claim about this doc.** *Ready* means an agent with no memory of the conversation could build the item from what is written down. If an answer the implementer needs lives only in your head or in this session, the roadmap item is `💬` — see [the gap test](#the-gap-test).
+**Ready is a source claim, not a roadmap decoration.** A cold agent must be able to build
+from the design and plan without guessing required behavior. If agent investigation can
+close a gap, make that the source's next action; stop only at a genuine owner gate.
+See [the gap test](#the-gap-test).
 
 ## Style & Formatting
 
@@ -542,11 +573,11 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
 - [ ] The header orients rather than contains: **In short** is one or two sentences stating a claim, architecture leads, no build inventory, whole block inside one screen
 - [ ] No walls of text: enumerations are lists, comparisons are tables, no paragraph past ~6 lines that should have been either
 - [ ] Implementation material lives in the companion sketch, not here; sketch entries resting on open questions name them, and the sketch is linked in **Reads with:**
-- [ ] The status line is one word from [the owed vocabulary](#status--the-word-names-what-is-owed), stamped as that row requires, and **checked against the tree** rather than re-spelled — no genre words, no percentages, and no doc without one
-- [ ] A `BUILT` line carries `MEASURED:` or `UNMEASURED:`, and says which honestly
+- [ ] `stage` holds one word from [the owed vocabulary](#status--the-word-names-what-is-owed) or the repository's vocabulary; prose carries its required stamp and evidence, not a duplicated lifecycle word; checked against the tree
+- [ ] A `stage: BUILT` claim carries `MEASURED:` or `UNMEASURED:`, and says which honestly
 - [ ] **Needs your ruling** names exactly the live `💬` ids, or **None** with none live
-- [ ] Frontmatter `status:` is one of Vantage's four and answers the other question; `accepted` verified to have zero open `💬` questions
-- [ ] `BUILT` with zero live questions was named as a graduation candidate, not left to a later review
+- [ ] Frontmatter `status:` is one of Vantage's four and answers the other question; `accepted` verified to have zero unanswered questions, including blocked ones
+- [ ] `BUILT` with zero unanswered questions was named as a graduation candidate, not left to a later review
 - [ ] Altitude holds: components/algorithms/invariants, no per-file edit plans outside a fenced section
 - [ ] Completeness holds: degenerate inputs, failure paths, ordering, defaults with units, triggers, pre-existing state, one-writer rules, and observable done-conditions are all stated
 - [ ] Every question an implementer must answer is answered, opened as an `OQ-N`, or explicitly delegated — none left silent
@@ -565,5 +596,5 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
 - [ ] The description reads as currently true — corrections are edits, not strata; the only append-only thing is the Decision Ledger, and ⚠ markers appear only inside a deliberately frozen body
 - [ ] Every preserved correction passes the trap test and is written forward-facing, about the system rather than about the document
 - [ ] Nothing framed as a task list the user has to maintain
-- [ ] The roadmap reflects this doc — its link, its status, and every question newly opened or answered — updated in the same commit
+- [ ] Source metadata is current; roadmap links, question coverage, ordering, and rationale were reviewed in the same commit without copying source state
 - [ ] Where this vocabulary now governs a corpus, [the check is in the repository](#land-the-check-in-the-repository) and re-runnable — not only in this skill

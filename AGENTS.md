@@ -7,15 +7,13 @@ documentation skills for AI-assisted engineering (`brainstorming`, `design-doc`,
 
 ## Skill Contributions
 
-Skill content is maintained in an upstream authoring tree and synchronized into
-this repository after review and validation. Open an issue or pull request to
-propose improvements; a direct edit to a synchronized skill may need to be
-applied upstream before the next release.
+This repository is the canonical home for its public skills and supporting
+files. Edit and commit them here; there is no upstream authoring copy that can
+overwrite your changes. Open an issue or pull request to propose improvements.
 
 ## Local Checks
 
-Before committing any standalone repository changes (documentation, plugin
-manifests, or scripts):
+Before committing changes to skills, documentation, plugin manifests, or scripts:
 
 ```bash
 just done

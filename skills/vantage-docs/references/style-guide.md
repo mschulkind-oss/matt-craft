@@ -7,9 +7,15 @@
 > version in front of you. Read this file only when the command cannot run
 > (no `uvx`, no network, no binary on `PATH`).
 >
-> Captured from **vantage-check 0.5.9** on 2026-09-05. Never hand-edit it:
-> regenerate with `uvx vantage-check style-guide > references/style-guide.md`
-> (re-adding this header), so it can never drift into a second opinion.
+> Captured from the local Vantage source at commit **4c6e8b7c** on 2026-09-29.
+> The published checker still prints the older guide; this snapshot includes the
+> planning-index conventions from the checkout. Never hand-edit the guide body:
+> regenerate from that checkout's `STYLE_GUIDE` export (or a checker built from it),
+> re-adding this header. Prefer a checker supporting these conventions; an older
+> published guide is not evidence that the newer syntax is invalid.
+> The sole snapshot adaptation replaces the upstream absolute-path example's
+> environment-specific root with `/path/to`, keeping it portable and export-safe.
+> Apply that substitution again when regenerating.
 >
 > Running `vantage-check` on **this file** reports `ref/unlinked-oq` a handful of
 > times: the guide's own prose names example ids, and upstream keeps that text in
@@ -17,7 +23,6 @@
 > to fix here — an edit would be undone by the next regeneration.
 
 ---
-
 
 ## Markdown style guide (for Vantage viewer)
 
@@ -65,10 +70,44 @@ vantage:
   status-chip: true # show `status` as a chip above the metadata card
 ---
 ```
-- **Nothing may sit above the opening delimiter** — not a blank line, not an editorial comment, not a `<!-- vantage: … -->` directive. Frontmatter is recognised only at the very first byte of the file (in Vantage, on GitHub, and in every other reader), so one line above it turns the whole block into body text: a horizontal rule followed by a heading made of the raw keys, with every field lost. `vantage-check` reports it as `frontmatter/not-at-top`.
+- **Nothing may sit above the opening delimiter** — not a blank line, not an editorial comment, not a `<!-- vantage: … -->` directive. Frontmatter is recognized only at the very first byte of the file (in Vantage, on GitHub, and in every other reader), so one line above it turns the whole block into body text: a horizontal rule followed by a heading made of the raw keys, with every field lost. `vantage-check` reports it as `frontmatter/not-at-top`.
 - **`vantage:` is Vantage's own reserved key.** It holds chrome that belongs to the file rather than to a section, it never shows up in the metadata card, and every other renderer ignores it. One key today: `status-chip`.
 - **Prefer `status-chip: true`**, which shows the document's own `status:` and therefore cannot disagree with it. A literal `status-chip: accepted` is accepted too, but it is a second value that goes stale on its own — `vantage-check` reports the disagreement.
 - The chip's vocabulary is `status`'s, exactly: `draft | in-review | accepted | deprecated`, lowercase. `Draft` renders no chip at all, silently.
+
+### Planning documents: `stage`, `next`, `depends-on`
+- **Vantage reads a repository's plans as a set.** A document whose frontmatter has `status` or `stage`, or that carries an `oq` directive, is a *planning document*, and Vantage shows its state (status, stage, open questions) in a badge beside every link to it. So write each fact once, in the document it belongs to, and link to it everywhere else: a copied status or count is the one that goes stale.
+- Three top-level keys beside `status` hold the rest of a document's planning state. They are facts about the file, so they sit at the top level, never under `vantage:`:
+```yaml
+---
+title: "Payload bootstrap"
+status: in-review
+stage: DESIGN
+next: "Rule OQ-B2 — the install step waits on it"
+depends-on:
+  - pypi-distribution.md
+  - ../plans/rollout.md#OQ-R1
+---
+```
+- **`stage` is one word from the repository's own vocabulary**, the words `[planning.stages]` declares (below), spelled exactly as declared: matching is case-sensitive, so `Decided` is not `DECIDED`. `vantage-check` reports a word outside them as `planning/stage-vocabulary`.
+- **Frontmatter is the stage's one home.** Do not repeat the word in a prose `**Status:**` line: that is a second copy, and no tool can read or check it. Keep the prose line, where a document has one, for the date and the why.
+- **`next` is the next step, on one line of plain text.** A bare `OQ-` id in it links to this document's question of that id, so name the question rather than paraphrasing it.
+- **`depends-on` lists what the document waits on**: relative paths, resolved like links, each optionally ending in `#OQ-…` to name one question. A single path may stand on its own. A target that does not exist, lies outside the repository, or does not contain the id is an error (`planning/depends-on-missing`).
+- **Never a `priority` key.** A priority only means something relative to the others, so it lives in one ordered list, the roadmap, and not in each document.
+- **The roadmap is ordered links.** Each entry is a link to a document or a question, then a one-clause reason for its place; the badge beside the link carries the rest, so never copy a status, a stage or a count into it. Prose beneath an entry holds only what has no other home, such as what would unblock it. A bare link to a document *routes* every question in it into the roadmap's order, and a link to one question's `#OQ-…` anchor routes that question; a link to any other heading routes nothing. With `planning/unrouted` turned on, `vantage-check` reports an open question no roadmap link reaches.
+- **`[planning]` in `.vantage.toml`** names the roadmap, which files are read, and what each stage word means. Every key is optional:
+```toml
+[planning]
+roadmap = "roadmap.md"          # the default
+exclude = ["docs/gallery/**"]   # gitignore syntax; every .md is included by default
+
+[planning.stages]               # each word maps to open | ready | built | done
+DESIGN = "open"
+DECIDED = "ready"
+BUILT = "built"
+SUPERSEDED = "done"
+```
+- **Each stage word maps to one of four roles**, which is what the word means to Vantage: `open` is still being decided, `ready` is decided and not built, `built` is built, and `done` is no longer a live proposal, so its questions leave every list of what needs a ruling. `vantage-check index` prints those lists.
 
 ### Mermaid diagrams
 - Use ```mermaid code blocks for flowcharts, sequence diagrams, and architecture diagrams. Vantage provides interactive zoom, pan, dark/light theme adaptation, and SVG export.
@@ -78,6 +117,7 @@ flowchart TD
     client["Client (React SPA)"] -->|WebSocket| srv["Vantage Server (Go)"]
     srv --> git["Git CLI (git diff)"]
 ```
+- **Inline `<svg>` is Vantage-only**: GitHub drops the drawing and prints a `<title>` as text. For a document read on GitHub, commit the drawing as a file and embed it with `![alt](diagram.svg)`.
 
 ### Code blocks and diffs
 - Always tag fenced code blocks with language identifiers (`ts`, `go`, `python`, `bash`, `json`, `yaml`, `diff`, `sql`, etc.) for syntax highlighting.
@@ -117,14 +157,14 @@ The steps below predate the rewrite.
 ```
 
 - **Three names**: `section` (the heading and everything under it), `block` (the one block after it), `oq` (one answerable Open Question).
-- **The keys and values are a closed set**: `tone` = `note | tip | important | warning | caution | muted`; `emphasis` = `strong | normal | quiet`; `badge` = `draft | stale | blocked | done | wip`; `collapsed` = `true | false`. Name a *tone*, never a colour — the theme decides what a warning looks like, in light mode, in dark mode, and in print.
+- **The keys and values are a closed set**: `tone` = `note | tip | important | warning | caution | muted`; `emphasis` = `strong | normal | quiet`; `badge` = `draft | stale | blocked | done | wip`; `collapsed` = `true | false`. Name a *tone*, never a color — the theme decides what a warning looks like, in light mode, in dark mode, and in print.
 - **Use them sparingly.** One or two per document, on the sections that genuinely differ. A document where everything is toned says nothing, and a rainbow one is harder to read than a plain one.
 - **Anything outside those sets is silently ignored** — nothing breaks, and nothing styles either. Run `vantage-check` on the document: the `vantage/*` rules are the only thing that will ever tell you a directive did nothing.
 - **Always close the comment with `-->`.** Never `--!>`, and never leave it open: Markdown reads every line below an unclosed `<!--` as part of the comment, and the whole rest of the document vanishes from the page. For the same reason `-->` cannot appear *inside* a value — it ends the comment early and spills the remainder into the page as literal text.
 - **In a list, indent the directive inside the item**, with blank lines around it (below). At the start of a line between two items it ends the list and starts a second one, which changes the numbering and the spacing in every renderer — the one thing a directive must never do.
 - **An open question's id is `OQ-` then an optional short uppercase prefix then digits** — `OQ-9`, `OQ-TP6`, `OQ-A03`. The prefix is what keeps ids distinct once one document references another's questions, so use one in both whenever they cross-reference. `vantage-check` reports anything outside that shape as `vantage/oq-id-format`, and the same id twice in one document as `vantage/oq-id-duplicate` — both are silent otherwise, because the id becomes the block's anchor and a refused or duplicated one simply goes nowhere.
 - **A reference is a link, or it is a lie.** An `OQ-` id, a `§N` section number and a filename all read like pointers, and written as bare prose none of them can be followed or checked — which is exactly why a stale one is never caught. Link the question to its anchor (`[OQ-4](#OQ-4)`, or the Decision Ledger once it is compacted), the section to its heading, the filename to the file. `vantage-check` reports all three (`ref/*`) as errors, and checks that the link points at the thing the reference names rather than merely at something. Writing a specimen rather than a reference? Put it in a fenced block, which the rules never read.
-- **Every open question (💬) with a stated leaning gets an `oq` directive.** The convention's prose — the emoji, the `OQ-N` id, the `_Leaning:_` line, the fill-in `**Answer:**` — produces no button on its own. Writing the convention and stopping there is the most common way this feature goes missing: the questions look complete, review mode is on, and there is nothing to click. **`vantage-check` reports it as an error** (`vantage/oq-missing`), because a question awaiting a ruling that the reviewer cannot file is not a style preference. Mark it 🔒 if it is blocked on something upstream and cannot be answered yet, or ✅ once it is decided; either state needs no directive.
+- **Every open question (💬) with a stated leaning gets an `oq` directive.** The convention's prose — the emoji, the `OQ-N` id, the `_Leaning:_` line, the fill-in `**Answer:**` — produces no button on its own. Writing the convention and stopping there is the most common way this feature goes missing: the questions look complete, review mode is on, and there is nothing to click. **`vantage-check` reports it as an error** (`vantage/oq-missing`), because a question awaiting a ruling that the reviewer cannot file is not a style preference. Mark it 🔒 if it is blocked on something upstream and cannot be answered yet, or ✅ once it is decided, and keep the directive in both states: a 🔒 question gets one too, with no `leaning` needed (below). Neither state gets the one-click button in review mode, since a blocked question cannot be answered yet and a decided one has been ruled, and that is expected: the directive is still what makes the question count. A question without a directive does not exist to Vantage's planning index (its model of a repository's plans), so nothing counts it, badges it or lists it as waiting. The directive goes when the question is compacted into the Decision Ledger, and not before.
 - **A `leaning` restates the leaning; it is never "yes".** The one-click button in review mode files that text as a review comment, and the comment is all the agent reading it has — nobody remembers which button was clicked. `leaning="Yes"` beside a two-branch question is a support ticket.
 
 ```markdown
@@ -133,6 +173,12 @@ The steps below predate the rewrite.
    <!-- vantage: oq id=OQ-9 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
    _Leaning:_ Back of the queue.
+
+2. 🔒 **OQ-10: The retry budget.**
+
+   <!-- vantage: oq id=OQ-10 -->
+
+   Waits on the load test, so there is no leaning to state yet.
 ```
 
 ### Tables, task lists, and math
