@@ -270,8 +270,7 @@ Use status emojis at the start of each question title for immediate scanning:
 ```markdown
 ## Open Questions
 
-1. 💬 **OQ-1: Queue position on re-entry.** When a PR fails and the agent fixes
-   it, does it go to the back of the queue or retain its position?
+1. 💬 **OQ-1: Does a fixed PR go to the back of the queue or retain its position?**
 
    <!-- vantage: oq id=OQ-1 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
@@ -280,7 +279,7 @@ Use status emojis at the start of each question title for immediate scanning:
    **Answer:**
    > _(empty — fill in when decided)_
 
-2. 💬 **OQ-2: Concurrent agents sharing the DB.** Multiple agents write to the
+2. 💬 **OQ-2: How long does a contended DB write wait before failing?** Multiple agents write to the
    DB simultaneously. SQLite WAL mode handles reads, but writes are
    serialized.
 
@@ -294,22 +293,20 @@ Use status emojis at the start of each question title for immediate scanning:
 
 **Format rules for Open Questions:**
 
-- **Emoji prefix + stable ID + bold question title** on the first line — status emoji (💬, 💬 🤷, ✅, 🔒), the id, then a bold sentence fragment or direct question.
-- Context and reasoning on the following lines (plain text)
+- **`design-doc`** owns the question shape: emoji + stable id + the decision asked in the bold title, then at most three lines of stakes and the options. Link background from the body, never preserve history inside a question. Vantage 0.8.0 warns past 120 words, excluding the leaning and Answer.
 - `_Leaning:_` (italic) — your current best guess, with brief rationale
 - **`Answer:`** on its own line, followed by a blockquote
-- Every question has an `oq` directive, in 💬, preference, 🔒, and ✅ states. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns syntax and checks, including matching the visible leaning to `leaning=` and checking missing directives by eye. **`design-doc`** owns the scaffold, answering, and compaction.
+- Every question has a directive, named by its marker (Vantage 0.8.0). **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns the mapping, syntax and checks; **`design-doc`** owns the scaffold, answering and compaction.
 - The blockquote starts with `_(empty — fill in when decided)_` as placeholder
 - The human fills in their answer in the blockquote **without erasing anything**
-- Process every ruling in the same turn: record the answer, briefly mark ✅ with its resolution date, fold the ruling into the story, preserve traps as warnings, and compact under **`design-doc`**'s protocol. Keep the id in its ledger row and repoint every inbound question-anchor link to `#decision-ledger` in the same commit, including roadmaps. Drop a ruled roadmap entry if nothing remains to decide. Until compaction, a routed ✅ question remains under *Needs you*.
+- Process every ruling in the same turn: record the answer, briefly mark ✅ with its resolution date, rename its directive to `question` and drop `leaning=`, fold the ruling into the story, preserve traps as warnings, and compact under **`design-doc`**'s protocol. Keep the id in its ledger row and repoint every inbound question-anchor link to `#decision-ledger` in the same commit, including roadmaps. Drop a ruled roadmap entry if nothing remains to decide. Until compaction, a routed ✅ question remains under *Needs you*.
 
 **Answered example** (only the brief state before same-turn compaction):
 
 ```markdown
-3. ✅ **OQ-3: Merge commit message format — RESOLVED (2026-08-16).** What should the merge queue put in
-   the commit message?
+3. ✅ **OQ-3: What goes in the merge commit message? — RESOLVED (2026-08-16).**
 
-   <!-- vantage: oq id=OQ-3 leaning="Include feature name, priority, approver, and a reference to the PR record." -->
+   <!-- vantage: question id=OQ-3 -->
 
    _Leaning:_ Include feature name, priority, approver, and a reference
    to the PR record.
@@ -323,10 +320,10 @@ Use status emojis at the start of each question title for immediate scanning:
 **Blocked example:**
 
 ```markdown
-4. 🔒 **OQ-4: Retry budget.** How many attempts before failing the PR?
+4. 🔒 **OQ-4: How many attempts before failing the PR?**
    Waits on the load test, so there is no leaning yet.
 
-   <!-- vantage: oq id=OQ-4 -->
+   <!-- vantage: question id=OQ-4 -->
 
    **Answer:**
    > _(empty — fill in when decided)_
@@ -334,7 +331,7 @@ Use status emojis at the start of each question title for immediate scanning:
 
 ## Writing Style & Formatting
 
-Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML frontmatter, callout alerts, Mermaid diagrams, KaTeX math, tables, line anchors) and for its rule that a reference — a question id, a section number, a filename — is written as a link.
+Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML frontmatter, callout alerts, Mermaid diagrams, KaTeX math, tables, line anchors, inline SVG with a fallback block on Vantage 0.8 or later) and for its rule that a reference — a question id, a section number, a filename — is written as a link.
 
 - **Present tense.** "Sam opens the dashboard" not "Sam would open the dashboard."
 - **Concrete, not abstract.** Show the command, the output, the screen state.
@@ -379,8 +376,8 @@ Before finalizing a user stories document:
 - [ ] Paths the narrative skipped are answered, opened as questions, or delegated — no silent holes left to be guessed
 - [ ] Gaps are inline, not deferred to a separate section
 - [ ] Where the project keeps a roadmap, gaps accepted as work have an entry, and every open question is reached by a roadmap link (the bare story or its `#OQ-…` anchor, not a heading link) rather than stranded inline
-- [ ] Where Vantage is used: `vantage-check <this story>` reports nothing, and, after the capability check in **`roadmap`**, `vantage-check index` (with `--roadmap <path>` when supported for multiple roadmaps) shows none of this story's questions under *Unrouted*
-- [ ] Every question has a status emoji (💬, 💬 🤷, 🔒 or ✅), a stable `OQ-` id, an answer placeholder, and an `oq` directive, 🔒 and ✅ included; every 💬 question has a `_Leaning:_` line restated in its directive's `leaning=`
+- [ ] Where Vantage is used: the checker **`vantage-docs`**, *Getting the binary*, names reports nothing about this story; older-checker limitations are disclosed rather than deleting valid directives, and, after the capability check in **`roadmap`**, `vantage-check index` (with `--roadmap <path>` when supported for multiple roadmaps) shows none of this story's questions under *Unrouted*
+- [ ] Every question has a status emoji (💬, 💬 🤷, 🔒 or ✅), a stable `OQ-` id, an answer placeholder, and the marker's directive under **`vantage-docs`** (Vantage 0.8.0), 🔒 and ✅ included; every 💬 question has a `_Leaning:_` line restated in its directive's `leaning=`
 - [ ] The frontmatter carries `stage` (a word the repo declares, if it declares any), `next`, and only real `depends-on` entries
 - [ ] At least one non-technical or minimal-complexity persona (a "Derek")
 - [ ] Numbers are real (not "several" or "a few")

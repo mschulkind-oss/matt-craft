@@ -15,7 +15,7 @@ new committed work needs a link from at least one existing roadmap. Do not creat
 a side effect of an unrelated doc task. See *Vantage integration* for discovery and pinning.
 
 A reader must learn in under a minute **what matters next, why it comes first, and where to
-act**. This must work in plain Markdown, on GitHub, and in a static export — not only in Vantage.
+act**. This must work in plain Markdown, on GitHub, in a static export, and in a Vantage 0.7 viewer, none of which draws planning badges — not only in Vantage 0.8.
 Badges are a convenience, never the content that makes the page useful.
 
 ## Ownership — one home per fact
@@ -52,7 +52,7 @@ its links to itself route nothing, so they cannot place those questions in its o
 5. **Boundaries:** name candidate work not yet committed to. A bare document or question
    link here still routes its questions, at the end of the order; heading links do not.
    There is no "outside the queue" state for an open question. Mark a genuine wait 🔒
-   in its source with what it waits on, rather than parking an answerable question.
+   in its source with what it waits on, and give it a `question` directive (Vantage 0.8.0), rather than parking an answerable question.
 
 Prefer **one ordered list**. Use sections only when they add navigational value, such as a
 separate external-wait list; document order is priority order, including across sections.
@@ -117,9 +117,9 @@ depends-on:
 - **`next`** holds one concrete next step as a line of plain text, including the first stop
   when useful. Research, experiments, design, implementation, and verification all count.
 - **`depends-on`** holds actual document dependencies as doc-relative paths, optionally ending
-  in `#OQ-…`. A bare path waits until every open question in that document is ruled, so name
-  the one question when only it gates the work; a target whose stage has the `done` role never
-  waits. A path that does not exist, leaves the repository, or does not contain the id fails
+  in `#OQ-…`. An entry naming a question waits only while it is 💬 open; a bare path waits
+  only while its document has a 💬 open question. A 🔒 or ✅ target, or one with a
+  `done`-role stage, never waits: say in prose what a blocked dependency waits on. A path that does not exist, leaves the repository, or does not contain the id fails
   `planning/depends-on-missing`, on even with no `.vantage.toml`. Hardware or host conditions
   need prose in the source; do not invent a missing file to encode them. A question needing an
   answer eventually is not necessarily blocking useful agent work now.
@@ -131,7 +131,9 @@ user bottleneck. Uncertainty about completion is not completion; keep verificati
 
 ## Vantage integration — optional tooling, not a content dependency
 
-Follow **`vantage-docs`** for the installed version's conventions. A Vantage planning index
+This section describes Vantage 0.8.0: a 0.7 viewer has no badges, planning page or
+`[planning]`, and drops `question` directives. Follow **`vantage-docs`** and the
+`style-guide` of the checker you run, whose first line names its release from 0.8.0. A Vantage planning index
 is its derived model of the repository's planning documents, not a separate editable queue.
 
 - A **bare document link** in the roadmap reaches all questions in that document.
@@ -142,7 +144,8 @@ is its derived model of the repository's planning documents, not a separate edit
   boundary links: a bare preface link gives background work first priority, and a bare
   or question-anchor link under Boundaries still queues its questions.
 - A roadmap's links to itself, and links to `done`-role documents, route nothing.
-- Questions exist to the index only through attached `oq` directives. **`vantage-docs`**,
+- Questions exist to the index only through attached directives (`oq`, and from
+  Vantage 0.8.0 `question`); the marker picks the name. **`vantage-docs`**,
   *Open Questions & Decision Ledgers*, owns directive syntax and checks; **`design-doc`** owns answering and compaction.
   Missing directives on 🔒, ✅ or leaning-less questions silently disappear. Read the
   sources too: an empty *Needs you* does not prove there are no questions.
@@ -164,11 +167,13 @@ uvx vantage-check index
 uvx vantage-check index --roadmap docs/plans/roadmap.md
 ```
 
-A checker without `index` may interpret it as a path. One without `planning/*` rules
-cannot validate planning facts and may reject valid config as `unknown rule "planning/…"`.
-Do not delete newer config to accommodate an older checker. Refresh the installed release
-or use a project-built checker if available; if support is still absent, read sources
-manually and disclose the limitation. Do not infer capabilities from a proposed release.
+A checker without `index` treats it as a path (`no such file or directory: index`,
+exit 2). One without `planning/*` rejects a config naming those rules and reports
+`question`/`fallback` as `vantage/unknown-name`. These are pre-0.8.0 limits, not
+document defects. Never delete valid config or directives, rename `question` to `oq`,
+or change `target` to satisfy it. Choose the checker as **`vantage-docs`**, *Getting
+the binary*, says; if none with planning support can run, read sources manually
+and disclose the limitation.
 
 **With multi-roadmap support** (check help for `--roadmap` and the matching guide), Vantage
 discovers every file named `roadmap.md`, in any directory and case, subject to hidden-directory
@@ -178,10 +183,9 @@ planning page has a picker; `index --roadmap <path>` chooses one, and the defaul
 the root. First-link order is per roadmap; *Unrouted* means **no roadmap** reaches the question,
 not that the selected roadmap lacks it. Do not add pins unless that restriction is intended.
 
-**Without multi-roadmap support**, a planning-capable older checker reads one exact path:
-`[planning] roadmap`, default `roadmap.md` at the root. An established file elsewhere needs
-that setting for that checker; do not mistake this compatibility case for current discovery.
-A checker with no planning support verifies neither model.
+Checkers before 0.8.0 have no planning support at all, so they verify neither discovery
+nor routing: read sources by hand and say so. Do not invent a released single-roadmap
+compatibility mode.
 
 The optional `[planning]` table also controls the scan perimeter and limits.
 `[planning.stages]` maps exact, case-sensitive words to `open` (still being decided),
@@ -201,7 +205,8 @@ working directory if neither exists). `--config` chooses config, not the project
 *Needs you*, *Unrouted*, *Waiting*, *Ready*, *Graduate*, *Disagrees* and scan omissions, then
 an annotated roadmap. Exit 0 means it ran, never that the plan is clean; it never exits 1.
 Exit 3 means the candidate limit prevented scanning. Skipped/unreadable files are unknown,
-not zero questions. Inspect the sections even when `planning/unrouted` is off (the default).
+not zero questions. Inspect the sections even when `planning/unrouted` is off (the default). *Needs you*
+includes ✅ questions awaiting compaction.
 
 For checks, pass the actual planning sources and roadmap paths, not assumed directories:
 missing paths exit 2. Run document checks where the repository follows **`vantage-docs`**;
@@ -229,7 +234,7 @@ the documents' own claims; checking them against the tree is still step 1.
    actions buried behind apparent owner gates or external waits; split independent steps.
 3. Find committed work and live questions with no priority link. Add their source or specific
    question at its intended position. Mark a genuine wait 🔒 in its source with its
-   unblock condition; do not park answerable questions outside the queue. Do not commit speculative
+   unblock condition and a `question` directive (Vantage 0.8.0); do not park answerable questions outside the queue. Do not commit speculative
    catalog entries to the build queue merely because they exist.
 4. Re-verify blockers and priority reasons. Order useful next efforts by the stated basis,
    without asking the user to sequence already-approved work.

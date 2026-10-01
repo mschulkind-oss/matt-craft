@@ -224,7 +224,7 @@ stage: BUILT
 # Built with a pending decision
 **Status:** 2026-09-29 (`a1b2c3d`). MEASURED: tests passed.
 1. 🔒 **OQ-3: Await target evidence.** Still undecided.
-   <!-- vantage: oq id=OQ-3 -->
+   <!-- vantage: question id=OQ-3 -->
 EOF
 
 # Regression fixtures for stage-first validation, comments, and compaction.
@@ -271,7 +271,7 @@ stage: BUILT
 **Status:** 2026-09-29. MEASURED: test.
 1. ✅ **OQ-A1: Ruled.** Awaiting compaction.
 
-   <!-- vantage: oq id=OQ-A1 -->
+   <!-- vantage: question id=OQ-A1 -->
 
    **Answer:**
    > Agreed.

@@ -105,8 +105,24 @@ Skills in this repository are verified with:
 just done
 ```
 
-- `just test` validates YAML frontmatter, `Use when` triggers, and resolves local references.
-- `just check` runs `uvx vantage-check` across all documentation and skill files.
+- `just test` validates YAML frontmatter, `Use when` triggers, local references,
+  status-script behavior, and copyable question examples (requires Python 3).
+- `just check` runs `uvx vantage-check` across README and skill bodies.
+
+Planning guidance names Vantage 0.8.0 explicitly. An older checker cannot verify
+that notation; never delete valid directives or change the human-owned `target`
+just to satisfy it. See [checker selection](skills/vantage-docs/SKILL.md#getting-the-binary).
+The example test checks marker/directive agreement and title shape statically,
+then checks extracted specimens as real Markdown when `vantage/question-name`
+is supported. It reports an explicit skip with older published checkers.
+To test with a matching local build, run:
+
+```bash
+VANTAGE_CHECK=/path/to/vantage-check python3 tests/question-examples.test.py
+```
+
+The shipped style-guide snapshot is published 0.7.1 output, not an invented
+0.8.0 guide. Regenerate it from the published 0.8.0 checker when available.
 
 ---
 

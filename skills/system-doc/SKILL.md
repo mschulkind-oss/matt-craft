@@ -28,12 +28,12 @@ brainstorming → research → design-doc → implementation-plan → (build it)
 **`design-doc`** says reaching the built state hands off to here, and that reads like the *start* of a wait — for a review, a soak, some later moment when the doc is ready. There is no such moment. In one census ~40 design docs qualified for graduation and sat, until a whole restructure was needed to route them.
 
 See **`design-doc`**, *Graduation is the cue*, for why reaching built is sufficient.
-A candidate has the repository's `built`-role `stage:` and **no question left in
-question form**: 💬, 🔒, and ✅ awaiting compaction all prevent graduation. Inspect
+A candidate has the repository's `built`-role `stage:` and **no live question** — one still carrying a question directive (`oq` on 💬;
+from Vantage 0.8.0, `question` on 🔒 or ✅): 💬, 🔒, and ✅ awaiting compaction all prevent graduation. Inspect
 questions for missing directives, which would make the index falsely show a candidate.
 
 With a checker whose help lists `index` and declared stages, *Graduate* prints the
-candidates. See **`roadmap`**, *Vantage integration*, for capabilities, index exit codes,
+candidates, whichever roadmap `--roadmap` picks. See **`roadmap`**, *Vantage integration*, for capabilities, index exit codes,
 and `--roadmap <path>` selection when multiple roadmaps are supported. Otherwise
 **`design-doc`**'s shell script is an emoji-based fallback, not the index of record.
 
@@ -42,7 +42,7 @@ and `--roadmap <path>` selection when multiple roadmaps are supported. Otherwise
 
 Not this skill:
 
-- A design still being decided, or with live `💬` or `🔒` questions → `design-doc`
+- A design still being decided, or with live `💬` or `🔒` questions, or uncompacted `✅` ones → `design-doc`
 - Knowledge about the *world* — libraries, protocols, prior art → `docs/research/` via `research`. System docs are evergreen knowledge about **what we built**; research docs are evergreen knowledge about everything else.
 - A user-facing guide, tutorial, or README → those have a different reader again (someone *using* the thing, not maintaining it)
 
@@ -182,7 +182,7 @@ This is a bounded sweep, not an order to edit every consumer: inspect documents 
 | Risk / mitigation table | **Cut** the risks the build resolved. A risk that is *still live* isn't history — move it into the section it threatens |
 | Sequencing, "what I'd build in order" | **Cut.** It's built |
 | The before-and-after framing: "what exists today", the gap, the diagnosis | **Cut** — it describes a world that no longer exists |
-| Open Questions, leanings, answer blockquotes, and every `oq` directive | **Cut** — a directive left in a `done`-role doc fails no rule and appears on no planning list, so nothing else will catch it |
+| Open Questions, leanings, answer blockquotes, and every question directive (`oq`, and from Vantage 0.8.0 `question`) | **Cut** — a directive left in a `done`-role doc fails no rule and appears on no planning list, so nothing else will catch it |
 | `next:` and `depends-on:` frontmatter | **Cut** — a reference owes no next step, and a `depends-on` naming the retired design or plan fails `planning/depends-on-missing` once step 4 deletes it |
 | Decision Ledger | **Cut**, minus the rows that pass the test below |
 | Postscripts, `⚠ Retracted:` headings, status archaeology | **Cut** — resolve them. The claim is either true, in which case state it plainly in the body, or it's gone |
@@ -287,7 +287,7 @@ Every hit gets rewritten to the new path **and a valid anchor**. A corrected pat
 > compaction procedure; **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns
 > directive syntax and reference rules. Retain needed ids in the appendix table.
 
-Inbound references are links now, not bare prose, so the last step of this one is mechanical: run `uvx vantage-check` over the referring documents. A path that no longer exists is `link/missing-target`, and an anchor that survived the rewrite by accident is `link/dead-section-anchor`. A `#OQ-N` anchor dies with its directive, so a link that named a question in the design doc is re-pointed at the reference's `#why-its-this-way`, never at `#OQ-N`. A `depends-on:` entry in another document's frontmatter is an inbound reference too, and it is not a link. Re-point it at the reference, which as a `done` document never makes anything wait, and keep a `#OQ-…` fragment only when the id survives in the appendix. A dead entry is `planning/depends-on-missing`, which only a checker whose `help` lists that planning rule can report. Check capabilities; do not remove valid config because an older checker rejects it. Three caveats the grep still covers: an id cited in a code comment is invisible to the checker, so is a doc you forgot to pass it, and so is a `depends-on` entry to an older checker.
+Inbound references are links now, not bare prose, so the last step of this one is mechanical: run `uvx vantage-check` over the referring documents. A path that no longer exists is `link/missing-target`, and an anchor that survived the rewrite by accident is `link/dead-section-anchor`. A `#OQ-N` anchor dies with its directive, so a link that named a question in the design doc is re-pointed at the reference's `#why-its-this-way`, never at `#OQ-N`. A `depends-on:` entry in another document's frontmatter is an inbound reference too, and it is not a link. Re-point it at the reference, which as a `done` document never makes anything wait, and keep a `#OQ-…` fragment only when the id survives in the appendix. A dead entry is `planning/depends-on-missing`, which only a checker whose `help` lists that planning rule can report. Run the checker **`vantage-docs`**, *Getting the binary*, names. Unknown `question` or `fallback` directives, or exit 2 on a `planning/*` rule, show a checker older than Vantage 0.8.0. Never rename `question` to `oq`, delete valid directives or config, or change `target` to satisfy it; disclose the checker's limits. Three caveats the grep still covers: an id cited in a code comment is invisible to the checker, so is a doc you forgot to pass it, and so is a `depends-on` entry to an older checker.
 
 If an inbound link points at material that got cut, the linking doc is asking for something the system doc no longer says. That's a finding, not a formatting problem: either the material was load-bearing and belongs back in, or the link was to deliberation and the *sentence* needs rewriting, not just the URL.
 
@@ -296,8 +296,9 @@ If an inbound link points at material that got cut, the linking doc is asking fo
 
 ### The roadmap is an inbound reference too
 
-A search scoped to a docs subtree can miss a roadmap elsewhere. Inspect every established
-roadmap that links this work, not just a root file. Where the project keeps a roadmap,
+A search scoped to a docs subtree can miss a roadmap elsewhere. Check every roadmap that links this work: the paths `[planning] roadmap` lists,
+or otherwise every file named `roadmap.md`, in any directory and letter case, outside
+hidden directories (`rg --files --iglob roadmap.md`), respecting the scan exclusions. Where the project keeps a roadmap,
 finish in the same commit; **`roadmap`**
 owns ordering and removal, never copied source state:
 
@@ -308,8 +309,11 @@ owns ordering and removal, never copied source state:
   preserve a maintainer-facing trap as a warning in the reference's negative-space section.
 - **Outstanding verification keeps a live owner and next step.** Preserve `UNMEASURED:` in the
   reference's prose verification line, but link a live planning source from at least one roadmap.
-  Use a ready-role stage for executable verification or a 🔒 question for a genuine owner-only
-  gate. A built-stage source with no questions would misleadingly appear under *Graduate*.
+  Give verification anyone can run a `ready`-role stage, so it lands under *Ready*.
+  Give an owner-only gate an `open`-role stage and a 🔒 question with
+  `<!-- vantage: question id=OQ-N -->` (Vantage 0.8.0), so it lands under *Waiting*.
+  A ready-stage source with 🔒 also appears under *Ready*; a built-stage source
+  without questions misleadingly appears under *Graduate*.
 
 ## Step 4 — Delete and commit
 
@@ -396,7 +400,7 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (frontmat
 > **A symbol is an anchor, never a definition.** This skill has you point at packages and types constantly, which makes it the doc kind most likely to confuse *where a thing lives* with *what a word means*. "The **epoch** is `broker.Epoch`" defines nothing — it hands the reader the reverse-engineering job the doc existed to spare them. Define the term in prose, then anchor it. A system doc is often the last surviving definition of its own vocabulary, because the design doc that coined the term was deleted in step 4.
 
 - **Every claim about behavior is anchored to a greppable symbol**, and the doc's authority rests on the verification stamp rather than on per-sentence citation.
-- **Diagrams earn their place more than in a design doc.** A `stateDiagram-v2` of the real state machine or a `sequenceDiagram` of the real protocol is often the highest-value thing on the page, because the reader is trying to build a mental model, not evaluate a proposal.
+- **Diagrams earn their place more than in a design doc.** A `stateDiagram-v2` of the real state machine or a `sequenceDiagram` of the real protocol is often the highest-value thing on the page, because the reader is trying to build a mental model, not evaluate a proposal. Inline `<svg>` needs Vantage 0.8 or later and a `<!-- vantage: fallback -->` block (see **`vantage-docs`**); for a doc read mostly on GitHub, commit the drawing as a file and embed it with `![alt](diagram.svg)`.
 - **Real names, real paths.** No "some sort of", no placeholder component names that lost an argument with the code. Real *numbers* live in the Current values table; the prose gets the magnitude and the reason.
 
 ## Quality checklist
@@ -405,7 +409,7 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (frontmat
 
 - [ ] `stage: CURRENT` (or the repository's own word for the `done` role, declared in `[planning.stages]` where Vantage is configured) owns lifecycle state; prose carries a verification date **and** a commit, without repeating the stage; step 1 was actually done
 - [ ] Every claim about behavior was checked against the code
-- [ ] The design doc's `stage:` was `BUILT` (the `built` role) and no `oq` directive was left in it — none open, 🔒 or ✅ awaiting compaction — before this started; in a Vantage repository that declares stages, `vantage-check index` listed it under Graduate. Not held back waiting for a cue that was never coming
+- [ ] The design doc's `stage:` was `BUILT` (the `built` role) and no question directive was left in it — no `oq` or Vantage 0.8.0 `question` awaiting compaction — before this started; in a Vantage repository that declares stages, `vantage-check index` listed it under Graduate. Not held back waiting for a cue that was never coming
 - [ ] An `UNMEASURED:` built claim came across with the doc rather than evaporating into a header that implies observation nobody made
 - [ ] Nothing unbuilt is described in present tense; anything specified-but-absent was called out, not dropped silently
 - [ ] Things the implementation added but the design never mentioned are written up
@@ -428,7 +432,7 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (frontmat
 - [ ] Principles kept their IDs and their rationale; invariants have their own section
 - [ ] Known traps and refuted objections survive as forward-facing `> [!WARNING]`s, not as history
 - [ ] The negative-space section survived
-- [ ] Zero alternatives tables, zero sequencing, zero Open Questions, zero postscripts; `rg -n 'vantage:\s*oq\b' <doc>` prints nothing (a `done`-role doc's leftover question is on no planning list and fails no rule), and no `next:` or `depends-on:` came across from the design
+- [ ] Zero alternatives tables, zero sequencing, zero Open Questions, zero postscripts; `rg -n 'vantage:\s*(oq|question)\b' <doc>` prints nothing (a `done`-role doc's leftover question directive, `oq` or Vantage 0.8.0 `question`, is on no planning list and fails no rule), and no `next:` or `depends-on:` came across from the design
 - [ ] Rulings kept only where a maintainer would otherwise undo them, in a `## Why it's this way` appendix with original `OQ-N` IDs
 
 **Landed**

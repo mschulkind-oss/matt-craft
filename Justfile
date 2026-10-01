@@ -7,6 +7,7 @@ default:
 test:
     ./scripts/check-skills skills
     sh tests/status-lines.test.sh
+    python3 tests/question-examples.test.py
 
 # Run vantage-check on documentation and skills
 check:

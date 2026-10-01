@@ -68,13 +68,13 @@ The shape that works, top to bottom. Not every entry needs every part, but the o
 - **Detailed entries below**, in the overview's order.
 - **An axioms or principles section** — the standing rules every idea is checked against, numbered so entries can cite them. These accumulate as the space gets understood; adding one is a real result.
 - **An Open Threads section.** See below.
-- **Scaling rule:** past ~a dozen entries, or when entries pass ~200 lines, split into **one file per idea plus an index** — the index keeps the overview table and one-line hooks, the files carry the full entries. The per-idea files are linked everywhere else by path; inbound anchor links must be rewritten at split time, not left dangling, and so must the roadmap links that *route* a question (put it into the roadmap's order; see **`roadmap`**). A bare roadmap link to the old monolith now routes only the questions the index still holds, so each question that moved into a per-idea file needs its own `#OQ-…` link or a bare link to that file, or it lands under *Unrouted*. Move each `oq` directive rather than copying it: a question left in both copies during the duplicate-content window is listed twice. A duplicate-content window (old monolith + new files) is fine mid-migration, but end the task with the monolith rewritten as the index.
+- **Scaling rule:** past ~a dozen entries, or when entries pass ~200 lines, split into **one file per idea plus an index** — the index keeps the overview table and one-line hooks, the files carry the full entries. The per-idea files are linked everywhere else by path; inbound anchor links must be rewritten at split time, not left dangling, and so must the roadmap links that *route* a question (put it into the roadmap's order; see **`roadmap`**). A bare roadmap link to the old monolith now routes only the questions the index still holds, so each question that moved into a per-idea file needs its own `#OQ-…` link or a bare link to that file, or it lands under *Unrouted*. Move each question directive (`oq`, or Vantage 0.8.0 `question` on 🔒/✅) rather than copying it: a question left in both copies during the duplicate-content window is listed twice. A duplicate-content window (old monolith + new files) is fine mid-migration, but end the task with the monolith rewritten as the index.
 
 ## Exploratory mode: the browsable catalog
 
 The loop above converges — it exists to make ideas decidable. Some catalogs have a second job: **being a library the user browses to get ideas, give ideas, and tweak ideas**, across many sessions, without any entry needing to be chosen. When that is the product:
 
-- **Every entry carries Options & Variants** — two to four explicitly open design decisions, each a genuinely distinct, pickable direction with named tradeoffs, written so a human can answer them. Cosmetic variations don't count; an option with no downside isn't an option.
+- **Every entry carries Options & Variants** — two to four explicitly open design decisions, each a genuinely distinct, pickable direction with named tradeoffs, written so a human can answer them. Cosmetic variations don't count; an option with no downside isn't an option. These are browse material, not Open Questions: use a plain list with no `OQ-` id or directive. Only a decision something waits on becomes an Open Question.
 - **Every entry carries an Idea Parking Lot** — sparks not yet integrated, one line each. The parking lot is where half-formed ideas wait without polluting the design; it is the browse-and-steal shelf.
 - **Hooks and tables up front; density over bloat.** A browsed doc is skimmed first and read second. If the hook doesn't tell you what the thing is in two sentences, the entry fails even if the body is brilliant.
 - **Composition is a finding.** When ideas are categorized — by platform, type, audience — check the distribution. A category with zero entries is an open thread, not an accident. And user rules about composition ("no educational games on the TV target; math and reading on the other three") constrain the *catalog*, not just each entry; audit the mix, not only the members.
@@ -82,7 +82,9 @@ The loop above converges — it exists to make ideas decidable. Some catalogs ha
 
 ## Open threads stay open
 
-Unresolved things get written down as unresolved, in their own section, each with enough context to be picked up cold. What belongs there:
+Unresolved things get written down as unresolved, in their own section, each with enough context to be picked up cold. For an Open Question, that context
+lives in its entry and the question links there; **`design-doc`** owns the short
+question shape and decision-asking bold title. What belongs there:
 
 - Decisions not yet made, with the leaning and what it hinges on
 - Known-broken items you found but could not fix
