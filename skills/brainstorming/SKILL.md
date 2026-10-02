@@ -68,7 +68,7 @@ The shape that works, top to bottom. Not every entry needs every part, but the o
 - **Detailed entries below**, in the overview's order.
 - **An axioms or principles section** — the standing rules every idea is checked against, numbered so entries can cite them. These accumulate as the space gets understood; adding one is a real result.
 - **An Open Threads section.** See below.
-- **Scaling rule:** past ~a dozen entries, or when entries pass ~200 lines, split into **one file per idea plus an index** — the index keeps the overview table and one-line hooks, the files carry the full entries. The per-idea files are linked everywhere else by path; inbound anchor links must be rewritten at split time, not left dangling, and so must the roadmap links that *route* a question (put it into the roadmap's order; see **`roadmap`**). A bare roadmap link to the old monolith now routes only the questions the index still holds, so each question that moved into a per-idea file needs its own `#OQ-…` link or a bare link to that file, or it lands under *Unrouted*. Move each question directive (`oq`, or Vantage 0.8.0 `question` on 🔒/✅) rather than copying it: a question left in both copies during the duplicate-content window is listed twice. A duplicate-content window (old monolith + new files) is fine mid-migration, but end the task with the monolith rewritten as the index.
+- **Scaling rule:** past ~a dozen entries, or when entries pass ~200 lines, split into **one file per idea plus an index** — the index keeps the overview table and one-line hooks, the files carry the full entries. The per-idea files are linked everywhere else by path; inbound anchor links must be rewritten at split time, not left dangling, and so must the roadmap links that *route* a question (put it into the roadmap's order; see **`roadmap`**). A bare roadmap link to the old monolith now routes only the questions the index still holds, so each question that moved into a per-idea file needs its own `#OQ-…` link or a bare link to that file, or it lands under *Not on a roadmap*. Move each question directive (see **`vantage-docs`**) rather than copying it: a question left in both copies during the duplicate-content window is listed twice. A duplicate-content window (old monolith + new files) is fine mid-migration, but end the task with the monolith rewritten as the index.
 
 ## Exploratory mode: the browsable catalog
 
@@ -133,8 +133,7 @@ Living document, revisited often. Each pass should leave it **better, not just l
     repoint every inbound question-anchor link, including roadmap links; the old anchor dies.
   - A still-costed idea is not committed work. For an owner ruling, prefer its exact question
     anchor rather than the entry heading, which routes nothing. **`roadmap`** owns routing,
-    discovery/pinning, and index verification; use `--roadmap <path>` where supported for
-    multiple roadmaps, rather than assuming a root-only file.
+    discovery/pinning, and index verification; use `--roadmap <path>` to check a roadmap other than the default, rather than assuming a root-only file.
   - Keep stakes and leaning here. Put the single most useful agent investigation in this
     file's one-line `next:`; a file has one next step, not one per idea.
   - While any idea or question is live, use an open-role stage (`SKETCH` with **`design-doc`**'s
@@ -165,7 +164,7 @@ Brainstorms invent vocabulary faster than any other doc — naming the turn is h
 - [ ] New entries say what they displace, or say explicitly that they add
 - [ ] At least one thing in the doc says what will *not* work, and why
 - [ ] Open Threads section exists and includes the untested assumptions
-- [ ] Where the project keeps a roadmap: promoted ideas are on it, and every question awaiting the user is routed there by its `#OQ-…` anchor or a bare link to the file holding it, never by a heading link; nothing still being costed here has a roadmap entry. After **`roadmap`**'s capability check, `vantage-check index` (with `--roadmap <path>` when supported for multiple roadmaps) shows none of this doc's questions under *Unrouted*
+- [ ] Where the project keeps a roadmap: promoted ideas are on it, and every question awaiting the user is routed there by its `#OQ-…` anchor or a bare link to the file holding it, never by a heading link; nothing still being costed here has a roadmap entry. `vantage-check index` shows none of this doc's questions under *Not on a roadmap*
 - [ ] References name the mechanism and what is portable, not just the title
 - [ ] A recommendation exists — the doc picks something
 - [ ] *Exploratory mode:* every entry has pickable Options & Variants and a living parking lot; the category mix is audited, not just the entries

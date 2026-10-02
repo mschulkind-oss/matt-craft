@@ -66,7 +66,7 @@ In this order. Drop any section that would be empty rather than padding it.
 
 **Everything else that ships** (`## Ships with`)**.** Tests by level and by case; the docs that now describe the old behavior; the surfaces that are neither — config defaults, CLI help, error text, generated files, migrations, examples. One line each, named by path. This is the section a cold implementer will not write for itself; see *Attention* below for why, and for what belongs in it.
 
-**Don't.** Out of scope, files not to touch, and — most valuable — the plausible wrong turn pre-empted with its reason: "you will want to put a cache in front of this; don't, invalidation is the live question in `OQ-N`."
+**Don't.** Out of scope, files not to touch, and — most valuable — the plausible wrong turn pre-empted with its reason: "you will want to put a cache in front of this; don't, invalidation is the live question `[OQ-N](rate-limiting.md#OQ-N)`."
 
 **Blockers.** Only what stops work. Live design questions stay in the design doc as `OQ-N` and are cited here as a link to the question's own anchor — or to the design doc's Decision Ledger once it has been compacted, which destroys that anchor. Never fork the question list across two documents.
 
@@ -133,12 +133,12 @@ is advice and is the first thing to be wrong.
   per-host pacing. That one catches a per-client regression; the unit tests don't.
 - `poll/loop_test.go:TestFetchAll` asserts unthrottled timing — rewrite it to the
   new behavior; do not relax the assertion until it passes.
-- Docs: `README.md` "Polling", `docs/reference/poller.md` §3, and the `--interval`
+- Docs: `README.md` "Polling", `docs/reference/poller.md` "Rate limits", and the `--interval`
   help text (it now interacts with the limit).
 - Config: `rate.per_host`, default 5/s, into `config.example.toml`.
 - Cheap and yours: bucket internals (advice: float tokens, not a timer).
   **Stop and ask** if the limit must be per-host *and* global — the design fixes
-  one, and `OQ-4` is unruled.
+  one, and [OQ-4](rate-limiting.md#OQ-4) is unruled.
 
 ## Don't
 - Don't reach for `golang.org/x/time/rate` — it cannot be driven by the fake
@@ -177,8 +177,7 @@ Do it **close to hand-off**, because it rots at the speed of the tree. Promoting
 
 Keep `stage`, `next`, and actual `depends-on` paths in this file's frontmatter. Review the
 roadmap in the **same commit** whenever links, sequencing rationale, or remaining scope
-change; do not copy plan state or blockers into a second table. See **`roadmap`** for capability checks before `vantage-check index` and
-`--roadmap <path>` selection when multiple roadmaps are supported.
+change; do not copy plan state or blockers into a second table. See **`roadmap`** for `vantage-check index` and `--roadmap <path>`.
 
 - **Opened as a sketch:** set `stage: SKETCH`, name refinement as the next action, and link
   the design gates. This is not a build hand-off, even if it has a priority position.

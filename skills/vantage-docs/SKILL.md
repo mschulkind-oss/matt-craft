@@ -12,7 +12,7 @@ Vantage renders Markdown with full GitHub Flavored Markdown (GFM) fidelity, KaTe
 [§1](#1-formatting) points at the formatting conventions — it does not restate them. [§2](#2-open-questions--decision-ledgers) and [§3](#3-defined-terms) are the substantive conventions every doc in the tree follows regardless of kind: how decisions are recorded, and how terms are defined. [§4](#4-vantage-check--read-it-first-run-it-last) is the tool, and it bookends the work:
 
 > [!IMPORTANT]
-> **Before writing** — run `style-guide` with the checker [Getting the binary](#getting-the-binary) names (usually `uvx vantage-check style-guide`) and read what it prints: the conventions of that checker's release, straight from the renderer's own source, whose first line names the release from 0.8.0. If no checker can run, also read [`references/style-guide.md`](references/style-guide.md), a published 0.7.1 snapshot without the 0.8.0 planning conventions, and say so in your hand-off.
+> **Before writing** — run `style-guide` with the checker [Getting the binary](#getting-the-binary) names (usually `uvx vantage-check style-guide`) and read what it prints: the conventions of that checker's release, straight from the renderer's own source, whose first line names the release from 0.8.0. If no checker can run, read [`references/style-guide.md`](references/style-guide.md) instead, 0.8.0's published guide shipped with this skill, and say so in your hand-off.
 >
 > **After writing** — run the review payload's command exactly as written when there is one, otherwise the checker [Getting the binary](#getting-the-binary) names. Fix findings about the document, not findings that only show the checker is older than it. An exit `2` is never a reason to weaken `.vantage.toml` ([Reading the result](#reading-the-result)).
 
@@ -32,7 +32,7 @@ Vantage renders Markdown with full GitHub Flavored Markdown (GFM) fidelity, KaTe
 | Source | When |
 | :--- | :--- |
 | `uvx vantage-check style-guide` | When it runs, with the command [Getting the binary](#getting-the-binary) selects. Generated from the renderer's own module, so it is correct for **that checker's release**, not necessarily the viewer your readers run. |
-| [`references/style-guide.md`](references/style-guide.md) | When no checker can run. Published 0.7.1 output, without local corrections; it does not cover the 0.8.0 conventions restated below. |
+| [`references/style-guide.md`](references/style-guide.md) | When no checker can run. Published 0.8.0 output, its first line included. |
 
 That covers document structure, relative links and line anchors, frontmatter, Mermaid, code and diff fences, callouts, tables, task lists, the `$$...$$` math rule, Vantage's `<!-- vantage: … -->` directives, and the reserved `vantage:` frontmatter key. From Vantage 0.8.0 it also covers planning keys and roadmaps, inline SVG and its fallback block, and the reserved `target` key.
 
@@ -75,7 +75,7 @@ The renderer defines syntax; these rules define how we write:
 
 Vantage needs no enabling step; `.vantage.toml` is optional. **`roadmap`**, *Vantage
 integration*, owns stage-role effects, dependencies, roadmap discovery/pinning, routing,
-and index capabilities. **`design-doc`** owns repository stage words and their mapping.
+and the planning index. **`design-doc`** owns repository stage words and their mapping.
 Do not mark unfinished work `done`: it removes every planning contribution without warning.
 
 > [!NOTE]
@@ -88,39 +88,54 @@ The **`design-doc`** skill owns the question scaffold, emoji legend, answering p
 
 Apply that scaffold to every question. This section owns the renderer contract as of
 Vantage 0.8.0:
-- **Every question carries a directive until compaction, and the marker picks its name.**
-  - **💬, 💬 🤷 and unmarked take `oq`:** `<!-- vantage: oq id=OQ-N leaning="…" -->`. The
-    `leaning` restates the visible `_Leaning:_` in the same words, including a preference or
-    honest uncertainty; that text is what **Take this leaning** files. With no leaning yet,
-    write the id alone; the button then files the literal "Take the stated leaning."
-  - **🔒 and ✅ take `question`:** `<!-- vantage: question id=OQ-N -->`, the id and nothing
-    else (a `leaning` on it is `vantage/unknown-key`, so the leaning stays in the prose). It
-    offers no button in any viewer.
-  - **Rename the directive in the edit that changes the marker.** Never leave `oq` on a 🔒
-    or ✅ question: every Vantage before 0.8 offers the one-click button on every `oq`.
-- Indent either directive inside the list item, with blank lines around it and content
-  after it; a trailing directive attaches to nothing (`vantage/orphan`). Outside a list,
-  put it above the bold title.
+- **Every question carries a directive until compaction, and the name to write is
+  `question`, whatever its marker.**
+  - **On an open question** (💬, 💬 🤷 or unmarked):
+    `<!-- vantage: question id=OQ-N leaning="…" -->`. The `leaning` restates the visible
+    `_Leaning:_` in the same words, including a preference or honest uncertainty; that text
+    is what **Take this leaning** files. With no leaning yet, write the id alone; the button
+    then files the literal "Take the stated leaning."
+  - **Changing the marker changes nothing else.** Mark a question 🔒 or ✅ and leave its
+    directive as it is: no viewer offers a leaning on a question that is not open, so one
+    left from when it was open does no harm. A question that starts out 🔒 with no leaning
+    takes the id alone: `<!-- vantage: question id=OQ-N -->`.
+  - **`oq` is the deprecated name, and Vantage reads it forever** (`vantage/oq-deprecated`,
+    a warning). Leave an existing `oq` on an open question unless the human says every
+    reader is on Vantage 0.8 or later; then rename it, keys unchanged. **Never `oq` on a 🔒
+    or ✅ question** (`vantage/question-name`, an error): every Vantage before 0.8 offers the
+    one-click button on every `oq`, so rename it to `question` in the edit that changes the
+    marker.
+  - **A repository whose readers are still on 0.7 keeps `oq` on open questions**, new ones
+    included, because 0.7 drops `question` whole and with it the one-click answer. It says
+    so by turning the warning off: `"vantage/oq-deprecated" = "off"` under `[check.rules]`
+    in `.vantage.toml`. That line is the human's call; never add or remove it yourself.
+- Indent the directive into the list item, on a line of its own directly above the
+  `_Leaning:_` paragraph (or another of its paragraphs when it states no leaning), with blank
+  lines around it; a trailing directive attaches to nothing (`vantage/orphan`). Write every
+  question as a list item: outside a list, a question runs from its directive's block to the
+  next heading, rule or question, so prose before then is read as part of it, and the
+  directive goes above the bold title.
 - A directive is more than a button: both names declare the question and give it its
   case-sensitive anchor, and a question with neither does not exist to the index, badges,
   or planning page. A green check is not proof all questions exist.
-- Before 0.8.0 the guide gave 🔒 and ✅ questions no directive at all. A checker that reports
-  `question` as `vantage/unknown-name` is older than 0.8.0 (bare `uvx` is, until 0.8.0 is on
-  PyPI): keep the directive; see [Getting the binary](#getting-the-binary).
+- A checker that reports `question` as `vantage/unknown-name` is older than 0.8.0: keep the
+  directive and run a current one ([Getting the binary](#getting-the-binary)).
 
 > [!IMPORTANT]
-> **Four parts of that scaffolding are checked at error severity, and one at warning.** The matching 0.8.0 style guide ([§1](#1-formatting)) describes them; what they cost you here:
+> **Four parts of that scaffolding are checked at error severity, and three at warning (which `--strict` fails).** The matching 0.8.0 style guide ([§1](#1-formatting)) describes them; what they cost you here:
 >
-> - **The `oq` directive is not optional, and only one case of it is checked.** A 💬 question in a list item, with an `OQ-` id, a `_Leaning:_` line and no `oq` directive, renders with nothing for the reviewer to click — `vantage/oq-missing`. A 🔒 or ✅ question, or a 💬 one with no leaning yet, that lacks a directive gets **no finding at all**, and does not exist to the planning index: no badge count, no planning-page card, no *Unrouted* entry. Check those by eye. Its `leaning` value restates the leaning in words and is never `"Yes"`: that text *is* the review comment the next agent reads, and nobody remembers which button was pressed.
+> - **The directive is not optional, and only one case of it is checked.** A 💬 question in a list item, with an `OQ-` id, a `_Leaning:_` line and no directive, renders with nothing for the reviewer to click — `vantage/oq-missing`. A 🔒 or ✅ question, or a 💬 one with no leaning yet, that lacks a directive gets **no finding at all**, and does not exist to the planning index: no badge count, no planning-page card, no *Not on a roadmap* entry. Check those by eye. Its `leaning` value restates the leaning in words and is never `"Yes"`: that text *is* the review comment the next agent reads, and nobody remembers which button was pressed.
 > - **The id is the question's anchor now**, so its shape is checked (`vantage/oq-id-format`) and so is uniqueness within the document, across `oq` and `question` (`vantage/oq-id-duplicate`). A malformed or duplicated one silently goes nowhere.
-> - **The name must match the marker** — `vantage/question-name` (0.8.0): `oq` on 🔒/✅, `question` on an open question, or either below a 🔒/✅ bold title outside a list. Put it above the title outside a list.
+> - **No `oq` on a 🔒 or ✅ question** — `vantage/question-name` (0.8.0): an `oq` on a 🔒 or ✅ question, or either name below a 🔒/✅ bold title outside a list, where it lands on the next block and the question reads as open. Put it above the title outside a list.
 > - **Question text stays short** — `planning/question-length` (0.8.0) warns past 120 words, excluding the `_Leaning:_` paragraph and anything from `**Answer:**` on; `--strict` fails it. **`design-doc`** owns the shape.
+> - **The leaning is a paragraph of its own** — `vantage/question-layout` (0.8.0, a warning): a `_Leaning:_` run into other text, which neither the page nor the planning card can lay out as the leaning.
+> - **`oq` is deprecated** — `vantage/oq-deprecated` (0.8.0, a warning) on every `oq` that `question-name` does not report. Rename one only as the directive rule above says.
 > - **Every reference to a question, a section or a file is a link** — `ref/unlinked-oq`, `ref/unlinked-section`, `ref/unlinked-file`. See below.
 
 ```markdown
 1. 💬 **OQ-9: Does a fixed PR go to the back of the queue on re-entry?**
 
-   <!-- vantage: oq id=OQ-9 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
+   <!-- vantage: question id=OQ-9 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
    _Leaning:_ Back of the queue — the fix might interact with what merged while it was out.
 
@@ -286,18 +301,20 @@ uvx vantage-check style-guide             # BEFORE writing: the canonical conven
 uvx vantage-check docs/design/api.md      # AFTER writing: does this actually render?
 uvx vantage-check docs/ userguide/        # directories, walked for .md and .markdown
 uvx vantage-check help                    # commands, options, and every rule id
-uvx vantage-check index                   # only after the capability check below
+uvx vantage-check index                   # the planning index (0.8.0 and later)
 ```
 
 `check` is the default command, so a bare path list runs it. With **no arguments at all it prints help rather than checking anything** — always pass a path.
 
-### Planning capabilities
+### Planning index
 
-Before any `index` invocation, confirm the installed checker's `help` lists `index`
-and `planning/*` rules. For multiple roadmaps, also check for `--roadmap <path>` and
-select the one being reviewed. **`roadmap`**, *Vantage integration*, owns discovery,
-pinning, root selection, index exit codes, and the manual fallback. Choose the checker as [Getting the binary](#getting-the-binary) says. Do not assume
-a proposed release is published; disclose missing support rather than calling it an empty index.
+`index` and the `planning/*` rules arrived in Vantage 0.8.0, with `--roadmap <path>` to
+choose among several roadmaps and `--request` to print the agent request the planning page
+copies. **`roadmap`**, *Vantage integration*, owns discovery, pinning, root selection, index
+exit codes, and the manual fallback. A checker older than 0.8.0 (a pin, or a `PATH` binary)
+reads `index` as a path (`no such file or directory: index`, exit 2): report the planning
+checks as not run rather than calling it an empty index. To check a file or directory named
+`index`, write `./index`.
 
 ### Before writing: `style-guide`
 
@@ -307,9 +324,9 @@ Three reasons it is a step and not a formality:
 
 - **This skill is a copy, and copies lag.** The printed guide wins. Restated conventions name their release; a checker older than that release neither teaches nor checks them.
 - **The newest release is the right one, even for older readers.** Released notation keeps its meaning; newer capabilities use a fallback older viewers show. Pin only where the repository does ([Getting the binary](#getting-the-binary)). Inside the Vantage repository itself, use its checkout build (`just cli`). Never claim an older checker verified behavior it predates.
-- **Some of it you cannot check by eye.** Vantage's `<!-- vantage: … -->` directives (`section`, `block`, `oq`, and from 0.8.0 `question` and `fallback`, with their closed vocabulary of tones and badges) and the reserved `vantage:` frontmatter key are *silently inert* when wrong — nothing breaks, and nothing styles either. Reading the vocabulary first is the cheap way to get them right; `check`'s `vantage/*` rules are the only way to find out afterwards.
+- **Some of it you cannot check by eye.** Vantage's `<!-- vantage: … -->` directives (`section` and `block`, from 0.8.0 `question` and `fallback`, and the deprecated `oq`, with their closed vocabulary of tones and badges) and the reserved `vantage:` frontmatter key are *silently inert* when wrong — nothing breaks, and nothing styles either. Reading the vocabulary first is the cheap way to get them right; `check`'s `vantage/*` rules are the only way to find out afterwards.
 
-If no checker can run, read [`references/style-guide.md`](references/style-guide.md), published 0.7.1 output shipped inside the skill for offline use. Say in your hand-off that it lacks 0.8.0 planning conventions; the release-qualified rules above supplement that gap. Regenerate this snapshot from published 0.8.0 output when available, keeping its first line. Never paste an unreleased build's guide into a repository's instructions.
+If no checker can run, read [`references/style-guide.md`](references/style-guide.md), 0.8.0's published guide shipped inside the skill for offline use, and say so in your hand-off. Regenerate it only from a published release's `style-guide` output, its first line included. Never paste an unreleased build's guide into a repository's instructions.
 
 ### After writing: `check`
 
@@ -319,7 +336,7 @@ Run it on every document you write or edit, before handing the work back. The st
 
 | If | Then |
 | :--- | :--- |
-| A Vantage review payload names a command | Run it **exactly as written**, from the repository root |
+| A Vantage review payload or a planning-page agent request names a command | Run it **exactly as written**, from the repository root. From 0.8.0 a released viewer prefixes it with `VANTAGE_VIEWER=<release>`, its own release: no checker reads it yet, and it is not a pin |
 | The repository pins a checker (its `AGENTS.md`, matching its CI) | Run that pin, for `check` and `style-guide` alike |
 | Otherwise, `uvx` is available (the usual case) | Bare `uvx vantage-check <path>`, the newest release. A release never gives existing notation a new meaning, so its notation is safe for readers on older viewers; never pin the checker to the viewer's version (`vantage --version` names that) |
 | Only a `vantage-check` on `PATH` | Run it, after `vantage-check version`: it is whatever release was installed, and `uvx` never looks at `PATH` |
@@ -330,13 +347,13 @@ neither does an exit `2` — deliver, and leave `.vantage.toml` as it is. A *sil
 thing that is not acceptable.
 
 **A checker older than the document is not a finding about the document.** The conventions
-these skills teach are Vantage 0.8.0's, and until 0.8.0 is on PyPI (0.7.1 is the newest on
-2026-10-01) bare `uvx vantage-check` is older: it reads `index` as a path (`no such file or
-directory: index`, exit 2), runs no `planning/*` rule, reports `question` and `fallback` as
-`vantage/unknown-name`, and exits 2 on a `.vantage.toml` that names a `planning/*` rule. Never
-rename a `question` to `oq`, delete a directive, or edit `.vantage.toml` to satisfy it. Inside
-a Vantage checkout, `just cli` builds a current checker at
-`packages/vantage-check/dist/vantage-check`; elsewhere, report the planning checks as not run.
+these skills teach are Vantage 0.8.0's. A checker before 0.8.0 (a pin, or a `PATH` binary)
+reads `index` as a path, runs no `planning/*` rule, reports `question` and `fallback` as
+`vantage/unknown-name`, and exits 2 on a `.vantage.toml` that names a rule it does not know,
+`"vantage/oq-deprecated" = "off"` included. Never rename a `question` to `oq`, delete a
+directive, or edit `.vantage.toml` to satisfy it: run a current checker, or report what it
+could not check. Inside a Vantage checkout, `just cli` builds the checkout's own checker at
+`packages/vantage-check/dist/vantage-check`.
 
 **Never change `target`.** A top-level `target = "X.Y"` names the oldest Vantage release the
 repository's readers use, and only a human edits it. A release checker older than it refuses
@@ -383,11 +400,11 @@ docs/standards/distribution.md
 > [!NOTE]
 > **Paths come first, or name the command.** `vantage-check --format json docs/` exits `2` with *unknown option* — the bare form takes a path list, and an option before the first path is read as the command name. Either put the options after the paths, or say `check` explicitly: `vantage-check check --format json docs/`.
 
-Configuration is optional. A `.vantage.toml` at the **repository root**, never in transient `.vantage/`, can set `check.strict`, `check.exit-code`, rule severities (`"error"`, `"warning"`, `"off"`), rule options (such as `planning/question-length`'s `max-words`), and `[planning]` ([planning ownership](#writing-rules-and-planning-ownership)). A top-level `target` belongs above the first `[table]` and only a human edits it. Invalid known values — wrong types, invalid severities or stage roles, a malformed or misplaced `target` — exit `2`. From 0.8.0, unknown keys, rule ids and rule options instead warn on stderr, are ignored, and never change the exit code, even with `--strict`. Preserve them when a newer checker is required; fix actual typos. Older checkers exit `2` on them. A 0.8.0 server still ignores the whole file over an unknown `[planning]` key, so add no undocumented key.
+Configuration is optional. A `.vantage.toml` at the **repository root**, never in transient `.vantage/`, can set `check.strict`, `check.exit-code`, rule severities (`"error"`, `"warning"`, `"off"`), rule options (such as `planning/question-length`'s `max-words`), and `[planning]` ([planning ownership](#writing-rules-and-planning-ownership)). A top-level `target` belongs above the first `[table]` and only a human edits it. Invalid known values — wrong types, invalid severities or stage roles, a malformed or misplaced `target` — exit `2`. From 0.8.0, unknown keys, rule ids and rule options instead warn on stderr, are ignored, and never change the exit code, even with `--strict`. Preserve them when a newer checker is required; fix actual typos. Older checkers exit `2` on them. From 0.8.0 the server, too, logs an unknown `[planning]` or `[starred]` key and reads the rest of the file; a server before 0.8.0 ignores the whole file over one in `[starred]`. Add no key Vantage does not document.
 
 ### What it checks
 
-Five families when the installed help lists `planning/*`; an older checker has no planning row — and the split is the point:
+Six families from 0.8.0; a checker before it has no `planning/*` or `prose/*` row — and the split is the point:
 
 | Family | The question it answers |
 | :--- | :--- |
@@ -395,7 +412,8 @@ Five families when the installed help lists `planning/*`; an older checker has n
 | `frontmatter/*`, `mermaid/*`, `katex/*`, `render/*` | Do the viewer's own parsers accept this? The checker imports Vantage's render pipeline rather than reimplementing it, so a block fails for exactly the reason the browser would, in that parser's words. `render/pipeline` is the end-to-end backstop. |
 | `ref/*` | *Should this have been a link at all?* An `OQ-` id, a `§N` number or a doc-relative filename written as prose ([§2](#2-open-questions--decision-ledgers)). A reference that is not a link cannot go dead, so no other rule can ever notice it went stale — which is the whole point of the family. |
 | `planning/*` | Do dependencies resolve and stages match the declared vocabulary? Does a ready/built claim disagree with open questions? Is each question short enough for its card (`question-length`, 120 words)? With the opt-in unrouted rule enabled, does any roadmap reach each open question? |
-| `vantage/*` | Is Vantage's own `<!-- vantage: … -->` markup, and the reserved `vantage:` frontmatter key, well-formed? Wrong ones are **silently inert** — no error anywhere — so these rules are the only thing that will ever tell you a directive styled nothing — and does each question directive's name match its marker (`question-name`)? |
+| `vantage/*` | Is Vantage's own `<!-- vantage: … -->` markup, and the reserved `vantage:` frontmatter key, well-formed? Wrong ones are **silently inert** — no error anywhere — so these rules are the only thing that will ever tell you a directive styled nothing. For questions they also ask: is an `oq` on a 🔒 or ✅ question, or a directive below a 🔒/✅ title outside a list (`question-name`); is an `oq` left that could be `question` (`oq-deprecated`); and is the leaning a paragraph of its own (`question-layout`)? |
+| `prose/*` | Does a paragraph run three or more enumerators together, as `(a) … (b) … (c)`, instead of a list (`prose/inline-list`, a warning)? |
 
 Links and directives come from the *parsed* document, never a text search, so `[Doc](/docs/x.md)` inside a code fence is a code sample rather than a finding. A link to a directory is fine: Vantage routes those to a listing.
 
@@ -405,19 +423,19 @@ Links and directives come from the *parsed* document, never a text search, so `[
 
 The temptation on a red run is to switch the rule off in `.vantage.toml`. Don't. Every default-on rule reports something genuinely broken — in the rendered page (a link that goes nowhere, a directive that styles nothing, a frontmatter block that rendered as a horizontal rule and a heading of raw keys), in what an older viewer offers (an `oq` on a question nobody can answer yet), or in the planning facts (a stage outside the declared words, a `depends-on` entry naming nothing, a `ready` or `built` stage over open questions). Silencing the rule hides the breakage, not just the message, and so does re-staging a document to a `done` word to quiet `planning/stage-disagrees`. Do not raise `planning/question-length`'s `max-words` just to pass one long question: move background into the body. Change severities only when the human asks, and say why in the commit.
 
-The one exception the tool documents for itself is performance: `vantage/block-split` re-parses the enclosing block per directive, which is quadratic on a long Open Questions list (a 40-question list measures ~171 ms against ~0.3 ms with the rule off). If that ever matters, turning *that* rule off is a considered trade, not a silencing.
+The tool documents exceptions of its own, each the human's call. A repository whose readers are still on Vantage 0.7 turns `vantage/oq-deprecated` off, since each `oq` it reports is those readers' one-click answer ([§2](#2-open-questions--decision-ledgers)); the 0.8.0 guide also lets a repository raise `max-words` or turn `planning/question-length` or `vantage/question-layout` off. The other is performance: `vantage/block-split` re-parses the enclosing block per directive, which is quadratic on a long Open Questions list (a 40-question list measures ~171 ms against ~0.3 ms with the rule off). If that ever matters, turning *that* rule off is a considered trade, not a silencing.
 
 ### Checking a tree that predates the checker
 
-A repo with a backlog will report dozens of findings that are not yours. **Check the files you touched**, not the whole tree, so the run's output is about your work. Clearing the backlog is its own task — propose it, don't fold it into an unrelated change. One exception: the planning rules report against the document that holds the question, never against the roadmap, so a check of the roadmap alone passes even when your edit left questions elsewhere unrouted. After editing the roadmap, or any document's `stage` or questions, also run `vantage-check index` and read *Unrouted* and *Disagrees*.
+A repo with a backlog will report dozens of findings that are not yours. **Check the files you touched**, not the whole tree, so the run's output is about your work. Clearing the backlog is its own task — propose it, don't fold it into an unrelated change. One exception: the planning rules report against the document that holds the question, never against the roadmap, so a check of the roadmap alone passes even when your edit left questions elsewhere unrouted. After editing the roadmap, or any document's `stage` or questions, also run `vantage-check index` and read *Not on a roadmap* and *Stage conflict*.
 
 ### What it does *not* check
 
 The checker reports broken rendering and supported planning facts. It does not verify:
 
-- prose, structure, or section size ([§1](#1-formatting));
-- whether Open Questions have been compacted into a Decision Ledger ([§2](#2-open-questions--decision-ledgers)) — `index` lists a built document under *Graduate* only once they are, but no rule fails on it;
-- a missing directive (`oq`, or `question` on 🔒 and ✅) on a 🔒, ✅, or leaning-less 💬 question; open questions left in a `done`-role document; a stage word written in `status` (reported only when `vantage: status-chip` is set) or repeated in a prose `**Status:**` line; and any `stage` word at all when `[planning.stages]` declares none;
+- prose beyond `prose/inline-list`, structure, or section size ([§1](#1-formatting));
+- whether Open Questions have been compacted into a Decision Ledger ([§2](#2-open-questions--decision-ledgers)) — `index` lists a built document under *Ready to graduate* only once they are, but no rule fails on it;
+- a missing question directive on a 🔒, ✅, or leaning-less 💬 question; open questions left in a `done`-role document; a stage word written in `status` (reported only when `vantage: status-chip` is set) or repeated in a prose `**Status:**` line; and any `stage` word at all when `[planning.stages]` declares none;
 - whether a term of art is defined, or whether glossary entries carry Origin lines ([§3](#3-defined-terms));
 - external `https://` links — it never touches the network;
 - Mermaid **layout** — diagrams are validated headless, grammar only, so one that parses can still lay out badly;

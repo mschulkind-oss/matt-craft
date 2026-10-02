@@ -49,7 +49,7 @@ This suite encodes a disciplined document state machine for AI-assisted engineer
 
 While `matt-craft` skills work in any Markdown-compatible environment, they are designed to pair with [Vantage](https://github.com/mschulkind-oss/vantage):
 
-- **Invisible in Standard Markdown:** Skills embed review directives and decision metadata using standard HTML comments (e.g. `<!-- vantage: oq id=... leaning="..." -->`). On GitHub, VS Code, or standard Markdown viewers, these are completely invisible—your documents stay clean and readable.
+- **Invisible in Standard Markdown:** Skills embed review directives and decision metadata using standard HTML comments (e.g. `<!-- vantage: question id=... leaning="..." -->`). On GitHub, VS Code, or standard Markdown viewers, these are completely invisible—your documents stay clean and readable.
 - **Interactive in Vantage:** When opened with Vantage, those hidden comments are parsed into interactive decision widgets, live status badges, and review threads without leaving your local terminal flow.
 - **Mechanical Link & Quality Verification:** The [`vantage-docs`](skills/vantage-docs/SKILL.md) skill and `uvx vantage-check` cover broken relative links and frontmatter validity before you commit. Term definitions still require author review.
 
@@ -112,17 +112,15 @@ just done
 Planning guidance names Vantage 0.8.0 explicitly. An older checker cannot verify
 that notation; never delete valid directives or change the human-owned `target`
 just to satisfy it. See [checker selection](skills/vantage-docs/SKILL.md#getting-the-binary).
-The example test checks marker/directive agreement and title shape statically,
-then checks extracted specimens as real Markdown when `vantage/question-name`
-is supported. It reports an explicit skip with older published checkers.
-To test with a matching local build, run:
+The example test checks question directives and title shape statically,
+then checks extracted specimens as real Markdown with `uvx vantage-check@0.8.0`,
+and fails, never skips, on a checker older than 0.8.0. To test with another build, run:
 
 ```bash
 VANTAGE_CHECK=/path/to/vantage-check python3 tests/question-examples.test.py
 ```
 
-The shipped style-guide snapshot is published 0.7.1 output, not an invented
-0.8.0 guide. Regenerate it from the published 0.8.0 checker when available.
+The shipped style-guide snapshot is `uvx vantage-check@0.8.0 style-guide` output, first line included. Regenerate it only from a published release.
 
 ---
 

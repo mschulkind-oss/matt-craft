@@ -20,7 +20,7 @@ just done
 ```
 
 This runs:
-- `just test` — validates skill frontmatter, triggers and local references; runs status-script regressions and question-example checks (Python 3). The example checker reports an explicit skip when the published Vantage checker lacks `vantage/question-name`; set `VANTAGE_CHECK` to a matching binary to exercise extracted specimens.
+- `just test` — validates skill frontmatter, triggers and local references; runs status-script regressions and question-example checks (Python 3). The example check runs the extracted specimens through `uvx vantage-check@0.8.0 check --no-config --strict` and fails on an older checker; set `VANTAGE_CHECK` to run another build.
 - `just check` (`uvx vantage-check README.md skills/*/SKILL.md`) — verifies Markdown syntax, link integrity, and formatting against Vantage standards.
 
 ## Commit Conventions

@@ -1,7 +1,8 @@
 """Check question specimens that the Markdown gate deliberately ignores in fences.
 
-Baseline: blocked/answered specimens used oq, offering an answer button in older
-viewers. Success: each specimen has the marker's directive and a question title.
+Baseline: specimens used `oq`, which Vantage 0.8.0 deprecates and which older
+viewers offer to answer on 🔒/✅. Success: each specimen writes `question` under a
+title that asks the decision.
 This is a deterministic packaging regression, not a live-model behavior evaluation.
 """
 import os
@@ -42,11 +43,11 @@ class QuestionExamples(unittest.TestCase):
                         self.assertEqual(len(directives), 1, body)
                         name, directive_id, attrs = directives[0]
                         self.assertEqual(directive_id, ident)
-                        self.assertEqual(name, "question" if marker in ("🔒", "✅") else "oq")
-                        if name == "question":
-                            self.assertEqual(attrs, "")
+                        self.assertEqual(name, "question", "Vantage 0.8.0 writes `question` in every state")
                         self.assertIn("?", title, "The bold title must ask the decision")
-                        if name == "oq":
+                        self.assertTrue(body[match.end() - match.start():].startswith("\n\n"),
+                                        "The title must be a paragraph of its own")
+                        if marker not in ("🔒", "✅"):
                             leaning = re.search(r'_Leaning:_ (.*?)(?=\n\n|\Z)', body, re.S)
                             value = re.search(r' leaning="([^"]*)"', attrs)
                             self.assertIsNotNone(leaning)
@@ -56,15 +57,13 @@ class QuestionExamples(unittest.TestCase):
         self.assertTrue({"💬", "💬 🤷", "🔒", "✅"}.issubset(seen))
 
     def test_examples_with_planning_checker(self):
-        # The normal gate ignores fenced specimens. Run these as real documents
-        # when a matching checker is available, never silently pass an old one.
-        command = shlex.split(os.environ.get("VANTAGE_CHECK", "uvx vantage-check"))
+        # The normal gate ignores fenced specimens, so check them as real
+        # documents with the release the skills teach, never a skip.
+        command = shlex.split(os.environ.get("VANTAGE_CHECK", "uvx vantage-check@0.8.0"))
         help_result = subprocess.run(command + ["help"], capture_output=True, text=True)
         self.assertEqual(help_result.returncode, 0, help_result.stderr)
-        if "vantage/question-name" not in help_result.stdout:
-            if "VANTAGE_CHECK" in os.environ:
-                self.fail("Explicit checker lacks vantage/question-name")
-            self.skipTest("Published checker lacks 0.8 question-name; specimens checked statically only")
+        self.assertIn("vantage/oq-deprecated", help_result.stdout,
+                      "This checker predates Vantage 0.8.0, whose notation the skills teach")
         with tempfile.TemporaryDirectory(prefix="question-examples-") as directory:
             paths = []
             for skill in ("design-doc", "user-stories", "vantage-docs"):
@@ -75,6 +74,17 @@ class QuestionExamples(unittest.TestCase):
                     path = pathlib.Path(directory) / f"{skill}-{i}.md"
                     path.write_text(block)
                     paths.append(str(path))
+                    # A state change keeps the directive and its leaning. Exercise
+                    # the same specimen in every state, including no emoji.
+                    for match, body in questions(block):
+                        if ' leaning="' not in body:
+                            continue
+                        for marker in ("💬", "🔒", "✅", ""):
+                            changed = re.sub(r"^\d+\. (💬(?: 🤷)?|🔒|✅) ",
+                                             "1. " + (marker + " " if marker else ""), body)
+                            path = pathlib.Path(directory) / f"state-{len(paths)}.md"
+                            path.write_text(changed)
+                            paths.append(str(path))
             result = subprocess.run(command + ["check", "--no-config", "--strict"] + paths,
                                     capture_output=True, text=True, cwd=directory)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

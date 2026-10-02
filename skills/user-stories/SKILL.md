@@ -37,8 +37,8 @@ A story kept as that record gets the repository's `done`-role stage word
 its questions off every list of what needs a ruling, so before setting it, rule
 each live question or move it into the design that took over: a `done` stage
 hides a question, it does not answer it. Never give a story a `built`-role word.
-Vantage lists a built document with no questions under *Graduate*, which a story
-never does, and one with open questions under *Disagrees*. Where the repository
+Vantage lists a built document with no questions under *Ready to graduate*, which a story
+never does, and one with open questions under *Stage conflict*. Where the repository
 declares no stages, no word has a role, so the questions have to be ruled or
 compacted before they leave the lists.
 
@@ -56,8 +56,7 @@ and Vantage discovery/pinning. A project with none does not get one from this sk
   not the bare story: that would pull all the story's rulings to the gap's position.
 - **Open questions** need a link from at least one existing roadmap, bare to this story or
   to the exact question anchor. Heading links show badges but route nothing. See
-  **`roadmap`**, *Vantage integration*, for routing and index capability checks; use
-  `--roadmap <path>` when supported for multiple roadmaps.
+  **`roadmap`**, *Vantage integration*, for routing and the planning index.
 - **The story's state** lives in top-level frontmatter: declared `stage`, one-line `next`,
   and only actual `depends-on` waits. Stakes, options, and leanings stay here.
 - **While feeding an active design**, keep a bare roadmap link to the story. Once it is
@@ -272,18 +271,19 @@ Use status emojis at the start of each question title for immediate scanning:
 
 1. 💬 **OQ-1: Does a fixed PR go to the back of the queue or retain its position?**
 
-   <!-- vantage: oq id=OQ-1 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
+   <!-- vantage: question id=OQ-1 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
    _Leaning:_ Back of the queue — the fix might interact with what merged while it was out.
 
    **Answer:**
    > _(empty — fill in when decided)_
 
-2. 💬 **OQ-2: How long does a contended DB write wait before failing?** Multiple agents write to the
-   DB simultaneously. SQLite WAL mode handles reads, but writes are
-   serialized.
+2. 💬 **OQ-2: How long does a contended DB write wait before failing?**
 
-   <!-- vantage: oq id=OQ-2 leaning="A 5s busy timeout, so a contended write waits instead of failing." -->
+   Multiple agents write to the DB simultaneously. SQLite WAL mode handles
+   reads, but writes are serialized.
+
+   <!-- vantage: question id=OQ-2 leaning="A 5s busy timeout, so a contended write waits instead of failing." -->
 
    _Leaning:_ A 5s busy timeout, so a contended write waits instead of failing.
 
@@ -294,12 +294,12 @@ Use status emojis at the start of each question title for immediate scanning:
 **Format rules for Open Questions:**
 
 - **`design-doc`** owns the question shape: emoji + stable id + the decision asked in the bold title, then at most three lines of stakes and the options. Link background from the body, never preserve history inside a question. Vantage 0.8.0 warns past 120 words, excluding the leaning and Answer.
-- `_Leaning:_` (italic) — your current best guess, with brief rationale
+- `_Leaning:_` (italic), as a paragraph of its own — your current best guess, with brief rationale. Vantage 0.8.0 warns on a leaning that shares a paragraph with other text (`vantage/question-layout`).
 - **`Answer:`** on its own line, followed by a blockquote
-- Every question has a directive, named by its marker (Vantage 0.8.0). **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns the mapping, syntax and checks; **`design-doc`** owns the scaffold, answering and compaction.
+- Every question has a question directive until compaction. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns its name, keys, syntax and checks, including the name a repository whose readers are still on Vantage 0.7 writes; **`design-doc`** owns the scaffold, answering and compaction.
 - The blockquote starts with `_(empty — fill in when decided)_` as placeholder
-- The human fills in their answer in the blockquote **without erasing anything**
-- Process every ruling in the same turn: record the answer, briefly mark ✅ with its resolution date, rename its directive to `question` and drop `leaning=`, fold the ruling into the story, preserve traps as warnings, and compact under **`design-doc`**'s protocol. Keep the id in its ledger row and repoint every inbound question-anchor link to `#decision-ledger` in the same commit, including roadmaps. Drop a ruled roadmap entry if nothing remains to decide. Until compaction, a routed ✅ question remains under *Needs you*.
+- The human answers in place: in the blockquote, **without erasing anything**, or, from Vantage 0.8.0, with a review comment on the question, which counts as its answer and reaches you through Copy or **Copy answers**. **`design-doc`**, *Answering Protocol*, records either one.
+- Process every ruling in the same turn: record the answer, briefly mark ✅ with its resolution date, rename an `oq` directive to `question` (see **`vantage-docs`**), fold the ruling into the story, preserve traps as warnings, and compact under **`design-doc`**'s protocol. Keep the id in its ledger row and repoint every inbound question-anchor link to `#decision-ledger` in the same commit, including roadmaps. Drop a ruled roadmap entry if nothing remains to decide. Until compaction, a routed ✅ question remains under *Needs you*.
 
 **Answered example** (only the brief state before same-turn compaction):
 
@@ -321,6 +321,7 @@ Use status emojis at the start of each question title for immediate scanning:
 
 ```markdown
 4. 🔒 **OQ-4: How many attempts before failing the PR?**
+
    Waits on the load test, so there is no leaning yet.
 
    <!-- vantage: question id=OQ-4 -->
@@ -376,8 +377,8 @@ Before finalizing a user stories document:
 - [ ] Paths the narrative skipped are answered, opened as questions, or delegated — no silent holes left to be guessed
 - [ ] Gaps are inline, not deferred to a separate section
 - [ ] Where the project keeps a roadmap, gaps accepted as work have an entry, and every open question is reached by a roadmap link (the bare story or its `#OQ-…` anchor, not a heading link) rather than stranded inline
-- [ ] Where Vantage is used: the checker **`vantage-docs`**, *Getting the binary*, names reports nothing about this story; older-checker limitations are disclosed rather than deleting valid directives, and, after the capability check in **`roadmap`**, `vantage-check index` (with `--roadmap <path>` when supported for multiple roadmaps) shows none of this story's questions under *Unrouted*
-- [ ] Every question has a status emoji (💬, 💬 🤷, 🔒 or ✅), a stable `OQ-` id, an answer placeholder, and the marker's directive under **`vantage-docs`** (Vantage 0.8.0), 🔒 and ✅ included; every 💬 question has a `_Leaning:_` line restated in its directive's `leaning=`
+- [ ] Where Vantage is used: the checker **`vantage-docs`**, *Getting the binary*, names reports nothing about this story; older-checker limitations are disclosed rather than deleting valid directives, and `vantage-check index` shows none of this story's questions under *Not on a roadmap*
+- [ ] Every question has a status emoji (💬, 💬 🤷, 🔒 or ✅), a stable `OQ-` id, an answer placeholder, and the question directive **`vantage-docs`** prescribes, 🔒 and ✅ included; every 💬 question has a `_Leaning:_` line restated in its directive's `leaning=`
 - [ ] The frontmatter carries `stage` (a word the repo declares, if it declares any), `next`, and only real `depends-on` entries
 - [ ] At least one non-technical or minimal-complexity persona (a "Derek")
 - [ ] Numbers are real (not "several" or "a few")

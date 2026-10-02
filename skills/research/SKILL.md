@@ -13,7 +13,7 @@ Research is cumulative. Every round starts from what the project already knows a
 2. **Investigate.** Web search, source reading, and local experiments to fill the gaps the existing docs don't cover — only the gaps.
 3. **Synthesize back.** End the round by updating the evergreen domain doc so the next round starts ahead. A round that produces only chat output is a failed round; the doc is the deliverable.
 4. **Review what the round changed on existing roadmaps.** Where a project keeps any
-   roadmap (any `roadmap.md`, subject to the tooling capabilities **`roadmap`** describes),
+   roadmap (every `roadmap.md`, or those `[planning] roadmap` lists; see **`roadmap`**),
    update the source's frontmatter `next` and actual dependencies, then review links and
    priority reasons in the same commit. Committed work or an owner ruling needs a link
    from at least one of them. Do not copy questions, leanings, state, or counts; do not
@@ -41,5 +41,4 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
   vocabulary and hides questions without warning. Otherwise move them into a live design,
   moving directives and repairing inbound anchors. Research is *promoted* into design;
   *graduation* is reserved for built design → system reference.
-- After a planning change, follow **`roadmap`**'s capability checks before `vantage-check index`; select `--roadmap <path>` when supported for multiple roadmaps and inspect the
-  result rather than treating an empty index as proof of no questions.
+- After a planning change, run `vantage-check index` as **`roadmap`** describes (`--roadmap <path>` for a roadmap other than the default) and inspect the result rather than treating an empty index as proof of no questions.
