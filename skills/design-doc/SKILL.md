@@ -58,6 +58,8 @@ Altitude is a ceiling, not an alibi. *Completeness* below is the floor.
 
 Altitude decides how high the doc flies; this decides that nothing is missing at that height. The two only look opposed. The rule that reconciles them: **specify behavior exhaustively, mechanism minimally.**
 
+**A hole is not the implementer's to close.** A gap that takes investigation is smart-role work: close it here, or make it the source's `next` action. It is never handed onward to the agent that builds from the plan — above all, unsettled concurrency and ordering, where a cheaper implementer produces a plausible guess that compiles and behaves differently than intended.
+
 Write for an implementer who is a strong builder and a weak guesser — assume the doc will be handed to someone with less context and less appetite for reconstructing your intent than you had writing it. They do not need your code, your file paths, or your line numbers; they need your decisions. You are an expert PM writing for an excellent engineer: hand over every judgement call that has a right answer, and none of the ones that don't.
 
 The dividing line, applied per claim: **could a reasonable implementer choose differently and still satisfy every behavior the doc states?** If yes it is theirs — data structures, decomposition, which file it lands in. If a different choice yields a system that *behaves* differently, it is yours, and a doc that doesn't say it is incomplete.
@@ -463,10 +465,19 @@ Format rules:
 - **Cite a question as a link, never as bare prose** — to its own id while it is in flight, to the owning document's Decision Ledger once it is compacted. Same for `§` section numbers and for filenames. See the **`vantage-docs`** skill; `vantage-check`'s `ref/*` rules are errors.
 
 ### Answering Protocol
-The user answers in place. Either they fill in the blockquote without erasing the question context, or, in Vantage, they comment on the question — **Take this leaning**, **Answer…**, or a comment on any part of it, in review mode or on a planning-page card — which reaches the agent through Copy or the planning page's **Copy answers**. Vantage 0.8.0 shows any such comment as the question's answer, waiting on the agent, until the agent replies; `vantage-check index` reads no comments, so it still lists the question as open. A comment is as much a ruling as a filled blockquote: record it as the Answer, process it as below, and reply through the review inbox. A comment that asks rather than rules gets a reply and no ruling, and the question then needs the user again. When the agent processes the answer — all of this in the same turn:
+The user answers in place. Either they fill in the blockquote without erasing the question context, or, in Vantage, they comment on the question — **Take this leaning**, **Answer…**, or a comment on any part of it, in review mode or on a planning-page card — which reaches the agent through Copy or the planning page's **Copy answers**. Vantage 0.8.0 shows any such comment as the question's answer, waiting on the agent, until the agent replies; `vantage-check index` reads no comments, so it still lists the question as open. A comment is as much a ruling as a filled blockquote: record it as the Answer, process it as below, and reply through the review inbox. A comment that asks rather than rules gets a reply and no ruling, and the question then needs the user again.
+
+**Record a clear ruling before any downstream work that depends on it.** Fold it into the governing body text, compact the settled question into the Decision Ledger, repair the inbound links that pointed at its anchor, and save the coherent update **in the checkout Vantage serves** — before launching or continuing implementation, a design writer, an independent review, or a batch of repairs. Do not wait for a whole-document revision, a full test suite, a release, or a commit. An edit saved in another worktree does not update the interface, and a reply in chat is not a recorded ruling.
+
+Then, in the same turn as that saved update:
+
 - Flip `💬` to `✅`, append `— RESOLVED (<date>)` to the title, record the answer, and in the same edit rename an `oq` directive to `question` (see **`vantage-docs`**).
 - Fold the ruling into the body section it governs, then compact the question into the Decision Ledger ([below](#compaction-fires-on-answering-not-on-a-threshold)). The `✅` state lives between these two bullets and nowhere else.
 - If the answer rejects your leaning, the leaning goes — it was a guess and it was wrong. What survives is anything the user's reasoning established as a *fact about the system*, and that belongs in the body, in the present tense, framed as a fact rather than as the correction of one.
+
+Update `status`, `stage`, `next`, and dependencies only as far as the ruling warrants. **A decision is not evidence it has been implemented**: do not claim `accepted` while any question is open, or use a built stage to hide unbuilt work. A clarification request closes nothing — reply without recording a ruling, and leave the question open. A partial answer records the part that settled and leaves a narrower open question, with its own directive, for the rest.
+
+**Save each coherent update as it lands**, rather than holding the whole batch for one write; a coordinator records rulings before handing the affected documents to a writer. Check the changed and referring documents, then deliver the comment responses promptly — without waiting for downstream work or the rest of the batch. A response may honestly say "recorded the ruling; implementation remains pending"; it may not claim the interface updated on the strength of chat, a brief, or an edit saved in an isolated worktree.
 
 ---
 
@@ -478,7 +489,7 @@ Once questions are answered, preserving 300+ lines of discursive OQ scaffolding 
 
 ### Compaction fires on answering, not on a threshold
 
-**Answering a question is two edits, not one: record the ruling, then compact it — same turn, every time.** An answered question never survives a single commit in question form.
+**Answering a question is two edits, not one: record the ruling, then compact it — same turn, every time.** An answered question never survives a single commit in question form. **Same turn is a floor, not a deferral:** a long turn that starts downstream work before the saved update has already broken the rule. Publication waits for no batch, review, or commit — only for the document to be coherent ([above](#answering-protocol)).
 
 Thresholds — "compact once answered outnumber open", "once the OQ section passes ~20–25% of the document" — read like rules and behave like nothing at all, because a threshold needs someone to be measuring and nobody is. A doc discovered sitting at 31% scaffolding is the *expected* outcome of a threshold rule, not a lapse in following one. The trigger has to be an event you cannot miss, and there is exactly one: **a ruling arrived.**
 
@@ -510,7 +521,7 @@ Replace verbose answered OQ blocks with a concise, greppable table:
 1. **IDs are an API — Never renumber or re-spell:**
    An ID may be cited in code comments, PRs, task tickets, or sibling docs. Before compacting, grep the repo for it. The Decision Ledger must retain the exact ID and spelling so all cross-references resolve.
 
-   Compaction also **deletes the question's directive (by then a ✅ question's `question`), and with it the anchor its id provided.** Every inbound link that pointed at `#OQ-N` now points at nothing. Repoint them at the ledger (`…#decision-ledger`) in the same commit that compacts.
+   Compaction also **deletes the question's directive (by then a ✅ question's `question`), and with it the anchor its id provided.** Every inbound link that pointed at `#OQ-N` now points at nothing. Repoint them at the ledger (`…#decision-ledger`) in the same saved update that compacts, and the same commit when there is one.
 
    **Grep the code, not just the docs** — this is the step that gets skipped, and the breakage it leaves is the kind no linter will ever report:
 
@@ -611,8 +622,8 @@ link from at least one existing roadmap; heading-only links do not route rulings
 although their badges look current. After changing questions, stages, or links,
 inspect `vantage-check index` for *Not on a roadmap* and *Stage conflict*; neither depends on the roadmap `--roadmap` picks. Do not duplicate question scaffolds.
 
-**Ready is a source claim, not a roadmap decoration.** A cold agent must be able to build
-from the design and plan without guessing required behavior. If agent investigation can
+**Ready is a source claim, not a roadmap decoration.** The implementer builds from the plan
+alone; the design serves the plan's author and the reviewer. If agent investigation can
 close a gap, make that the source's next action; stop only at a genuine owner gate.
 See [the gap test](#the-gap-test).
 
@@ -654,6 +665,8 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
 - [ ] The ledger's `Built` column was filled by opening the tree, not by reading commit messages
 - [ ] Before any compaction, `rg -n 'OQ-[A-Z]*[0-9]'` was run over the **whole repo** — source comments cite these ids and no markdown tool can see them
 - [ ] No `✅` question survived the turn it was answered in — every ruling is a ledger row plus body text, and no leaning is versioned
+- [ ] The served checkout was updated before downstream work began — a saved update, not merely compaction before the final commit
+- [ ] A clarification closed nothing and a partial answer left a narrower question open; a decision was not reported as implemented
 - [ ] Every question was checked against sibling docs' Decision Ledgers before it was opened
 - [ ] The audit pass has run since the last substantive edit: negatives re-searched, dated evidence re-read at the current commit
 - [ ] The description reads as currently true — corrections are edits, not strata; the only append-only thing is the Decision Ledger, and ⚠ markers appear only inside a deliberately frozen body

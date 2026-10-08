@@ -148,10 +148,13 @@ is its derived model of the repository's planning documents, not a separate edit
   checks; **`design-doc`** owns answering and compaction.
   Missing directives on 🔒, ✅ or leaning-less questions silently disappear. Read the
   sources too: an empty *Needs you* does not prove there are no questions. Nor does a 💬 question listed there prove it still needs the user: `index` reads no review comments, so one answered by comment stays 💬 until its document records the ruling (**`design-doc`**, *Answering Protocol*).
-- Compaction removes the directive and its anchor. Repoint inbound Markdown links to
-  the Decision Ledger and reconsider priority: a ledger link routes nothing. Keep
+- Compaction removes the directive and its anchor. Repoint inbound Markdown links, including
+  a roadmap's, **in the same saved update that compacts** — not after downstream work
+  finishes — and reconsider priority there, since a ledger link routes nothing. Keep
   question fragments in `depends-on` unchanged when the id survives in a ledger row;
-  they stop waiting. A heading fragment instead waits on the whole document.
+  they stop waiting. A heading fragment instead waits on the whole document. Status and
+  counts stay owned by the source document; a commit is not the trigger for making the live
+  document true.
 
 ### Checker, discovery, and selection
 

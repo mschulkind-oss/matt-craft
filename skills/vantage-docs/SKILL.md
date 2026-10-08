@@ -161,14 +161,22 @@ The prefix is what keeps ids distinct once two documents reference each other's 
 
 ### Compaction and references
 
-**`design-doc`** owns same-turn answering and compaction. Use its five-column ledger:
+**`design-doc`** owns same-turn answering and compaction, and the fuller authoring procedure. Use its five-column ledger:
 `| ID | Ruling / Decision | Date | Settled in | Built |`. Fill `Built` from the tree;
 *Settled in* is a section link, not a bare number. A bare id is permitted only in a table
 whose first column is exactly `ID`; that row also preserves a compacted dependency id.
 
+**A ruling lives in saved Markdown, and only there.** A review comment, an agent reply, or a
+brief is not a substitute: a reply alone leaves the question unchanged and still needing the
+human, because Vantage derives planning state from the saved document. Record the ruling in
+the checkout Vantage serves *before* downstream work starts on it — the canonical style
+guide's **Record rulings before downstream work** section ([§1](#1-formatting) says how to
+read the served guide), with **`design-doc`**, *Answering Protocol*, for the authoring steps.
+
 Compaction deletes the directive and therefore its case-sensitive question anchor.
-Repoint inbound Markdown links to `#decision-ledger` in the same commit, including
-roadmap links; a ledger link routes nothing. Keep a `depends-on` question fragment
+Repoint inbound Markdown links to `#decision-ledger` in the same saved update that
+compacts (and the same commit), including roadmap links; a ledger link routes nothing.
+Keep a `depends-on` question fragment
 unchanged if its id remains in a ledger row; see **`roadmap`** for dependency semantics.
 
 Before compacting, search the **whole repository**, not only docs:

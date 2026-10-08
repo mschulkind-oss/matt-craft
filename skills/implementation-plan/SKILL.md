@@ -7,7 +7,7 @@ description: Use when a settled design needs a build hand-off grounded in the cu
 
 The design doc says what to build, and is written for the person deciding. This says what the builder would otherwise have to rediscover, and is written for the agent that builds it.
 
-Assume that agent is a capable coder starting cold: no repo in context, a limited search budget, and no way to know which of its plausible first moves is the one this codebase already regrets. You just spent a session in the tree. **The plan is the transfer of what you know and they would otherwise pay for.**
+Assume the **implementer** role: a cheaper model that executes well, has a small search budget, and must not diagnose. The **smart** role — the one that just read the tree and settled the design — writes this plan, and the implementer builds from this plan alone; the design is the author's and the reviewer's, not the implementer's. Name the roles, never the models: which model fills each is configuration, and it changes between sessions. You just spent a session in the tree. **The plan is the transfer of what you know and they would otherwise pay for.**
 
 The file has a life before that, though. It **opens as a sketch** while the design is still being argued, holding the implementation material that would otherwise clutter the design doc — see [Lifecycle](#lifecycle). A sketch is not a hand-off, and nothing is built from one.
 
@@ -19,12 +19,13 @@ That is the whole filter. Before a line goes in, say what it saves. "One obvious
 
 The corollaries are what keep the doc short:
 
-- **Never restate the design.** Link it. A plan that re-explains the feature is pure cost: the implementer reads both.
-- **Never write the code.** No function bodies. Signatures only where the shape is a contract someone else must match — an interface, a wire message, a CLI surface.
-- **Name, don't quote.** `store.WithTx(ctx, fn)` beats a pasted snippet, costs a tenth as much, and cannot go stale in place.
+- **Never restate the design's argument.** Link the design. A plan that re-explains the feature is pure cost. But *do* quote the settled behavior a task needs, marked **do not re-open**: the implementer does not read the design, and a fact it has to re-derive is a fact it can get wrong.
+- **Never write the production code.** No function bodies. Signatures only where the shape is a contract someone else must match — an interface, a wire message, a CLI surface.
+- **Do write the failing test in full**, with exact literals — config values, strings, JSON, and the red command. That is the one place a pasted block outruns a description.
+- **Name production code, don't quote it.** `store.WithTx(ctx, fn)` beats a pasted snippet, costs a tenth as much, and cannot go stale in place.
 - **If you can't say what a line saves, it is not advice, it is throat-clearing.**
 
-Aim for one screen — call it 120 lines. Past ~200 you are writing the implementation with extra steps, and the implementer reads less of it, not more.
+Aim for ~120 lines of prose per task. Test code, commands, and the commit message do not count toward that — they are exact by design, and the briefs that worked spent most of their length there. Past ~200 lines of prose per task you are writing the implementation with extra steps, and the implementer reads less of it, not more.
 
 ## Binding vs. advisory — mark which
 
@@ -43,10 +44,34 @@ Advice stripped of its reason degrades into an order, and that is the failure th
 Put this in the plan, near the top. It is the rule the implementer most needs and the one nobody writes down.
 
 1. **The design doc wins on behavior.** If the plan implies different behavior, the plan is wrong.
-2. **The tree wins on fact.** File moved, helper gone, map stale → follow the tree and say so in the commit.
+2. **The tree wins on fact — cosmetic drift only.** A moved line, a renamed helper with the same role: follow the tree and say so in the report and the commit.
 3. **The plan is advice, and is the first thing to be wrong.** It is one agent's understanding at one commit.
 
 The instruction that follows: **never twist the code to match the plan.** An overtaken plan is a note to correct, not a spec to satisfy.
+
+**Stop and report; do not commit** when the disagreement is not cosmetic:
+
+- the test does not fail the way the task predicted;
+- a file the task names is dirty with someone else's work;
+- a symbol the task names is gone;
+- the fix needs a file outside the task's fence;
+- a gate fails outside the task's scope.
+
+Those are not the tree being right and the plan wrong. They are the plan's assumptions breaking, and the implementer's job is to stop, not to diagnose a way through. State the conditions in each task's preconditions, and repeat the rule here.
+
+## Ready to hand off
+
+A plan is safe to hand to the implementer only when all of these hold. This is the smart role's check before spawning, not something the implementer fixes.
+
+- The author reproduced the problem or confirmed the gap, and recorded how — the command, the run id, the file read.
+- Every behavior a task needs is answered, or marked **cheap** and explicitly left to the implementer.
+- The failing test and the command that shows it red are given in full.
+- Every path and symbol named was read at the commit the plan is stamped against.
+- Fences, stop conditions, gates, and the commit message are present.
+
+Then reread each task as the implementer and search the text for **investigate**, **figure out**, **decide**, and **choose**. Every hit is either diagnosis the author should do now, or a choice to mark cheap. Those four words are the readiness test failing out loud.
+
+A design question left open in the plan is not a precondition — it is the design's, open until the user rules. See **`design-doc`**, *Completeness*.
 
 ## What goes in
 
@@ -62,7 +87,18 @@ In this order. Drop any section that would be empty rather than padding it.
 
 **Traps.** What looks right and isn't, one line each, with the symptom, so it is recognizable from the inside: "config is loaded twice; the second load silently wins and has no CLI flags in it." Ordering constraints, late-initialized globals, generated files, a test that is flaky for a known reason.
 
-**Build order.** Numbered steps, each a vertical slice that ends green and committable, each naming the command that proves it: `just test ./internal/store`. For a bug, step 1 is the failing test. Say what unblocks the rest, and what gets expensive if it lands late.
+**Tasks.** The shared header above — header, map, reuse, traps — is written once. Below it, each unit of work is a task, and the task is what the implementer is handed. Give each the fields it needs, and drop any that would be empty:
+
+- **Settled** — the behavior it must produce, quoted from the ruling, marked **do not re-open**.
+- **Preconditions** — the commands that must hold, and what to do if one fails (usually the stop-and-report list under *Precedence*).
+- **Tests first** — the failing test, in full, and the command that shows it red.
+- **Change** — file, symbol, `~line`. The shape, not the body.
+- **Gates** — the exact commands that prove it green, including any to run by hand because the hook is not installed here.
+- **Fences** — files and hunks that are out of scope, naming another agent's work when it shares the tree.
+- **Commit message** — the exact message to write.
+- **Report** — what to paste back: the red command and its output, the green gates, and anything the tree forced.
+
+**Build order** is then a property of the tasks, not a separate list: mark each **independent** or **after N**. A task is sized as one commit and one worktree; parallel tasks get disjoint files, or the order they land in is named. Say what unblocks the rest, and what gets expensive if it lands late.
 
 **Everything else that ships** (`## Ships with`)**.** Tests by level and by case; the docs that now describe the old behavior; the surfaces that are neither — config defaults, CLI help, error text, generated files, migrations, examples. One line each, named by path. This is the section a cold implementer will not write for itself; see *Attention* below for why, and for what belongs in it.
 
@@ -122,10 +158,19 @@ is advice and is the first thing to be wrong.
 - One goroutine per host, but a single shared HTTP client — a per-client
   bucket is not a per-host bucket. **Constraint:** the design's limit is per host.
 
-## Build order
-1. Bucket + unit tests, no wiring. → `just test ./internal/rate`
-2. Wire into the loop behind a default-on flag. → `just test ./internal/poll`
-3. Drop the flag once the soak is clean. → `just check`
+## Tasks
+**Task 1 — the bucket.**
+- **Settled:** the limit is per host, refilled on the injected clock. Do not re-open.
+- **Tests first:** `internal/rate/bucket_test.go` — burst exhaustion, refill across a
+  fake-clock jump, zero-rate config. → `just test ./internal/rate` (red).
+- **Change:** `internal/rate/bucket.go` (new); acquire in `internal/poll/loop.go` (~`:88`).
+- **Gates:** `just test ./internal/rate`.
+- **Fences:** nothing under `internal/http`.
+- **Commit:** `feat(rate): per-host token bucket`.
+- **Report:** the red run, the green run, and whether `internal/clock` already had a fake.
+
+**Task 2 — wire the loop** (after 1): behind a default-on flag. → `just test ./internal/poll`.
+**Task 3 — drop the flag** (after 2, soak clean): → `just check`.
 
 ## Ships with
 - Unit: burst exhaustion, refill across a fake-clock jump, zero-rate config.
@@ -190,7 +235,7 @@ change; do not copy plan state or blockers into a second table. See **`roadmap`*
 
 ## Whether this is working
 
-This genre is an experiment. The claim — context transferred from an author who has the tree loaded to an implementer who doesn't pays for its own tokens — is plausible and unproven. Measure it cheaply. When the work lands, note two things in the landing commit:
+This genre is an experiment. The claim — context transferred from an author who has the tree loaded to an implementer who doesn't pays for its own tokens — is plausible and unproven. Measure it cheaply. Each task's **Report** is where the first list arrives: read it, and fold what it reveals into the next plan. When the work lands, note two things in the landing commit:
 
 - **What the implementer had to ask or rediscover.** A hole the plan should have closed.
 - **What the plan said that nobody needed.** Dead tokens; that category comes out of the next plan.
@@ -211,14 +256,20 @@ Follow **`vantage-docs`** for Markdown formatting. Otherwise this genre inverts 
 - [ ] Status is honest: `SKETCH` while the design has open questions, promoted only after reading the tree
 - [ ] No design decision is made here — behavior that could go two ways is an `OQ-N` in the design doc
 - [ ] Every entry resting on an open question links it; on promotion, each was re-checked against its ruling
-- [ ] Links the design doc and does not restate it
+- [ ] Ready to hand off: the problem was reproduced, every behavior is answered or cheap, the red test and its command are given, paths were read at the stamped commit, and fences, stop conditions, gates and the commit message are present
+- [ ] Reread as the implementer: no "investigate", "figure out", "decide" or "choose" is left unmarked
+- [ ] Each task carries its Settled, Preconditions, Tests first, Change, Gates, Fences, Commit message and Report fields; empty fields were dropped
+- [ ] Settled behavior is quoted to be self-contained, not merely linked
+- [ ] Stop-and-report conditions are named (test not red as predicted, dirty file, missing symbol, a file outside the fence, a gate failure out of scope)
+- [ ] Links the design doc and does not restate its argument; the settled behavior a task needs is quoted instead
 - [ ] Written-against commit named, and dated
-- [ ] Precedence stated: design → tree → plan
+- [ ] Precedence stated: design → tree → plan, with the stop-and-report cases
 - [ ] Every advice line carries its reason; every constraint is a fact, not a preference
 - [ ] No function bodies; signatures only where the shape is a contract
 - [ ] The map covers every file that changes, new ones marked
 - [ ] Reuse names symbols and paths, not descriptions of them
-- [ ] Each build step ends green and names the command that proves it
+- [ ] Each task ends green and names the command that proves it
+- [ ] Tasks are marked independent or after N; each is one commit and one worktree, and parallel tasks have disjoint files or a stated landing order
 - [ ] Tests named by level and by case, including the integration test that would catch this breaking
 - [ ] Tests that must change with the behavior are marked as rewrites, not repairs
 - [ ] Docs, config keys, CLI help and generated files describing the old behavior are named by path
@@ -227,4 +278,4 @@ Follow **`vantage-docs`** for Markdown formatting. Otherwise this genre inverts 
 - [ ] Cheap choices marked cheap; expensive ones marked stop-and-ask
 - [ ] No behavior claims that belong in the design doc
 - [ ] Source metadata matches the plan's actual readiness; roadmap links and sequencing were reviewed in the same commit, without copied state
-- [ ] Under ~120 lines
+- [ ] Under ~120 lines of prose per task (test code, commands and the commit message excluded)
