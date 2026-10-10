@@ -144,11 +144,11 @@ Living document, revisited often. Each pass should leave it **better, not just l
 When the ask is volume — "flesh out the whole catalog," five per category — parallel agents earn their cost, and their failure modes are predictable. The recipe that works:
 
 1. **Template first, agents second.** Write the full entry anatomy (every section, in order, with the voice exemplar named) *before* launching anything. Fast models fill templates well and invent structure badly.
-2. **One owner per file.** Split by category/slot with explicit file lists. Two agents with overlapping write sets is the #1 way to lose work. Files nobody owns are the coordinator's to carry forward.
+2. **One owner per file.** Split by category/slot with explicit file lists. Two agents with overlapping write sets is the #1 way to lose work. Files nobody owns are the main agent's to carry forward.
 3. **Fast models draft, capable models enrich, commit between.** The draft wave lands as a checkpoint commit; the enrichment wave edits in place. This preserves the "before" state, makes the enrichment diff reviewable, and means an enrichment failure never loses the drafts.
 4. **Forbid sub-agent spawning in the briefs.** Research agents that fan out on their own initiative multiply concurrent streams and hit rate limits; the kills lose everything. If you need more parallelism, you add it deliberately, staggered.
 5. **Steer mid-flight when the constraints change.** A queued message to a running agent beats silently redoing its output afterward — but follow the original channel: refine the constraint, don't reverse it (a mid-flight reversal produces a doc at war with itself).
-6. **The coordinator does the integration:** inbound links, the index, count claims ("twelve concepts"), cross-links between siblings, and the commit split so each wave is its own readable change.
+6. **The main agent does the integration:** inbound links, the index, count claims ("twelve concepts"), cross-links between siblings, and the commit split so each wave is its own readable change.
 
 Follow the **`vantage-docs`** style guide for Markdown conventions (frontmatter, callouts, Mermaid, tables) and for its **Defined Terms** rules.
 

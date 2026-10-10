@@ -477,7 +477,7 @@ Then, in the same turn as that saved update:
 
 Update `status`, `stage`, `next`, and dependencies only as far as the ruling warrants. **A decision is not evidence it has been implemented**: do not claim `accepted` while any question is open, or use a built stage to hide unbuilt work. A clarification request closes nothing — reply without recording a ruling, and leave the question open. A partial answer records the part that settled and leaves a narrower open question, with its own directive, for the rest.
 
-**Save each coherent update as it lands**, rather than holding the whole batch for one write; a coordinator records rulings before handing the affected documents to a writer. Check the changed and referring documents, then deliver the comment responses promptly — without waiting for downstream work or the rest of the batch. A response may honestly say "recorded the ruling; implementation remains pending"; it may not claim the interface updated on the strength of chat, a brief, or an edit saved in an isolated worktree.
+**Save each coherent update as it lands**, rather than holding the whole batch for one write; the main agent records rulings before handing the affected documents to a writer. Check the changed and referring documents, then deliver the comment responses promptly — without waiting for downstream work or the rest of the batch. A response may honestly say "recorded the ruling; implementation remains pending"; it may not claim the interface updated on the strength of chat, a brief, or an edit saved in an isolated worktree.
 
 ---
 
