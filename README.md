@@ -19,6 +19,8 @@
 | **[`user-stories`](skills/user-stories/SKILL.md)** | Use when exploring a product or feature through realistic narrative workflows and the gaps they expose. |
 | **[`vantage-docs`](skills/vantage-docs/SKILL.md)** | Use when authoring, formatting, reviewing, or render-verifying Markdown documentation for Vantage and GitHub. |
 
+The pack also ships a briefing, [`briefing/document-lifecycle.md`](briefing/document-lifecycle.md), that names each skill by the situation that calls for it. Installed as an agent pack, it reaches the agent's context, so the trigger is read as a rule rather than only as a catalog entry.
+
 ---
 
 ## The Document Lifecycle
