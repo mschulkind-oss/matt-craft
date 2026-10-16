@@ -96,6 +96,7 @@ answering, and compaction protocol. **`vantage-docs`**, *Open Questions & Decisi
 every question needs one, including preference, blocked, and briefly answered questions.
 Missing directives can silently disappear from the index; the directive is not just a button.
 Agent-owned investigation, costing, and known-broken work are not owner questions.
+A candidate raised only in your report to the user is not an owner question either: under **`design-doc`**'s filing rule, a design question exists only once it is filed in its document and routed by a roadmap. Surface a thread here, in the document, or not at all — never as chat-only extras appended to the questions the documents actually hold.
 
 
 ## Reference works

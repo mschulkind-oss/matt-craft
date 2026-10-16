@@ -104,7 +104,7 @@ In this order. Drop any section that would be empty rather than padding it.
 
 **Don't.** Out of scope, files not to touch, and — most valuable — the plausible wrong turn pre-empted with its reason: "you will want to put a cache in front of this; don't, invalidation is the live question `[OQ-N](rate-limiting.md#OQ-N)`."
 
-**Blockers.** Only what stops work. Live design questions stay in the design doc as `OQ-N` and are cited here as a link to the question's own anchor — or to the design doc's Decision Ledger once it has been compacted, which destroys that anchor. Never fork the question list across two documents.
+**Blockers.** Only what stops work. Live design questions stay in the design doc as `OQ-N` and are cited here as a link to the question's own anchor — or to the design doc's Decision Ledger once it has been compacted, which destroys that anchor. Never fork the question list across two documents. A design decision you notice while planning that is filed nowhere is not a blocker and not a question (**`design-doc`**, *Phase 1*: a question that is not filed does not exist): get it filed and routed in the design, settle it within the plan's own altitude, or drop it — never hand the implementer or the user a chat-only question beside the filed ones.
 
 ## Attention — the failure is misallocation, not absence
 

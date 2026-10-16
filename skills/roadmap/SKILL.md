@@ -37,6 +37,8 @@ an empty source doc just to have a link. If that work grows into a design or pla
 facts there and leave the priority reason here. Keep open questions out of the roadmap itself:
 its links to itself route nothing, so they cannot place those questions in its own order. A question that needs a ruling earns a small source document, linked bare.
 
+**Unrouted is not a state a question can be in.** A design question exists only once it is filed in its owning document and a link here routes it (**`design-doc`**, *Phase 1: Open Questions (Deliberation)*, states the filing rule in full). A question in an unlinked document, or one an agent has noticed but never filed, is not waiting outside the queue — it is not a question, and no report may present it as one, as a supplement to the routed list, or as a count of extra decisions pending. When reconciliation turns one up, the remedy is on the filing side, never the reporting side: route its document or its anchor at its intended place, or remove the question from its source. Do not list it for the user under *Not on a roadmap* and move on; that heading names work for the agent, not questions for the user.
+
 ## The shape — an annotated priority list
 
 1. **Header:** title, last reconciled date, and a short scope statement.
@@ -144,7 +146,7 @@ is its derived model of the repository's planning documents, not a separate edit
   or question-anchor link under Boundaries still queues its questions.
 - A roadmap's links to itself, and links to `done`-role documents, route nothing.
 - Questions exist to the index only through an attached question directive, in every
-  state. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns its name, syntax and
+  state — and to the user only through routing as well: an unrouted question is not reported as a question awaiting a ruling, whatever the index shows. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns its name, syntax and
   checks; **`design-doc`** owns answering and compaction.
   Missing directives on 🔒, ✅ or leaning-less questions silently disappear. Read the
   sources too: an empty *Needs you* does not prove there are no questions. Nor does a 💬 question listed there prove it still needs the user: `index` reads no review comments, so one answered by comment stays 💬 until its document records the ruling (**`design-doc`**, *Answering Protocol*).

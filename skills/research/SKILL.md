@@ -39,6 +39,6 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
   needs a directive, not just a 💬 question with a technical leaning. Keep questions here
   only with an unset or open-role stage; `CURRENT` maps to `done` in **`design-doc`**'s
   vocabulary and hides questions without warning. Otherwise move them into a live design,
-  moving directives and repairing inbound anchors. Research is *promoted* into design;
+  moving directives and repairing inbound anchors. A user decision a round surfaces only in its chat report is not a question (**`design-doc`**, *Phase 1*: a question that is not filed does not exist) — file it where it belongs, with its routing, or let the round's verdict carry it. Research is *promoted* into design;
   *graduation* is reserved for built design → system reference.
 - After a planning change, run `vantage-check index` as **`roadmap`** describes (`--roadmap <path>` for a roadmap other than the default) and inspect the result rather than treating an empty index as proof of no questions.

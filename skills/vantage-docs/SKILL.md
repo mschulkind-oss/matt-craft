@@ -117,7 +117,7 @@ Vantage 0.8.0:
   directive goes above the bold title.
 - A directive is more than a button: both names declare the question and give it its
   case-sensitive anchor, and a question with neither does not exist to the index, badges,
-  or planning page. A green check is not proof all questions exist.
+  or planning page. A green check is not proof all questions exist. Take the non-existence literally, in chat as much as in the index: a design decision that was never written into a document with a directive — or whose document no roadmap routes (**`roadmap`** owns routing; **`design-doc`**, *Phase 1*, owns the filing rule) — is not a question, so never report it alongside the filed ones as an extra awaiting a ruling. File it properly or do not raise it as a question at all.
 - A checker that reports `question` as `vantage/unknown-name` is older than 0.8.0: keep the
   directive and run a current one ([Getting the binary](#getting-the-binary)).
 
