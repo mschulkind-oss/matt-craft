@@ -7,9 +7,34 @@ description: Use when a settled design needs a build hand-off grounded in the cu
 
 The design doc says what to build, and is written for the person deciding. This says what the builder would otherwise have to rediscover, and is written for the agent that builds it.
 
-Assume the **implementer** role: a cheaper model that executes well, has a small search budget, and must not diagnose. The **smart** role — the one that just read the tree and settled the design — writes this plan, and the implementer builds from this plan alone; the design is the author's and the reviewer's, not the implementer's. Name the roles, never the models: which model fills each is configuration, and it changes between sessions. You just spent a session in the tree. **The plan is the transfer of what you know and they would otherwise pay for.**
+Three roles touch this file, at three different times, and the split is the point:
 
-The file has a life before that, though. It **opens as a sketch** while the design is still being argued, holding the implementation material that would otherwise clutter the design doc — see [Lifecycle](#lifecycle). A sketch is not a hand-off, and nothing is built from one.
+| Role | Cost | Does here |
+| :--- | :--- | :--- |
+| **Designer** | Expensive — holds the design | **Seeds** it with what the design work happened to surface. Never completes it. |
+| **Planner** | Mid-tier — cheap to run, reads the tree fast | Completes it against the tree once the design is accepted: map, reuse, traps, tasks. |
+| **Implementer** | Cheapest — executes well, must not diagnose | Builds from the completed plan alone. |
+
+Name the roles, never the models: which model fills each is configuration, and it changes between sessions. **The plan is the transfer of what the planner knows and the implementer would otherwise pay for.** The design is the designer's and the reviewer's, not the implementer's.
+
+**The stage this file exists to name** is the one between a design and its build: design `status: accepted`, every question ruled, and the plan still a seed. Nothing is built from that state, and the planner is the only role with work to do in it.
+
+## The seed stage — design accepted, plan not yet built
+
+**The gate is the design's `status: accepted` with no question open, including 🔒 blocked ones.** Until then the file is a **seed** stamped `stage: SKETCH`, and the designer owes it nothing beyond what surfaced. At the gate the planner takes it over. There is no second cue and no review in between.
+
+**What the designer may put in the seed, and nothing else:**
+
+- Notes that came up while arguing the design — a library, a schema or signature sketch, a migration mechanic, a packaging or rollout detail, an ordering constraint below the design's altitude.
+- **A search, written as a search** — "check whether `X` still exists before relying on it." A line that would take reading to write is a note for the planner, not an entry.
+
+**What the designer must not do, and why.** No map, no reuse survey, no traps hunt, no test design, no build order. Each needs the tree read at the commit the build will start from, which the planner does for a fraction of the cost, after the rulings are in, without the design's context competing for its attention. A designer that fills those sections has paid the expensive rate for work the plan will have to redo anyway.
+
+**Design-only is a legal request.** "Don't write the implementation doc, just the design doc" means no plan work at all beyond the seed, and no investigation for it.
+
+**At the gate the planner reads the tree first**, stamps the commit the plan is written against, then keeps what still holds from the seed, drops what the tree contradicts, and writes the sections the seed deliberately lacks ([What goes in](#what-goes-in)). A seed line is never evidence; it is a candidate.
+
+**Nothing is built from a seed, and no implementer starts before the plan is `DECIDED`.** If the user explicitly waives the plan, say what that costs: the implementer then stops at every hole instead of guessing, because it must not diagnose.
 
 ## The economics — one test per line
 
@@ -61,21 +86,21 @@ Those are not the tree being right and the plan wrong. They are the plan's assum
 
 ## Ready to hand off
 
-A plan is safe to hand to the implementer only when all of these hold. This is the smart role's check before spawning, not something the implementer fixes.
+A plan is safe to hand to the implementer only when all of these hold. This is the planner's check before spawning, not something the implementer fixes.
 
-- The author reproduced the problem or confirmed the gap, and recorded how — the command, the run id, the file read.
+- The planner reproduced the problem or confirmed the gap, and recorded how — the command, the run id, the file read.
 - Every behavior a task needs is answered, or marked **cheap** and explicitly left to the implementer.
 - The failing test and the command that shows it red are given in full.
 - Every path and symbol named was read at the commit the plan is stamped against.
 - Fences, stop conditions, gates, and the commit message are present.
 
-Then reread each task as the implementer and search the text for **investigate**, **figure out**, **decide**, and **choose**. Every hit is either diagnosis the author should do now, or a choice to mark cheap. Those four words are the readiness test failing out loud.
+Then reread each task as the implementer and search the text for **investigate**, **figure out**, **decide**, and **choose**. Every hit is either diagnosis the planner should do now, or a choice to mark cheap. Those four words are the readiness test failing out loud.
 
 A design question left open in the plan is not a precondition — it is the design's, open until the user rules. See **`design-doc`**, *Completeness*.
 
 ## What goes in
 
-In this order. Drop any section that would be empty rather than padding it.
+In this order. Drop any section that would be empty rather than padding it. None of it belongs in the seed: these sections appear once the planner has read the tree.
 
 **Header.** The design doc link, top-level `status`, `stage`, `next`, and actual `depends-on` paths, plus the commit the plan was written against — `Written against a1b2c3d, 2026-09-01`. That stamp is the entire staleness defense: an implementer arriving 200 commits later knows exactly how far to trust the map.
 
@@ -194,24 +219,26 @@ is advice and is the first thing to be wrong.
 
 Lands beside the design it serves, same basename plus `-plan`: `docs/design/<topic>-plan.md`.
 
-### It opens as a sketch
+### It is seeded during the design (designer)
 
-The file exists from early in the design, not from hand-off. While the design is still being argued it is a **sketch** — `stage: SKETCH` in frontmatter, with a dated prose status line saying it is incomplete and unstable while questions are open — and it has exactly one job: hold the implementation material that would otherwise clutter the design doc. Dependency and library notes, schema and signature sketches, migration mechanics, packaging, sequencing below the design's altitude.
+The file exists from early in the design, not from hand-off. While the design is still being argued it is a **seed** — `stage: SKETCH` in frontmatter, with a dated prose status line saying it was seeded during design and is not a hand-off — and it has exactly one job: hold the implementation material that would otherwise clutter the design doc. Dependency and library notes, schema and signature sketches, migration mechanics, packaging, sequencing below the design's altitude, and searches written as searches.
+
+The seed is filled only from what surfaced while arguing the design. [The seed stage](#the-seed-stage--design-accepted-plan-not-yet-built) owns what may go in and what must not.
 
 Two rules govern it, and **`design-doc`** owns both:
 
-- **No design decision is made in the sketch.** Behavior that could reasonably go two ways is an `OQ-N` in the design doc, never a line here. The sketch holds settled-but-boring material; it is not a place for a decision to hide.
+- **No design decision is made in the seed.** Behavior that could reasonably go two ways is an `OQ-N` in the design doc, never a line here. The seed holds settled-but-boring material; it is not a place for a decision to hide.
 - **An entry resting on an unruled question names it,** and is revisited when that question is answered. A line written under a guess the ruling contradicts is what the marking exists to catch.
 
   ```markdown
   Blocked on [OQ-4](rate-limiting.md#OQ-4) — the retry policy shapes this.
   ```
 
-### It is completed against the tree
+### It is completed against the tree (planner)
 
-**A sketch is not a hand-off, and nothing is built from one.** The promotion happens after the design settles and **after reading the code**, and it is what adds the sections carrying this genre's whole value: the map, the reuse, the traps, the build order, `Ships with`. A plan written from the design alone contains no codebase knowledge, which was the entire product.
+**A seed is not a hand-off, and nothing is built from one.** The planner starts at the design's `status: accepted`, **reads the code**, and adds the sections carrying this genre's whole value: the map, the reuse, the traps, the build order, `Ships with`. A plan written from the design alone contains no codebase knowledge, which was the entire product.
 
-Do it **close to hand-off**, because it rots at the speed of the tree. Promoting means: stamp the written-against commit, drop the `SKETCH` status, and re-check every line that has been sitting in the sketch since the design was open — those are the stalest lines in the file, and they were written before the rulings.
+Do it **close to hand-off**, because it rots at the speed of the tree. Completing means: stamp the written-against commit, set the repository's ready stage (default `DECIDED`), and re-check every seed line — those are the stalest lines in the file, and they were written before the rulings.
 
 **Deleted at graduation**, in the same commit that adds the system doc (see **`system-doc`**, Step 4), not at landing. Keep the plan and roadmap links while graduation or verification is owed; stamp it with the repository's built stage (`BUILT` with **`design-doc`**'s mapping). Git keeps it afterward. Two things move out first:
 
@@ -224,9 +251,10 @@ Keep `stage`, `next`, and actual `depends-on` paths in this file's frontmatter. 
 roadmap in the **same commit** whenever links, sequencing rationale, or remaining scope
 change; do not copy plan state or blockers into a second table. See **`roadmap`** for `vantage-check index` and `--roadmap <path>`.
 
-- **Opened as a sketch:** set `stage: SKETCH`, name refinement as the next action, and link
-  the design gates. This is not a build hand-off, even if it has a priority position.
-- **Promoted against the tree:** set the repository's ready stage (default `DECIDED`),
+- **Seeded during the design:** set `stage: SKETCH`, name the design's acceptance as the cue
+  for completion, and link the design gates. This is not a build hand-off, even if it has a
+  priority position.
+- **Completed against the tree (planner):** set the repository's ready stage (default `DECIDED`),
   record the written-against commit, and name the first build step in `next`. Review the
   roadmap link to this hand-off and its order, not a duplicated ready label.
 - **Work landed:** set the built stage and retain the plan and roadmap links while graduation
@@ -235,10 +263,11 @@ change; do not copy plan state or blockers into a second table. See **`roadmap`*
 
 ## Whether this is working
 
-This genre is an experiment. The claim — context transferred from an author who has the tree loaded to an implementer who doesn't pays for its own tokens — is plausible and unproven. Measure it cheaply. Each task's **Report** is where the first list arrives: read it, and fold what it reveals into the next plan. When the work lands, note two things in the landing commit:
+This genre is an experiment. The claim — context transferred from a planner who has the tree loaded to an implementer who doesn't pays for its own tokens — is plausible and unproven. Measure it cheaply. Each task's **Report** is where the first list arrives: read it, and fold what it reveals into the next plan. When the work lands, note three things in the landing commit:
 
 - **What the implementer had to ask or rediscover.** A hole the plan should have closed.
 - **What the plan said that nobody needed.** Dead tokens; that category comes out of the next plan.
+- **What the seed was worth.** Which seeded lines survived the tree read, and which the planner discarded or had to rediscover. That ratio is whether the designer's parking lot saved anything or was noise.
 
 If the first list stays empty while the second grows, the plans are too long. If the reverse, too thin.
 
@@ -253,9 +282,11 @@ Follow **`vantage-docs`** for Markdown formatting. Otherwise this genre inverts 
 
 ## Quality checklist
 
-- [ ] Status is honest: `SKETCH` while the design has open questions, promoted only after reading the tree
+- [ ] Status is honest: `SKETCH` (the seed) until the design is accepted, completed only by the planner, after reading the tree
+- [ ] The seed holds only what the design work surfaced — no map, reuse survey, traps, test design or build order was written before the gate, and nothing was read to fill it
+- [ ] Roles are named, not models: the designer seeded and stopped; the planner completed the plan
 - [ ] No design decision is made here — behavior that could go two ways is an `OQ-N` in the design doc
-- [ ] Every entry resting on an open question links it; on promotion, each was re-checked against its ruling
+- [ ] Every entry resting on an open question links it; when the plan was completed, each was re-checked against its ruling
 - [ ] Ready to hand off: the problem was reproduced, every behavior is answered or cheap, the red test and its command are given, paths were read at the stamped commit, and fences, stop conditions, gates and the commit message are present
 - [ ] Reread as the implementer: no "investigate", "figure out", "decide" or "choose" is left unmarked
 - [ ] Each task carries its Settled, Preconditions, Tests first, Change, Gates, Fences, Commit message and Report fields; empty fields were dropped

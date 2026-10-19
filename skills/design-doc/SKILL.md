@@ -9,11 +9,30 @@ Write and maintain the document that captures a design being worked out together
 
 The doc serves two readers in sequence: the user *now*, deliberating the design and answering open questions in place; and anyone *later*, reading a settled record of what was decided and why. Once the design is actually built, that later reader is better served by a **`system-doc`** — and this doc graduates into one.
 
-**Both readers are deciding, and what they are deciding is architecture** — the shape, the trade-offs, the things that will be expensive to change later. What gets built, in which file, in what order is a different document for a different reader: the companion sketch below. Keeping the two apart is what stops this doc from becoming a feature list.
+**Both readers are deciding, and what they are deciding is architecture** — the shape, the trade-offs, the things that will be expensive to change later. What gets built, in which file, in what order is a different document for a different reader: the companion seed below. Keeping the two apart is what stops this doc from becoming a feature list.
 
 **The objective is a document that is currently true and quickly readable** — not one that has lost nothing. Those two come apart the moment a question gets answered, and when they do, true-and-readable wins. Preserving the *decision* serves both readers; preserving the *deliberation* that produced it serves neither, and costs the next reader the time it takes to work out which of the four leanings on the page is the live one. Every rule below about compacting, overturning, and retracting is that one trade applied somewhere specific.
 
 The **`design-doc`** skill owns the question scaffold, emoji legend, answering protocol, and compaction. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns directive syntax and checks; **`roadmap`**, *Vantage integration*, owns planning-tool behavior and routing. With several roadmaps, pass `vantage-check index --roadmap <path>` to choose the one *Needs you* follows; no other section depends on it.
+
+## The three roles — and which one writes what
+
+The split follows what each role is worth paying for. Name the roles, never the models: which model fills each is configuration, and it changes between sessions.
+
+| Role | Cost | Owns | Does not |
+| :--- | :--- | :--- | :--- |
+| **Designer** | Expensive — judgement, deep context | This doc: the shape, the trade-offs, the open questions. The **seed** of the plan. | Survey the tree for the plan's sake; write the map, the reuse, the traps, or the tests. |
+| **Planner** | Mid-tier — cheap to run, reads the tree fast | The completed **`implementation-plan`**, written against the tree once this doc is accepted. | Re-open a ruling, or change behavior. |
+| **Implementer** | Cheap — executes well, must not diagnose | The code, from the completed plan alone. | Read this doc, build from a seed, guess. |
+
+*(Designer, planner and implementer are coined here: role names for the three stages of the document lifecycle, not job titles and not model names.)*
+
+Two rules follow, and they are the point of the split:
+
+- **The designer's only plan work is the seed** — what the design work surfaced on its own, nothing it had to go looking for. Digging through the tree to fill a plan is the planner's job: later, at the tree's current commit, by a model cheap to run and not required to hold the whole design.
+- **A design-only instruction is legal and common.** "Don't write the implementation doc, just the design doc" means: write this doc, park whatever surfaced in the seed, and stop. Nothing more is owed until the design is accepted.
+
+The gate between the roles is this doc's own `status: accepted` with no question left open, including 🔒 blocked ones. The seed is [below](#the-companion-seed--where-the-material-you-dont-want-goes); **`implementation-plan`** owns what happens at the gate.
 
 ## Default Behavior (When run by itself or on an existing doc)
 
@@ -40,7 +59,7 @@ Not this skill:
 
 - A design that is **built and merged** → `system-doc`: the doc graduates out of the planning tree into an evergreen reference of the system as built, and this one is deleted
 - Persona-driven workflow narratives → `user-stories` (same Open Questions format, different body)
-- The build hand-off — file map, what to reuse, traps, build order → `implementation-plan`. It opens as a **sketch** alongside this doc ([below](#the-companion-sketch--where-the-material-you-dont-want-goes)) and is completed against the tree once the design settles
+- The build hand-off — file map, what to reuse, traps, build order → `implementation-plan`. This doc **seeds** it ([below](#the-companion-seed--where-the-material-you-dont-want-goes)); a separate planner completes it against the tree once the design is accepted
 - Task checklists and work queues → `roadmap.md` or `docs/tasks/`; a design doc *links* to them, it never contains them
 - Cumulative research/domain knowledge → `docs/research/` domain docs
 
@@ -50,7 +69,7 @@ Write at the level of **systems, components, and algorithms** — the things the
 
 In scope: named components and their responsibilities; ownership and one-writer rules; data models; state machines, protocols, and message shapes; algorithms with their parameters and update rules; invariants; conflict and failure modes; what each alternative costs; sequencing.
 
-Out of scope: per-file edit plans, function-by-function changes, code diffs — that material has its own home in an **`implementation-plan`**, open from the start of the design as a sketch ([below](#the-companion-sketch--where-the-material-you-dont-want-goes)) so there is somewhere to put it the moment it comes up. **Code is cited as evidence, not specified as work** — `file.go:123` references proving a claim about what exists are good; schema/config/CLI-surface sketches are good; implementations are not. Implementation-level material does not get a fenced section here as a compromise; it goes in the sketch, which is what the sketch is for.
+Out of scope: per-file edit plans, function-by-function changes, code diffs — that material has its own home in an **`implementation-plan`**, seeded from the start of the design ([below](#the-companion-seed--where-the-material-you-dont-want-goes)) so there is somewhere to put it the moment it comes up. **Code is cited as evidence, not specified as work** — `file.go:123` references proving a claim about what exists are good; schema/config/CLI-surface sketches are good; implementations are not. Implementation-level material does not get a fenced section here as a compromise; it goes in the seed, which is what the seed is for.
 
 Altitude is a ceiling, not an alibi. *Completeness* below is the floor.
 
@@ -58,7 +77,7 @@ Altitude is a ceiling, not an alibi. *Completeness* below is the floor.
 
 Altitude decides how high the doc flies; this decides that nothing is missing at that height. The two only look opposed. The rule that reconciles them: **specify behavior exhaustively, mechanism minimally.**
 
-**A hole is not the implementer's to close.** A gap that takes investigation is smart-role work: close it here, or make it the source's `next` action. It is never handed onward to the agent that builds from the plan — above all, unsettled concurrency and ordering, where a cheaper implementer produces a plausible guess that compiles and behaves differently than intended.
+**A hole is not the implementer's to close.** A gap that takes investigation is design work: close it here, or make it the source's `next` action. It is never handed onward to the agent that builds from the plan — above all, unsettled concurrency and ordering, where a cheaper implementer produces a plausible guess that compiles and behaves differently than intended.
 
 Write for an implementer who is a strong builder and a weak guesser — assume the doc will be handed to someone with less context and less appetite for reconstructing your intent than you had writing it. They do not need your code, your file paths, or your line numbers; they need your decisions. You are an expert PM writing for an excellent engineer: hand over every judgement call that has a right answer, and none of the ones that don't.
 
@@ -94,27 +113,31 @@ Delegating is a complete specification. Silence is not. Those three are the only
 
 `docs/design/<topic>.md` by default; follow the local convention where the repo splits `docs/plans/` (in-flight RFCs) from `docs/design/`. Either way this is the *planning* tree — the built system's evergreen reference lands in `docs/reference/` (see `system-doc`). Filename is a content noun (`boundary-broker.md`, `adaptive-leveling.md`) — never a date, never prefixed with the tool that wrote it, and never `roadmap.md` in any case: Vantage 0.8.0 reads every file of that name as a roadmap. Use a subject name such as `roadmap-discovery.md` for a design about roadmaps.
 
-## The companion sketch — where the material you don't want goes
+## The companion seed — where the material you don't want goes
 
-Altitude says implementation material belongs in an **`implementation-plan`**. The trap is timing: that plan is written later, so while the design is being argued the material has nowhere to go — and it lands here, in the doc that was supposed to stay at altitude. Fix the timing. **Open the plan as a sketch the moment the first piece of it exists.**
+Altitude says implementation material belongs in an **`implementation-plan`**. The trap is timing: the plan is completed later, so while the design is being argued the material has nowhere to go — and it lands here, in the doc that was supposed to stay at altitude. Fix the timing. **Open the plan as a seed the moment the first piece of it surfaces.**
 
-It lands beside the design, same basename plus `-plan` — `docs/design/<topic>-plan.md` — stamped with `stage: SKETCH` in frontmatter and `**Status:** 2026-09-05 — incomplete, and unstable while questions are open.` — the sketch sits in the planning tree and takes [a status line](#status--the-word-names-what-is-owed) like everything else there
+It lands beside the design, same basename plus `-plan` — `docs/design/<topic>-plan.md` — stamped with `stage: SKETCH` in frontmatter and `**Status:** 2026-09-05 — seeded during design; not a hand-off, and incomplete until the design is accepted.` The seed sits in the planning tree and takes [a status line](#status--the-word-names-what-is-owed) like everything else there.
 
-**What to push into it.** Anything that surfaced during design, is worth keeping, and the user does not need to rule on: dependency and library notes, a schema or signature sketch, migration mechanics, packaging and rollout detail, sequencing below the design's altitude, "check whether `X` still exists before relying on it."
+**Seed, not plan.** The designer is expensive and is here to think, not to survey the tree. The seed holds what the design work *happened to surface*; it is never filled by going looking. If an entry would need a search to write, the seed gets the search as a note — "check whether `X` still exists before relying on it" — and the planner does it later. Writing the map, the reuse survey, the traps, the tests, or the build order here is the failure this rule prevents: it spends the designer's context on work a mid-tier planner does better and cheaper, once the rulings are in.
 
-**What it is not.** It is **not a hand-off artifact**, and an agent must not build from it while it is stamped `SKETCH`. A real plan's product is codebase knowledge — the map, the reuse, the traps — and only an agent that has just read the tree can write it. The sketch is a parking lot that keeps this doc clean; **`implementation-plan`** owns what it must become first.
+**Design-only is a legal instruction.** "Don't write the implementation doc, just the design doc" means exactly that: write this doc, park whatever surfaced in the seed, and stop. Nothing on the plan is owed until the design is accepted.
+
+**What to push into it.** Anything that surfaced during design, is worth keeping, and the user does not need to rule on: dependency and library notes, a schema or signature sketch, migration mechanics, packaging and rollout detail, sequencing below the design's altitude, and the "check whether `X` still exists" notes above.
+
+**What it is not.** It is **not a hand-off artifact**, and an agent must not build from it while it is stamped `SKETCH`. A real plan's product is codebase knowledge — the map, the reuse, the traps — and only an agent that has just read the tree can write it. The seed is a parking lot that keeps this doc clean; **`implementation-plan`** owns the gate that turns it into a plan (*The seed stage*) and the planner who works it.
 
 > [!IMPORTANT]
-> **No design decision is ever made in the sketch.** If writing an entry means choosing behavior — something a reasonable implementer could do differently and get a system that behaves differently — it is not a sketch entry. It is an `OQ-N` here. The sketch holds settled-but-boring material; it is never where a decision hides.
+> **No design decision is ever made in the seed.** If writing an entry means choosing behavior — something a reasonable implementer could do differently and get a system that behaves differently — it is not a seed entry. It is an `OQ-N` here. The seed holds settled-but-boring material; it is never where a decision hides.
 
-**Open questions are the growth mechanic.** A sketch entry resting on an unruled
+**Open questions are the growth mechanic.** A seed entry resting on an unruled
 question carries a prose link and declares the wait in `depends-on` frontmatter:
 
 ```yaml
 depends-on: [rate-limiting.md#OQ-4]
 ```
 
-That question-specific dependency puts the sketch under *Blocked* while the question
+That question-specific dependency puts the seed under *Blocked* while the question
 is open. After compaction, the retained ledger id keeps the dependency valid and
 stops the wait; repoint the prose link to `#decision-ledger` because its old anchor
 is gone. See **`roadmap`** for dependency semantics.
@@ -123,9 +146,9 @@ is gone. See **`roadmap`** for dependency semantics.
 Blocked on [OQ-4](rate-limiting.md#OQ-4) — the retry policy shapes this.
 ```
 
-Answering a question is therefore two edits, not one: fold the ruling into the body here, then revisit every sketch entry that named it. An entry written under a guess the ruling contradicts is precisely what the marking exists to catch.
+Answering a question is therefore two edits, not one: fold the ruling into the body here, then revisit every seed entry that named it. An entry written under a guess the ruling contradicts is precisely what the marking exists to catch.
 
-**Cross-reference both ways.** This doc's **Reads with:** names the sketch *and* says it is one. The sketch links back here and carries the precedence rule: the design wins on behavior.
+**Cross-reference both ways.** This doc's **Reads with:** names the seed *and* says it is one. The seed links back here and carries the precedence rule: the design wins on behavior.
 
 ## The header block
 
@@ -147,9 +170,9 @@ That is the job **In short** keeps failing, and the reason is in the old instruc
 | **Cost** | What this breaks, deletes, or forecloses |
 | **Start at** | The one section carrying the load, as a link; everything else falls out of it |
 | **Needs your ruling** | Live `OQ-N` links, or **None**. A hand-kept copy of what Vantage's badge and `vantage-check index` compute from the question directives (`question`, or the deprecated `oq`); nothing in Vantage reads it, so it stays true only where `status-lines.sh` checks it |
-| **Reads with** | Sibling docs and the companion sketch, one parenthetical each saying why |
+| **Reads with** | Sibling docs and the companion seed, one parenthetical each saying why |
 
-**Ceiling: one screen, call it 20 lines.** Past that the fix is cutting, never reflowing — anything that will not fit a slot is body material or sketch material, and both have somewhere to be.
+**Ceiling: one screen, call it 20 lines.** Past that the fix is cutting, never reflowing — anything that will not fit a slot is body material or seed material, and both have somewhere to be.
 
 **Status** is [its own section below](#status--the-word-names-what-is-owed) — it is the line most read and most often false, so it gets the space. Re-stamp it on amendment rather than silently editing it. A **Scope note** naming what was split into a sibling doc joins the header when there was a split.
 
@@ -183,7 +206,7 @@ migration path is written.
 **Needs your ruling:** [OQ-2](#OQ-2), [OQ-5](#OQ-5).
 
 **Reads with:** [`configuration-surface-plan.md`](configuration-surface-plan.md)
-(the implementation sketch — incomplete while [OQ-2](#OQ-2) is open),
+(the implementation plan's seed — incomplete while [OQ-2](#OQ-2) is open),
 [`model-benchmarks.md`](../reports/model-benchmarks.md) (every number quoted here).
 
 ---
@@ -201,7 +224,7 @@ one authoritative value. Vantage reads the stage only from `stage:`, so a legacy
 | :--- | :--- | :--- |
 | `SKETCH` | Nothing yet — thinking out loud, and nobody should act on it | ISO date |
 | `DESIGN` | A **ruling** from the user | ISO date |
-| `DECIDED` | **Work.** Every ruling is in; nothing is built | ISO date |
+| `DECIDED` | **Work.** Every ruling is in; nothing is built. On a design doc the first work owed is the plan, completed by the planner; on the plan, the build | ISO date |
 | `BUILT` | Nothing. It is a [graduation candidate](#graduation-is-the-cue-and-there-is-no-second-one) | ISO date, commit, and a [measurement clause](#a-built-claim-carries-a-measurement-clause) |
 | `GRADUATED` / `SUPERSEDED` | Terminal — this is no longer the live copy, and the line links to what is | ISO date |
 | `CURRENT` | To be kept true | **No date** — see below |
@@ -362,28 +385,38 @@ Signature moves, whichever shape:
 - **Sequencing as prose** ("What I would build, in order"), not tickets — task granularity lives elsewhere.
 - **Load-bearing principles get numbered** (`P1.`, `P2.`) so later sections and sibling docs can cite them.
 
-## The Two Lifecycle Phases of Decisions
+## The Lifecycle — two phases here, one hand-off out
 
-Design documents evolve through two distinct phases:
+Design documents evolve through two phases, and then leave this skill twice:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ Phase 1: Deliberating (In-Flight RFC / Proposal)        │
+│ Phase 1: Deliberating (designer)                        │
 │ • Full OQ scaffolding (leanings, stakes, context)       │
 │ • SKETCH / DESIGN  —  frontmatter: draft / in-review    │
 │ • User rules on open questions in-doc                   │
+│ • Plan seed: only what the design work surfaced         │
 └────────────────────────────┬────────────────────────────┘
                              │
                              ▼ Compaction Trigger
 ┌─────────────────────────────────────────────────────────┐
-│ Phase 2: Settled (Durable System Description)           │
+│ Phase 2: Settled (designer)                             │
 │ • Ruling woven into normative body text (§X)            │
 │ • Refuted objections & traps preserved as warnings      │
 │ • OQ scaffolding compacted into Decision Ledger table   │
 │ • DECIDED — owes work  —  frontmatter: accepted         │
 └────────────────────────────┬────────────────────────────┘
                              │
-                             ▼ Implementation lands
+                             ▼ Design accepted, no question open
+┌─────────────────────────────────────────────────────────┐
+│ Hand-off: the seed becomes a plan (planner)             │
+│ • The plan is still `SKETCH`; nothing may build from it │
+│ • Planner reads the tree at a stamped commit            │
+│ • Map, reuse, traps, tasks, gates → plan: DECIDED       │
+│ • This is the stage between accepted and built          │
+└────────────────────────────┬────────────────────────────┘
+                             │
+                             ▼ Implementation lands (implementer)
 ┌─────────────────────────────────────────────────────────┐
 │ Phase 3: BUILT → hand off to `system-doc`               │
 │ • Reconciled against the code as actually built         │
@@ -392,8 +425,9 @@ Design documents evolve through two distinct phases:
 └─────────────────────────────────────────────────────────┘
 ```
 
-Phases 1 and 2 are this skill. Phase 3 is **`system-doc`** — a different reader
-(a maintainer, not a decider) and a different genre, so it lives in its own
+Phases 1 and 2 are this skill. The hand-off is **`implementation-plan`**'s: it owns
+the gate, and the planner who works it. Phase 3 is **`system-doc`** — a different
+reader (a maintainer, not a decider) and a different genre, so it lives in its own
 skill. Everything below covers phases 1 and 2.
 
 ---
@@ -629,7 +663,7 @@ although their badges look current. After changing questions, stages, or links,
 inspect `vantage-check index` for *Not on a roadmap* and *Stage conflict*; neither depends on the roadmap `--roadmap` picks. Do not duplicate question scaffolds.
 
 **Ready is a source claim, not a roadmap decoration.** The implementer builds from the plan
-alone; the design serves the plan's author and the reviewer. If agent investigation can
+alone; the design serves the planner who writes it and the reviewer. If agent investigation can
 close a gap, make that the source's next action; stop only at a genuine owner gate.
 See [the gap test](#the-gap-test).
 
@@ -650,13 +684,14 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
 
 - [ ] The header orients rather than contains: **In short** is one or two sentences stating a claim, architecture leads, no build inventory, whole block inside one screen
 - [ ] No walls of text: enumerations are lists, comparisons are tables, no paragraph past ~6 lines that should have been either
-- [ ] Implementation material lives in the companion sketch, not here; sketch entries resting on open questions name them, and the sketch is linked in **Reads with:**
+- [ ] Implementation material lives in the companion seed, not here; every seed entry is something the design work surfaced (nothing was read to fill it), entries resting on open questions name them, and the seed is linked in **Reads with:**
 - [ ] `stage` holds one word from [the owed vocabulary](#status--the-word-names-what-is-owed) or the repository's vocabulary; prose carries its required stamp and evidence, not a duplicated lifecycle word; checked against the tree
 - [ ] A `stage: BUILT` claim carries `MEASURED:` or `UNMEASURED:`, and says which honestly
 - [ ] **Needs your ruling** names exactly the live `💬` ids, or **None** with none live
 - [ ] Frontmatter `status:` is one of Vantage's four and answers the other question; `accepted` verified to have zero unanswered questions, including blocked ones
 - [ ] `BUILT` with no question left in question form was named as a graduation candidate, not left to a later review
-- [ ] Altitude holds: components/algorithms/invariants, and no per-file edit plans; that material is in the companion sketch
+- [ ] Altitude holds: components/algorithms/invariants, and no per-file edit plans; that material is in the companion seed
+- [ ] The plan's ownership is stated: the designer seeds it and never completes it, and the planner completes it only once `status: accepted` with no question open
 - [ ] Completeness holds: degenerate inputs, failure paths, ordering, defaults with units, triggers, pre-existing state, one-writer rules, and observable done-conditions are all stated
 - [ ] Every question an implementer must answer is answered, opened as an `OQ-N`, or explicitly delegated — none left silent
 - [ ] Claims about existing code carry file:line evidence

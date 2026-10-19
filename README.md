@@ -39,10 +39,12 @@ This suite encodes a disciplined document state machine for AI-assisted engineer
                      └──────────────┘
 ```
 
+Three roles fill the boxes after research, and the split is deliberate: the expensive **designer** writes the design doc and only *seeds* the plan with what the design work surfaced; once the design is accepted, the mid-tier **planner** reads the tree and completes the plan; the cheap **implementer** builds from that plan alone. Between the accepted design and the completed plan there is a stage of its own — the seed — and nothing is built from it.
+
 1. **Explore (`/research`, `/brainstorming`, `/user-stories`):** Survey constraints, map edge cases, and evaluate options before committing to code.
-2. **Decide (`/design-doc`):** Capture architecture with explicit, machine-readable Open Questions and a decision ledger.
+2. **Decide (`/design-doc`):** The designer captures architecture with explicit, machine-readable Open Questions and a decision ledger, and seeds the plan beside it with whatever surfaced. Design-only is a complete instruction.
 3. **Prioritize (`/roadmap`):** Order unfinished work and explain why one effort precedes another. Source documents own their stage, next step, dependencies, and questions; the roadmap links them without copying state. Descriptive links and short annotations remain useful without Vantage's badges.
-4. **Plan (`/implementation-plan`):** Ground settled designs into task checklists tied directly to current repository paths.
+4. **Plan (`/implementation-plan`):** Once the design is accepted, the planner grounds it in task checklists tied directly to current repository paths, written against a stamped commit. Until then the file is a seed and is never built from.
 5. **Graduate (`/system-doc`):** Transition completed designs into permanent system references with freshness tracking.
 
 ---

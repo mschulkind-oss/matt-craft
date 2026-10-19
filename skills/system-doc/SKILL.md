@@ -11,6 +11,7 @@ That is not the same document with the Open Questions deleted. It is a different
 
 ```
 brainstorming → research → design-doc → implementation-plan → (build it) → system-doc
+                          (designer)     (seed → planner)     (implementer)
                             ↑                                                   │
                             └── a substantial change ───────────────────────────┘
                                 starts a new design doc

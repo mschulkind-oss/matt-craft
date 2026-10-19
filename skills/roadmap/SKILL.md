@@ -256,7 +256,7 @@ alone is not a reason to copy it here or churn the file.
 | Design or accepted story gap created | Add a priority link with a reason |
 | Question opened | Link its owner or its anchor; leave stakes and leaning there |
 | Question compacted | Repair dead anchors; keep unfinished work prioritized |
-| Design settled / plan promoted against the tree | Link the build hand-off; revisit sequencing, not copied state |
+| Design accepted (plan still a seed) / plan completed against the tree | Link the build hand-off; revisit sequencing, not copied state |
 | Research changes a dependency or rejects an option | Reconsider priority and any roadmap-only unblock condition |
 | Design built | Keep graduation or target verification if still owed; compact its ✅ questions, since Vantage lists it under *Ready to graduate* only once it has none |
 | Doc split, renamed, or superseded | Move directives rather than copy them; repair every roadmap and inbound anchor link, keeping unfinished work visible |
