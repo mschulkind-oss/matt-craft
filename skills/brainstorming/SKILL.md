@@ -82,9 +82,7 @@ The loop above converges — it exists to make ideas decidable. Some catalogs ha
 
 ## Open threads stay open
 
-Unresolved things get written down as unresolved, in their own section, each with enough context to be picked up cold. For an Open Question, that context
-lives in its entry and the question links there; **`design-doc`** owns the short
-question shape and decision-asking bold title. What belongs there:
+Unresolved things get written down as unresolved, in their own section, each with enough context to be picked up cold. For an Open Question, **`design-doc`**, *Write the question as a walkthrough*, owns the shape: the question carries its own setup story and see-it options, because it is answered from its card; the entry holds the evidence and history the story links to, and a link there is not a substitute for the story. What belongs there:
 
 - Decisions not yet made, with the leaning and what it hinges on
 - Known-broken items you found but could not fix

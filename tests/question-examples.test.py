@@ -85,8 +85,26 @@ class QuestionExamples(unittest.TestCase):
                             path = pathlib.Path(directory) / f"state-{len(paths)}.md"
                             path.write_text(changed)
                             paths.append(str(path))
-            result = subprocess.run(command + ["check", "--no-config", "--strict"] + paths,
-                                    capture_output=True, text=True, cwd=directory)
+            # Specimens are checked at the length the skills teach. The setup story
+            # and the see-it options are the question, so a walkthrough specimen runs
+            # past the 120-word default, which was calibrated on id-shaped questions.
+            # Everything else stays at its default: this file relaxes one option of
+            # one rule and nothing else, and the assertion below keeps it that way.
+            config = pathlib.Path(directory) / "specimens.toml"
+            config.write_text(
+                '# Specimens are story-shaped; the default was measured on id-shaped\n'
+                '# questions; a setup story and two see-it options run 130-180.\n'
+                '[check.rules."planning/question-length"]\n'
+                'max-words = 160\n'
+            )
+            self.assertEqual(
+                [line for line in config.read_text().splitlines() if line and not line.startswith("#")],
+                ['[check.rules."planning/question-length"]', "max-words = 160"],
+                "The specimen config may relax this one option and nothing else",
+            )
+            result = subprocess.run(
+                command + ["check", "--config", str(config), "--strict"] + paths,
+                capture_output=True, text=True, cwd=directory)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_graduation_checks_both_directives(self):

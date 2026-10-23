@@ -269,7 +269,18 @@ Use status emojis at the start of each question title for immediate scanning:
 ```markdown
 ## Open Questions
 
-1. 💬 **OQ-1: Does a fixed PR go to the back of the queue or retain its position?**
+1. 💬 **OQ-1: Should a PR that was sent back for a fix rejoin the review queue at the back?**
+
+   Priya's PR is in review when a reviewer sends it back for a fix; she pushes the
+   fix an hour later, and two other PRs merged while hers was out. Today her PR
+   rejoins the queue at its old position, so the next reviewer reads a diff that no
+   longer matches `main`. Re-checking costs a reviewer a turn, and dropping to the
+   back costs Priya a day.
+
+   - **A — Back of the queue.** Priya waits behind everything opened since. The
+     reviewer always reads the fix against the `main` it will merge into.
+   - **B — Keep its position.** Priya's fix is reviewed within the hour, but the
+     reviewer may be reading it against a `main` that moved.
 
    <!-- vantage: question id=OQ-1 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
@@ -293,7 +304,7 @@ Use status emojis at the start of each question title for immediate scanning:
 
 **Format rules for Open Questions:**
 
-- **`design-doc`** owns the question shape: emoji + stable id + the decision asked in the bold title, then at most three lines of stakes and the options. Link background from the body, never preserve history inside a question. Vantage 0.8.0 warns past 120 words, excluding the leaning and Answer.
+- **`design-doc`** owns the question shape — *Write the question as a walkthrough*: a setup story naming who and what they have, what they run, what happens today and why that leaves a choice; a title a user would ask rather than the document's framing; then options that say what the person would see. Emoji and stable id lead the bold title. Link background from the body, never preserve deliberation history inside a question. A story-shaped question often runs past Vantage's 120-word default, which was measured on id-shaped ones — the story stays, and `max-words` is the human's call.
 - `_Leaning:_` (italic), as a paragraph of its own — your current best guess, with brief rationale. Vantage 0.8.0 warns on a leaning that shares a paragraph with other text (`vantage/question-layout`).
 - **`Answer:`** on its own line, followed by a blockquote
 - Every question has a question directive until compaction. **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns its name, keys, syntax and checks, including the name a repository whose readers are still on Vantage 0.7 writes; **`design-doc`** owns the scaffold, answering and compaction. A decision the stories surface but nobody writes into this section does not exist as a question (**`design-doc`**, *Phase 1*: a question that is not filed does not exist) — file it here and route it, or settle it in the story; do not report it to the user as an extra question alongside the filed ones.

@@ -450,21 +450,51 @@ Use status emojis at the start of each question title. The emoji is the question
 - ✅ **Answered / Resolved:** Decided question (awaiting compaction).
 - 🔒 **Blocked:** Blocked on an upstream decision, an experiment or other external input before it can be answered.
 
+### Write the question as a walkthrough
+
+A question is answered from its own card, usually without the rest of the document open. So it has to carry its own story: the situation that forces a choice, in words a reader new to the document can picture. A question that is accurate but has to be decoded first is the failure this section exists to prevent — the title in the document's own framing, options that are labels whose consequences live elsewhere, and the reason it is a question three sections away. This one is quoted as a specimen, not a template:
+
+```text
+💬 OQ-7: Is the queue's own recheck report enough, dropping D-5's eligibility half?
+   The build declared no eligibility check (D-5 says why). The report is the
+   daemon's stderr line at each recheck and its --check; no launch prints one (§14).
+   - A — Keep D-5. B — An eligibility check with alternatives…
+```
+
+Every question opens with four beats, in three or four sentences:
+
+1. **Who, and what they have.** A named person in a concrete situation: "Priya's PR is in review when a reviewer sends it back for a fix."
+2. **What they run.** The exact command, push, or click.
+3. **What happens today.** The visible result, with the real message where there is one.
+4. **Why that leaves a choice.** The one decision the situation forces.
+
+Then:
+
+- **The title is the question a user would ask**, not the document's framing of it. "Should a reviewer be warned when a PR changes under them?" — not "Is the queue's own recheck report enough, dropping D-5's eligibility half?"
+- **Each option says what the person would see.** Not "Keep D-5", but "the recheck says nothing; the daemon's log and `--check` are where you find out." Give each option's cost in the same terms: the line they read, the refusal they hit, the step they take.
+- **Give the size of the problem when the answer turns on it.** When an option proposes a mechanism — a table, a new extension point, a config key — say how many real cases it serves today, which are known, and how much is unsurveyed. Mark guesses as guesses. Three rows do not need an extensible table, and the reader cannot see that from the proposal.
+- **Say why it is like this, from the decision that made it so.** When the question rests on an earlier ruling, state that ruling in plain words, with its date and the user's own reason quoted. When a constraint comes from a mechanism rather than a principle, say so — otherwise the question reads as an exception to a rule nobody made.
+- **Separate what blocks from what seems to block.** A question that looks like "must this be a plugin?" is often really blocked by a separate rule, "plugins may be named only in user config". Name the real blocker; the apparent one sends the reader to the wrong decision.
+- **No coined term the choice does not turn on, and none at all in the options.** A term that stays is defined in a phrase where it appears. Options never use the document's internal ids, section numbers, or decision codes.
+- **Recommend, and give the one reason that carries it.** A leaning the document cannot defend in a sentence is flagged as weak rather than presented as settled. When the user pushes back on a leaning, re-examine that reason instead of restating the leaning with more qualifications.
+
 Per-question format:
 
 ```markdown
 ## Open Questions
 
-1. 💬 **OQ-1: Where does a fixed PR re-enter the queue?**
+1. 💬 **OQ-1: Should a PR that was sent back for a fix rejoin the review queue at the back?**
 
-   The choice determines whether earlier reviews can be bypassed after a fix.
+   Priya's PR is in review when a reviewer sends it back for a fix; she pushes the
+   fix an hour later, and two other PRs merged while hers was out. Today her PR
+   rejoins the queue at its old position, so the next reviewer reads a diff that no
+   longer matches `main`. Re-checking costs a reviewer a turn, and dropping to the
+   back costs Priya a day.
 
-   - **A — Back of the queue.** Recheck against what merged while it was out;
-     the PR waits longer.
-   - **B — Retain its position.** Shorter wait, but earlier reviews may no
-     longer reflect the fixed PR.
-   - **C — Next review cycle.** Keeps this cycle's order, but delays the fix
-     until another cycle begins.
+   - **A — Back of the queue.** Priya waits behind everything opened since. The
+     reviewer always reads the fix against the `main` it will merge into.
+   - **B — Keep its position.** Priya's fix is reviewed within the hour, but the
+     reviewer may be reading it against a `main` that moved.
 
    <!-- vantage: question id=OQ-1 leaning="Back of the queue — the fix might interact with what merged while it was out." -->
 
@@ -494,10 +524,10 @@ Per-question format:
 
 Format rules:
 
-- **One question per numbered list item, each part a paragraph of its own** — the title line, the stakes, the options list, `_Leaning:_`, `**Answer:**` — with a blank line before each. A `_Leaning:_` run into another paragraph is not laid out as the leaning (`vantage/question-layout`). Outside a list, a question runs on to the next heading, rule or question, so prose after it reads as part of it.
+- **One question per numbered list item, each part a paragraph of its own** — the title line, the setup story, the options list, `_Leaning:_`, `**Answer:**` — with a blank line before each. A `_Leaning:_` run into another paragraph is not laid out as the leaning (`vantage/question-layout`). Outside a list, a question runs on to the next heading, rule or question, so prose after it reads as part of it.
 - **Emoji prefix + stable ID + the question as the bold title**: say in one line what is being decided, readable on its own; it is the planning-page card's headline.
-- **Below it, only what a ruling needs**: at most three lines of stakes (what the answer decides or blocks), then the options. Background, history and cross-references go in the body, and the question links there. No history in a question: when it moves, rewrite it in place, as a leaning is replaced. Vantage 0.8.0 warns past 120 words, not counting the `_Leaning:_` paragraph or anything from `**Answer:**` on (`planning/question-length`). Move excess background to the body rather than raising the limit to pass one question.
-- **Choices belong on separate lines.** If the question offers A/B/C (or any named alternatives), put each in its own indented bullet under the question, with a bold label, a short description, and the material trade-off. Leave a blank line before and after the nested list so it stays inside the question in Markdown. Never run `A: … B: … C: …` together in a paragraph — not in the question, context, or leaning. Keep the stakes and options easy to scan before the answer block; don't bury the choice in a long introductory sentence. For a simple two-way question, plain prose is fine if it stays readable.
+- **Below the title: the setup story, then the options, and nothing else.** Evidence, deliberation history and cross-references stay in the body and the question links there; a link is not a substitute for the story, and the story is not background. No history in a question: when it moves, rewrite it in place, as a leaning is replaced. Vantage's `planning/question-length` warns past 120 words, not counting the `_Leaning:_` paragraph or anything from `**Answer:**` on — a default measured on id-shaped questions, so a question written this way runs 130–180 in practice. When a document's questions are consistently story-shaped, the limit is the wrong limit: propose `max-words` under `[check.rules]` to the user and say why. **Never cut the story to pass the check.**
+- **Choices belong on separate lines.** If the question offers A/B/C (or any named alternatives), put each in its own indented bullet under the question, with a bold label, a short description, and the material trade-off. Leave a blank line before and after the nested list so it stays inside the question in Markdown. Never run `A: … B: … C: …` together in a paragraph — not in the question, context, or leaning. Keep the story and the options easy to scan before the answer block; don't bury the choice in a long introductory sentence. For a simple two-way question, plain prose is fine if it stays readable.
 - `_Leaning:_` — your current best guess with brief rationale. Every open question has one; a 🔒 blocked question need not. For an open question, "I genuinely don't know" or deferring to user preference (🤷) is itself a leaning worth stating. **A leaning is replaced, never versioned.** There is no "Leaning (second version)" and no "Leaning (fourth version, and it is review's)" — a leaning is what you think *now*, so when it changes it changes and the old one goes. If *why* it changed is load-bearing, that reason is a fact about the system: state it in the body as one. The leaning is not an autobiography of the design.
 - `**Answer:**` on its own line, then a blockquote starting as `_(empty — fill in when decided)_`.
 - **A question directive on every question** (Vantage 0.8.0). **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns its name, keys, attachment and checks, including when an open question keeps the deprecated `oq`. Changing the marker changes nothing else about the directive, except that an `oq` becomes `question` in the same edit: `oq` on a 🔒 or ✅ question is an error (`vantage/question-name`). A green check does not prove every question has a directive.
@@ -506,6 +536,10 @@ Format rules:
 
 ### Answering Protocol
 The user answers in place. Either they fill in the blockquote without erasing the question context, or, in Vantage, they comment on the question — **Take this leaning**, **Answer…**, or a comment on any part of it, in review mode or on a planning-page card — which reaches the agent through Copy or the planning page's **Copy answers**. Vantage 0.8.0 shows any such comment as the question's answer, waiting on the agent, until the agent replies; `vantage-check index` reads no comments, so it still lists the question as open. A comment is as much a ruling as a filled blockquote: record it as the Answer, process it as below, and reply through the review inbox. A comment that asks rather than rules gets a reply and no ruling, and the question then needs the user again.
+
+**A follow-up question is answered by revising the question, in place.** When the user asks about a question — "why is this a plugin?", "how many presets are there?", "is that the only case?" — the answer is folded into that question's own setup: the expanded story, the missing size, the paragraph on why it is like this. It is not a new *Answers* section, an appendix, a longer list of cross-references, and above all not a restatement with more qualifications. That last one is the failure to watch for: the reader learns nothing they can picture, and asks again. The test is that someone reading only the question block now has the context that prompted the question, in the same plain story form. Evidence and history that will not fit the story go in the body section the question links to — some documents keep one per question, headed `Background to OQ-N`.
+
+**An open sub-point is its own question.** If something still needs a ruling, it is a full question with its own setup and directive, never a "please confirm X" line tucked into another question or a status paragraph. Open means in the current set; a point that is not open does not belong there at all. Hiding one inside another question reads as settled when it is not.
 
 **Record a clear ruling before any downstream work that depends on it.** Fold it into the governing body text, compact the settled question into the Decision Ledger, repair the inbound links that pointed at its anchor, and save the coherent update **in the checkout Vantage serves** — before launching or continuing implementation, a design writer, an independent review, or a batch of repairs. Do not wait for a whole-document revision, a full test suite, a release, or a commit. An edit saved in another worktree does not update the interface, and a reply in chat is not a recorded ruling.
 
@@ -697,9 +731,13 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
 - [ ] Claims about existing code carry file:line evidence
 - [ ] A negative-space section says what this does NOT cover
 - [ ] Alternatives considered, each with an explicit verdict
-- [ ] Live Open Questions have status emoji (💬), stable ID, bold title, stakes, leaning, empty Answer blockquote, and a question directive (**`vantage-docs`**) carrying the id and the same leaning text as the prose `_Leaning:_`
+- [ ] Live Open Questions have status emoji (💬), stable ID, bold title, a setup story, leaning, empty Answer blockquote, and a question directive (**`vantage-docs`**) carrying the id and the same leaning text as the prose `_Leaning:_`
 - [ ] Every 🔒 and ✅ question has a `question` directive, never `oq` (Vantage 0.8.0); `vantage/question-name` reports a wrong name, but no rule reports a missing one
-- [ ] Every question's bold title asks the decision; its text, leaning and Answer aside, stays within 120 words with no background or history
+- [ ] Every question opens with the four beats — who and what they have, what they run, what happens today, why that leaves a choice — and its title is the question a user would ask, not the document's framing of it
+- [ ] Every option says what the person would see, including the message, refusal or step; no option is a bare label like "Keep D-5"
+- [ ] A question proposing a mechanism states how many real cases it serves today, which are known, and how much is unsurveyed
+- [ ] No internal id, section number, decision code, coined term or cross-reference in a question's story or options; evidence and deliberation history are in the body
+- [ ] Question length is within the repository's limit or `max-words` was proposed — the story was never shortened to fit
 - [ ] Every lettered or named choice in Open Questions has its own indented bullet and trade-off; no A/B/C alternatives run together in prose
 - [ ] The checker **`vantage-docs`**, *Getting the binary*, names is clean on the doc — in particular every section number, question id and filename in prose is a link (`ref/*`)
 - [ ] Settled decisions are compacted into the Decision Ledger + normative body text (with refuted objections preserved as warnings)
