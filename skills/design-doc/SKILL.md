@@ -36,7 +36,7 @@ The gate between the roles is this doc's own `status: accepted` with no question
 
 ## Default Behavior (When run by itself or on an existing doc)
 
-There are three operations on a design doc and they are different jobs: **drafting** it, **compacting** it as rulings land, and **auditing** its claims against the tree. Only drafting needs a prompt.
+There are four operations on a design doc and they are different jobs: **drafting** an initial design, **iterating on reviews** as feedback arrives, **compacting** it as rulings land, and **auditing** its claims against the tree. Drafting and review iteration need prompts; compaction and auditing can run autonomously.
 
 If this skill is invoked without specific drafting instructions (e.g. `/design-doc` or "run design-doc on docs/design/foo.md"), the default action is to **compact, audit, and verify the header of the design doc**:
 
@@ -52,6 +52,8 @@ If this skill is invoked without specific drafting instructions (e.g. `/design-d
 
 - "Write me a doc about this idea I've been considering"
 - "Write up this feature" / "capture what we just discussed"
+- "Here are review comments on this design doc" / "update the doc based on my feedback"
+- "Iterate on this design" / revising a design doc without conversational rot
 - "Compact this design doc" / "Clean up the OQs" / `/design-doc` standalone
 - Any substantive design conversation that should end in a durable document
 
@@ -432,6 +434,69 @@ skill. Everything below covers phases 1 and 2.
 
 ---
 
+## Review iteration — narrative forward logic and the first-time state
+
+During design deliberation, the user comments on sections, pushes back on mechanisms, identifies edge cases, and clarifies requirements. The document must absorb these revisions without degrading into an archaeological transcript.
+
+### The First-Time State Principle
+
+> [!IMPORTANT]
+> **Update the document to the state it would have been in if the author knew this context the first time.**
+
+When a review comment changes an assumption, constraint, or component design:
+- Ask: *"If I had known this from day one, how would this document read?"*
+- Rewrite the document from that premise.
+- Present the resulting architecture cleanly and directly, as if conceived with full knowledge from the beginning.
+- A reader picking up the document should never see the seams of the review. The document is an architectural specification, not a log of the conversation that produced it.
+
+### Narrative-driven forward logic
+
+A design doc is an argument that moves forward:
+
+```text
+Problem statement → Constraints & Principles → Proposed Architecture → Component Interactions → Invariants & Guarantees
+```
+
+The logic flows forward from premises to conclusions. When review feedback shifts a decision or introduces a new constraint:
+- **Trace the forward logic from its root premise.** Adjust the problem framing or guiding principles upstream so the new design choice is the natural, logical outcome of the updated premise.
+- **Do not patch the conclusion while leaving the old premise intact.** A document that states premise A in the principles section, proposes design B in the architecture section, and then tacks on "but we actually do C because of premise D" has broken its forward logic. Rewrite the principles with premise D, so the architecture section introduces design C directly.
+- **Never make the reader reconstruct the journey.** The reader wants to evaluate the system as designed, not piece together a puzzle of historical compromises.
+
+### Banned: Conversational accretion and review rot
+
+Conversational accretion rots a document into an unreadable, fragmented context dump. The following patterns are strictly forbidden:
+
+1. **No conversational markers or attribution:**
+   - ❌ *"Per reviewer comment...", "In review, the user pointed out that...", "As discussed in chat...", "In response to feedback...", "We discussed whether..."*
+   - ✅ State the fact about the system: *"The queue drops unauthenticated messages immediately."* The document speaks with a unified authorial voice about the system, never about the meeting.
+2. **No track-changes prose or changelog sediment:**
+   - ❌ *"Originally the transport section proposed a centralized daemon, but this was revised to a client library because...", "Update (turn 4): we decided to...", "Addendum to Persistence:", "Revision notes:"*
+   - ✅ Replace the section with the client library design. Delete the obsolete daemon proposal.
+3. **No dead branches left dangling with inline repudiation:**
+   - When an approach is discarded during review, remove it. Do not leave dead architectures in the body surrounded by paragraphs explaining why they were abandoned.
+   - *The Trap Exception:* If the discarded alternative is an intuitive trap that a future engineer would naturally re-derive, capture it as a forward-facing principle, constraint, or `> [!WARNING]` about the *system* (e.g. `> [!WARNING] Do not retry on 429 without backoff because the upstream rate limiter resets per window`). See [the trap test](#critical-rules-for-compacting). Never write it as review minutes.
+4. **No half-document, half-conversation hybrids:**
+   - Never intersperse dialog, user quotes, agent explanations, or discussion notes into the document body.
+   - The discussion lives in the conversation. The durable document holds only the settled, forward-logic result.
+
+### The review iteration workflow
+
+When review comments arrive:
+
+1. **Classify each comment:**
+   - *Direct design change or constraint:* Identify which sections' forward logic is affected.
+   - *Settled ruling on an Open Question:* Follow the [Answering Protocol](#answering-protocol) — fold the ruling into the body, compact to the Decision Ledger.
+   - *Subtle trap or refuted intuition:* Formulate as a forward-facing warning or invariant.
+   - *Genuine unresolved architectural fork:* File as a new `OQ-N` with setup walkthrough and options.
+2. **Refactor upstream premises:** Update problem framing, constraints, or principles so the revised architecture follows naturally.
+3. **Rewrite affected sections in place:** Completely replace obsolete text. Ensure tone, tense, and terminology remain seamless.
+4. **Run the First-Time Test:**
+   Reread the modified sections in the context of the whole document.
+   *Could someone reading this for the first time tell that a debate or misunderstanding took place?*
+   If yes, remove the conversational residue and restore the clean forward narrative.
+
+---
+
 ## Phase 1: Open Questions (Deliberation)
 
 During active design deliberation, end the document with an **Open Questions** section. These are **unresolved design decisions that need the user's ruling** — not TODOs, not bugs, not things you could decide yourself.
@@ -546,7 +611,7 @@ The user answers in place. Either they fill in the blockquote without erasing th
 Then, in the same turn as that saved update:
 
 - Flip `💬` to `✅`, append `— RESOLVED (<date>)` to the title, record the answer, and in the same edit rename an `oq` directive to `question` (see **`vantage-docs`**).
-- Fold the ruling into the body section it governs, then compact the question into the Decision Ledger ([below](#compaction-fires-on-answering-not-on-a-threshold)). The `✅` state lives between these two bullets and nowhere else.
+- Fold the ruling into the body section it governs rewritten to [the first-time state](#the-first-time-state-principle), then compact the question into the Decision Ledger ([below](#compaction-fires-on-answering-not-on-a-threshold)). Never leave conversational residue ("per the answer to OQ-X") in the narrative body. The `✅` state lives between these two bullets and nowhere else.
 - If the answer rejects your leaning, the leaning goes — it was a guess and it was wrong. What survives is anything the user's reasoning established as a *fact about the system*, and that belongs in the body, in the present tense, framed as a fact rather than as the correction of one.
 
 Update `status`, `stage`, `next`, and dependencies only as far as the ruling warrants. **A decision is not evidence it has been implemented**: do not claim `accepted` while any question is open, or use a built stage to hide unbuilt work. A clarification request closes nothing — reply without recording a ruling, and leave the question open. A partial answer records the part that settled and leaves a narrower open question, with its own directive, for the rest.
@@ -673,6 +738,8 @@ A design doc holds two kinds of content, and they take **opposite** editing rule
 
 **"Nothing is deleted" is a rule about the second row only** — and it has to say so, because unscoped it reads as covering both, and then it wins. It wins on frequency: compaction waits for a ruling to arrive, while "annotate, never edit" applies to every keystroke in between. Every correction becomes a permanent stratum, and the doc turns into a transcript of its own review. The end state is observable and it is not subtle — a 2,000-line document carrying fifty-odd ⚠ markers and 640 lines of Open Questions for three live questions, where finding out what is true *now* means date-sorting the page.
 
+Review comments are rewrite prompts, not addenda. If you catch yourself writing "Per review comments...", "The reviewer noted that...", or preserving discarded proposals as historical strata in the narrative, stop: rewrite the section to [the first-time state](#the-first-time-state-principle). Deliberation belongs in git history; the document body must preserve narrative-driven forward logic.
+
 ### When the doc itself is overtaken
 
 These mechanisms are for a change of **status**, not a correction of a claim: the world moved, the body now describes a system that no longer exists, and rewriting in place would mean rewriting all of it. Once the design is built the doc stops accreting these and graduates via `system-doc` instead.
@@ -751,6 +818,8 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
 - [ ] The audit pass has run since the last substantive edit: negatives re-searched, dated evidence re-read at the current commit
 - [ ] The description reads as currently true — corrections are edits, not strata; the only append-only thing is the Decision Ledger, and ⚠ markers appear only inside a deliberately frozen body
 - [ ] Every preserved correction passes the trap test and is written forward-facing, about the system rather than about the document
+- [ ] Passes the first-time test: the document reads as if the author had known all review feedback, constraints, and rulings from the very first draft — zero conversational residue ("per review", "reviewer pointed out", "as discussed") and no track-changes prose
+- [ ] Narrative forward logic holds: arguments move forward from problem and principles to architecture; comments were not patched on as exceptions or addenda to broken upstream premises
 - [ ] Nothing framed as a task list the user has to maintain
 - [ ] Source metadata is current; roadmap links, question coverage, ordering, and rationale were reviewed in the same commit without copying source state
 - [ ] Where this vocabulary now governs a corpus, [the check is in the repository](#land-the-check-in-the-repository) and re-runnable — not only in this skill

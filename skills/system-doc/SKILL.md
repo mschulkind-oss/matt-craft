@@ -383,7 +383,7 @@ That second case is the whole return on writing these docs. Preserve the ability
 
 ### Rewritten, never annotated
 
-Like a design doc's description, and unlike its Decision Ledger, a system doc is rewritten in place. It has no ledger and no frozen body, so nothing in it is append-only. A system doc has no "how we got here" to preserve — it describes what is true now. Edit it into its new truth and let git hold the old one. A change big enough to need deliberation starts a **new design doc**, not a postscript here; when that design ships, it comes back through this skill and folds in.
+Like a design doc's description, and unlike its Decision Ledger, a system doc is rewritten in place to the first-time state. It has no ledger and no frozen body, so nothing in it is append-only. A system doc has no "how we got here" to preserve — it describes what is true now, without conversational accretion or review commentary. Edit it into its new truth and let git hold the old one. A change big enough to need deliberation starts a **new design doc**, not a postscript here; when that design ships, it comes back through this skill and folds in.
 
 ### Re-verification is this skill's default mode
 

@@ -50,6 +50,10 @@ That covers document structure, relative links and line anchors, frontmatter, Me
 The renderer defines syntax; these rules define how we write:
 
 - **Vertical space over density:** give context room to breathe with lists and line breaks.
+- **Rewritten to the first-time state:** when revising a document after review or
+  discussion, update it to the state it would have been in if the author knew the new
+  context from the beginning. Never accrete review commentary, conversational logs,
+  or track-changes prose into the body; preserve narrative forward logic.
 - **Section size limits:** move sections longer than several formatted paragraphs to a
   dedicated document and link them.
 - **One home per planning fact:** source documents own `status`, `stage`, `next`, and
