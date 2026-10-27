@@ -2,7 +2,7 @@
 
 > Matt Schulkind's workflow and documentation skills for AI-assisted engineering.
 
-`matt-craft` is an opinionated suite of 8 workflow and documentation skills for AI-assisted engineering. It structures the way developers and AI coding agents collaborate—moving architectural decisions out of ephemeral, rotting chat windows into a durable, machine-verifiable Markdown document lifecycle.
+`matt-craft` is an opinionated suite of 9 workflow and documentation skills for AI-assisted engineering. It structures the way developers and AI coding agents collaborate—moving architectural decisions out of ephemeral, rotting chat windows into a durable, machine-verifiable Markdown document lifecycle.
 
 ---
 
@@ -17,6 +17,7 @@
 | **[`roadmap`](skills/roadmap/SKILL.md)** | Use when prioritizing unfinished work with readable ordering reasons while source documents own planning state. |
 | **[`system-doc`](skills/system-doc/SKILL.md)** | Use when documenting how an implemented system works, graduating a shipped design, or re-verifying a system reference. |
 | **[`user-stories`](skills/user-stories/SKILL.md)** | Use when exploring a product or feature through realistic narrative workflows and the gaps they expose. |
+| **[`engineering-principles`](skills/engineering-principles/SKILL.md)** | Use when specifying a system's structure, its failure handling, its verification, or how an operator will observe and correct it. |
 | **[`vantage-docs`](skills/vantage-docs/SKILL.md)** | Use when authoring, formatting, reviewing, or render-verifying Markdown documentation for Vantage and GitHub. |
 
 The pack also ships a briefing, [`briefing/document-lifecycle.md`](briefing/document-lifecycle.md), that names each skill by the situation that calls for it. Installed as an agent pack, it reaches the agent's context, so the trigger is read as a rule rather than only as a catalog entry.
