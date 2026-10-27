@@ -116,16 +116,24 @@ In this order. Drop any section that would be empty rather than padding it. None
 
 - **Settled** — the behavior it must produce, quoted from the ruling, marked **do not re-open**.
 - **Preconditions** — the commands that must hold, and what to do if one fails (usually the stop-and-report list under *Precedence*).
-- **Tests first** — the failing test, in full, and the command that shows it red.
-- **Change** — file, symbol, `~line`. The shape, not the body.
+- **Tests first** — the failing test, in full, and the command that shows it red. It drives the
+  surface a real caller uses, not a seam opened for the test — see **`engineering-principles`**,
+  `tests-use-consumer-interfaces`.
+- **Change** — file, symbol, `~line`. The shape, not the body. Where a change both decides and
+  mutates, split the decision out or say why it is coupled — see **`engineering-principles`**,
+  `pure-planning-separate-effects`.
 - **Gates** — the exact commands that prove it green, including any to run by hand because the hook is not installed here.
 - **Fences** — files and hunks that are out of scope, naming another agent's work when it shares the tree.
+  A fence is a rule, so it states which tier it relies on; a fence that only asks the implementer to
+  remember is a tier-3 rule and is named as one — see **`engineering-principles`**, `principle-zero`.
 - **Commit message** — the exact message to write.
 - **Report** — what to paste back: the red command and its output, the green gates, and anything the tree forced.
 
 **Build order** is then a property of the tasks, not a separate list: mark each **independent** or **after N**. A task is sized as one commit and one worktree; parallel tasks get disjoint files, or the order they land in is named. Say what unblocks the rest, and what gets expensive if it lands late.
 
-**Everything else that ships** (`## Ships with`)**.** Tests by level and by case; the docs that now describe the old behavior; the surfaces that are neither — config defaults, CLI help, error text, generated files, migrations, examples. One line each, named by path. This is the section a cold implementer will not write for itself; see *Attention* below for why, and for what belongs in it.
+**Everything else that ships** (`## Ships with`)**.** A task that adds behavior adds its observable
+surface here — the counter, the status verb, the log line an operator would ask for first — see
+**`engineering-principles`**, `visibility-with-behavior`. Tests by level and by case; the docs that now describe the old behavior; the surfaces that are neither — config defaults, CLI help, error text, generated files, migrations, examples. One line each, named by path. This is the section a cold implementer will not write for itself; see *Attention* below for why, and for what belongs in it.
 
 **Don't.** Out of scope, files not to touch, and — most valuable — the plausible wrong turn pre-empted with its reason: "you will want to put a cache in front of this; don't, invalidation is the live question `[OQ-N](rate-limiting.md#OQ-N)`."
 

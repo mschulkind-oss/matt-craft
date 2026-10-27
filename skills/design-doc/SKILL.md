@@ -77,7 +77,10 @@ Altitude is a ceiling, not an alibi. *Completeness* below is the floor.
 
 ## Completeness — altitude is not permission to leave holes
 
-Altitude decides how high the doc flies; this decides that nothing is missing at that height. The two only look opposed. The rule that reconciles them: **specify behavior exhaustively, mechanism minimally.**
+Altitude decides how high the doc flies; this decides that nothing is missing at that height. The two only look opposed. The rule that reconciles them: **specify behavior exhaustively, mechanism minimally.** Where the
+design mutates state, name the pure decision and the effectful shell separately — a design that
+interleaves them has left the split to the implementer — see **`engineering-principles`**,
+`pure-planning-separate-effects`.
 
 **A hole is not the implementer's to close.** A gap that takes investigation is design work: close it here, or make it the source's `next` action. It is never handed onward to the agent that builds from the plan — above all, unsettled concurrency and ordering, where a cheaper implementer produces a plausible guess that compiles and behaves differently than intended.
 
@@ -99,7 +102,7 @@ Walk these before handing the doc off. Each is a question the implementer must a
 - **State that already exists.** What happens to the rows, files, and sessions already out there on the day this ships: migrated, ignored, or rejected.
 - **One writer, named.** For each piece of state, who may write it — and if two components can, who wins.
 - **Forbidden behavior.** What the thing must never do where a reasonable implementation might: never block the caller, never write outside the cache dir, never retry a non-idempotent call.
-- **What done looks like.** The observable outcomes that mean it was built as designed — behavior a human could check, not test names and not coverage numbers.
+- **What done looks like.** The observable outcomes that mean it was built as designed — behavior a human could check, not test names and not coverage numbers. Name the evidence an operator will read: the status verb, the metric, the log line that ships with the behavior — see **`engineering-principles`**, `visibility-with-behavior` and `truthful-observable-state`.
 
 ### The gap test
 
@@ -507,6 +510,11 @@ When a candidate question occurs to you while working, there are exactly two mov
 
 Scope: this governs design decisions awaiting a ruling. An ordinary conversational clarification, an operational ask, or a small question unrelated to a design choice is not an Open Question and needs no filing. That is not a loophole: if the answer would settle a design choice the user must rule on, it is a design question, and it gets filed or it does not get asked. Where the project keeps no roadmap, do not create one for this rule — the document alone is the filing.
 
+**A question that is parked is work that is parked.** Filing a question does not license proceeding
+on a guessed answer, and an operator's silence is not an answer: the work that depends on the ruling
+stops, and the document says what stopped. Work that does not depend on it continues — see
+**`engineering-principles`**, `scoped-autonomy` and `three-step-operator-loop`.
+
 **Before opening a question, search the corpus for a ruling on it.** Decision Ledgers are per-document, which is exactly what makes a collision between two of them invisible: a subject settled last month in a sibling doc's ledger arrives here looking brand new, the design re-litigates it, and the second ruling can land flatly contradicting the first with nothing in either document admitting the other exists. So grep the docs tree for the subject before you write `OQ-N`. If a prior ruling turns up, the question is no longer the original question — it is **"does that ruling still hold?"**, asked with a link to the ledger row, the date it was made, and what has changed since. A ruling that holds costs one line and no user turn; one that doesn't gets overturned deliberately, in both documents, instead of by accident in one.
 
 Use status emojis at the start of each question title. The emoji is the question's state; **`vantage-docs`**, *Open Questions & Decision Ledgers*, owns the directive and its syntax:
@@ -656,6 +664,11 @@ Replace verbose answered OQ blocks with a concise, greppable table:
 > Filling it from `git log` defeats the whole point. A commit message is the author's claim that they built the thing, which is the same optimism the ledger row already carries; checking it twice from one source is not checking it. Open the tree.
 
 ### Critical Rules for Compacting
+
+**Every ruling that proposes a fix states its tier.** A recurring failure is fixed structurally, or
+made visible where it happens, or written down as a procedure — in that order, stopping at the first
+rung that is achievable. A ledger row whose fix is "remember to" is a tier-3 row, and says so — see
+**`engineering-principles`**, `principle-zero`.
 
 1. **IDs are an API — Never renumber or re-spell:**
    An ID may be cited in code comments, PRs, task tickets, or sibling docs. Before compacting, grep the repo for it. The Decision Ledger must retain the exact ID and spelling so all cross-references resolve.
