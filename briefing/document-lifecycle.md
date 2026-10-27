@@ -19,3 +19,6 @@ specification.
   (product behavior through realistic use).
 - **Markdown that must pass Vantage or GitHub review** — links, directives,
   terms of art — is **`vantage-docs`**.
+- **A rule that keeps being broken, or a system whose state, tests or observation
+  surfaces lie** — the engineering disciplines underneath the documents, rather than
+  the documents themselves — is **`engineering-principles`**.
