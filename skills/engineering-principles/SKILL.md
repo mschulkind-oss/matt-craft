@@ -34,24 +34,24 @@ library exists to prevent.
 
 | Card | The rule in one line |
 | :--- | :--- |
-| `lawyer-mode` (lands in this change) | A defined term must survive substitution: replace it with its definition and the text still means the same thing. A concept must survive deletion: remove it and something named breaks. |
+| [`lawyer-mode`](references/lawyer-mode.md) | A defined term must survive substitution: replace it with its definition and the text still means the same thing. A concept must survive deletion: remove it and something named breaks. |
 
 ## Tier 2 — engineering and verification
 
 | Card | The rule in one line |
 | :--- | :--- |
-| `human-operable-automation` (lands in this change) | Automation uses the same supported interfaces a human does. There is no agent-only side channel. |
+| [`human-operable-automation`](references/human-operable-automation.md) | Automation uses the same supported interfaces a human does. There is no agent-only side channel. |
 | `truthful-observable-state` (lands in this change) | State and audits report what happened. Missing data is not zero, and a check that did not run is not a pass. |
 | `visibility-with-behavior` (lands in this change) | A mechanism ships in the same change as the surface that lets an operator watch it work and watch it fail. |
 | `tests-use-consumer-interfaces` (lands in this change) | Tests drive the boundary real callers use, not a private seam invented for the test. |
 | `pure-planning-separate-effects` (lands in this change) | Compute an inspectable plan; execute it at one explicit effectful boundary. |
-| `scoped-autonomy` (lands in this change) | Authority is explicit, dated, and bounded. An unanswered question parks the work; silence is never a default. |
+| [`scoped-autonomy`](references/scoped-autonomy.md) | Authority is explicit, dated, and bounded. An unanswered question parks the work; silence is never a default. |
 
 ## Tier 3 — feedback and economics
 
 | Card | The rule in one line |
 | :--- | :--- |
-| `three-step-operator-loop` (lands in this change) | See what the agent is doing, hold the goal, correct early enough that drift never compounds. |
+| [`three-step-operator-loop`](references/three-step-operator-loop.md) | See what the agent is doing, hold the goal, correct early enough that drift never compounds. |
 | `practices-now-mandatory` (lands in this change) | Authoring labor is now cheap enough that strict contracts and invariant tests are affordable — and agent drift makes mechanical verification more necessary, not less. |
 
 ## Specified by sibling skills — pointers, not cards
