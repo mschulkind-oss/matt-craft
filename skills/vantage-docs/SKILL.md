@@ -246,6 +246,11 @@ Before using a term of art, be able to answer three questions **without opening 
 
 Fail any of the three and you do not have a term, you have a placeholder. Define it now, or write the plain words instead.
 
+**The substitution test.** Replace every defined term in a passage with its definition. The prose
+must still parse, and must still claim exactly what it claimed. Where it stops doing so, the
+definition is incomplete or the term was carrying meaning the definition does not state — see
+**`engineering-principles`**, `lawyer-mode`.
+
 ### Code is never the definition
 
 > [!IMPORTANT]
@@ -263,6 +268,10 @@ The other half of the standard, and the more commonly broken half:
 - **One word, one concept.** If *session* means both the transport connection and the user's login, one of them needs a different word — and the doc picks which.
 
 ### Prefer the plain word
+
+**The delete test.** Delete the concept — the page, the layer, the abstraction, the field — and
+name what breaks. If nothing breaks, it had no consumer, and its presence was a decision nobody
+made — see **`engineering-principles`**, `lawyer-mode`.
 
 The goal is **less undefined jargon, not more defined jargon.** A term of art earns its place only by being *more precise* than the plain phrase — never by being shorter, and never by sounding more serious.
 

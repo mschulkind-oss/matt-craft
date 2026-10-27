@@ -56,6 +56,16 @@ its links to itself route nothing, so they cannot place those questions in its o
    There is no "outside the queue" state for an open question. Mark a genuine wait 🔒
    in its source with what it waits on, and give it its question directive (see **`vantage-docs`**), rather than parking an answerable question.
 
+**An entry that waits on a ruling says what is queued.** If an item needs an operator's decision,
+the entry names what is parked, what the operator will see when they look, and what resumes the
+work once it is answered. Silence is not a default — see **`engineering-principles`**,
+`three-step-operator-loop` and `scoped-autonomy`.
+
+**A reason for skipping a discipline may not cite authoring cost.** "We did not have time for the
+contract, the property test or the schema" is a tier-3 argument dressed as a trade-off, and the
+authoring cost of those artifacts is no longer the constraint — see **`engineering-principles`**,
+`practices-now-mandatory`.
+
 Prefer **one ordered list**. Use sections only when they add navigational value, such as a
 separate external-wait list; document order is priority order, including across sections.
 Do not recreate a status dashboard with mandatory Actionable / Needs you tables: where Vantage
