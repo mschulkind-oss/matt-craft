@@ -10,8 +10,13 @@ specification.
   the user rules. Per-file build detail belongs in the companion
   **`implementation-plan`**, which opens as a sketch while the design is open
   and must not be built from while it is one.
-- **A shipped system's reference** is a **`system-doc`**; a built design
-  graduates out of the design doc into it, and the design doc is deleted.
+- **A shipped system's reference** is a **`system-doc`** (or a multi-file
+  **`doc-constellation`** for large subsystems); a built design graduates out
+  of the design doc into it, and the design doc is deleted.
+- **Recovering from agent divergence, adopting a legacy codebase, or realigning
+  unanchored code** without treating code as king is **`architecture-realignment`**.
+- **Cleaning a cluttered or drifted shelf of documents**, fixing lying status lines,
+  and executing safe absorption-checked retirements is **`doc-janitor`**.
 - **Unfinished work, and the reason one effort precedes another**, is a
   **`roadmap`**, which links source documents rather than restating them.
 - **Before a direction exists**, exploration is **`research`** (external

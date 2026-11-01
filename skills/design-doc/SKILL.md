@@ -424,6 +424,7 @@ Design documents evolve through two phases, and then leave this skill twice:
                              ▼ Implementation lands (implementer)
 ┌─────────────────────────────────────────────────────────┐
 │ Phase 3: BUILT → hand off to `system-doc`               │
+│   (or `doc-constellation` when ≥ 3 coupled mechanisms)  │
 │ • Reconciled against the code as actually built         │
 │ • Alternatives, risks, sequencing, ledger stripped      │
 │ • Rewritten at docs/reference/; THIS doc is deleted     │
@@ -431,17 +432,24 @@ Design documents evolve through two phases, and then leave this skill twice:
 ```
 
 Phases 1 and 2 are this skill. The hand-off is **`implementation-plan`**'s: it owns
-the gate, and the planner who works it. Phase 3 is **`system-doc`** — a different
+the gate, and the planner who works it. Phase 3 is **`system-doc`** (for a single-file
+reference) or **`doc-constellation`** (for a 4–8 file subsystem reference) — a different
 reader (a maintainer, not a decider) and a different genre, so it lives in its own
-skill. Everything below covers phases 1 and 2.
+skill. If the codebase has already diverged from earlier rulings or was built without a
+design doc, enter through **`architecture-realignment`** first (which freezes code edits,
+runs three-way archaeology across sessions, docs, and code, and uses this skill in Step 3
+to converge the target architecture before planning deletions and implementation).
+Everything below covers phases 1 and 2.
 
 ---
 
-## Review iteration — narrative forward logic and the first-time state
+## Review iteration — narrative forward logic, the Vantage thread protocol, and the first-time state
 
-During design deliberation, the user comments on sections, pushes back on mechanisms, identifies edge cases, and clarifies requirements. The document must absorb these revisions without degrading into an archaeological transcript.
+During design deliberation — whether starting from a greenfield `design-doc` or converging a target architecture in Step 3 of **`architecture-realignment`** — the user comments on sections, pushes back on mechanisms, identifies edge cases, and clarifies requirements. The document must absorb these revisions without degrading into an archaeological transcript or a circular logic puzzle.
 
 ### The First-Time State Principle
+
+*(Zero Process Scarring)*
 
 > [!IMPORTANT]
 > **Update the document to the state it would have been in if the author knew this context the first time.**
@@ -450,20 +458,50 @@ When a review comment changes an assumption, constraint, or component design:
 - Ask: *"If I had known this from day one, how would this document read?"*
 - Rewrite the document from that premise.
 - Present the resulting architecture cleanly and directly, as if conceived with full knowledge from the beginning.
-- A reader picking up the document should never see the seams of the review. The document is an architectural specification, not a log of the conversation that produced it.
+- A reader picking up the document should never see the seams of the review. The document is an architectural specification, not a log of the conversation that produced it. All historical ruling provenance lives solely in the bottom **Decision Ledger** (`D1`, `D2`, …), never in explanatory body paragraphs.
 
-### Narrative-driven forward logic
+### The Vantage Thread Protocol (Two-Channel Split)
 
-A design doc is an argument that moves forward:
+When the user leaves review comments on a document (via Vantage threads, PR review comments, or inline notes), every comment triggers a strict two-part response that separates **conversational explanation** from **document state**:
 
-```text
-Problem statement → Constraints & Principles → Proposed Architecture → Component Interactions → Invariants & Guarantees
+```mermaid
+sequenceDiagram
+    participant Owner as Owner (Vantage Thread)
+    participant Designer as Agent (design-doc)
+    participant Doc as Document on Disk
+
+    Owner->>Designer: "Why didn't we use a message queue here?"
+    Designer->>Doc: 1. Rewrite section on disk so the invariant/constraint is self-evident to a fresh reader (zero defensive scar tissue)
+    Designer->>Owner: 2. Reply directly in Vantage thread explaining the trade-off + naming what changed in the doc
+    Note over Owner,Designer: If debate continues, it stays in the Vantage thread — never in the document body.
 ```
 
-The logic flows forward from premises to conclusions. When review feedback shifts a decision or introduces a new constraint:
+1. **Answer the human in the thread; fix the blind spot in the document:**
+   When the user asks *"Why didn't we use a message queue here?"*:
+   - Put the direct conversational answer in the **Vantage reply thread**.
+   - Ask yourself: *"What was missing or unclear in the prose that caused a smart reader to ask this?"* Then **rewrite the document section** so that a fresh reader reading the page for the first time sees the governing constraint immediately and *never has the question in the first place*.
+2. **Never copy the thread debate into the document:**
+   If the user's question is a clarification or devil's-advocate probe and the architecture does not change, sharpen the clarity of the governing section without adding a defensive paragraph about message queues. If the choice is still contested, keep the debate **in the Vantage thread** (or file an `OQ-N`) until the user rules.
+3. **Save the document to disk before posting the reply:**
+   Review tools read the file on disk when the reply is delivered. Always write and verify the updated file first, then post the reply naming the exact section rewritten and what changed.
+4. **Prefer one restated section to five scattered patches:**
+   When multiple comments cluster around one mechanism, delete the scarred paragraphs and write one unified, forward-reading section that satisfies all of them at once.
+
+### Narrative-driven forward logic (No "Logic Puzzles")
+
+A design doc is an argument and a system model that moves strictly forward:
+
+```text
+Problem statement → Constraints & Principles → Vocabulary & Data Shapes → Proposed Architecture (Intake → Output) → Invariants & Guarantees
+```
+
+Human working memory is finite. A document that forces the reader to jump to Section 6 to understand a term used in Section 2, and then to Section 9 to understand a state flag in Section 6, is a **logic puzzle**, not an architecture document. Enforce both **argument forward flow** and **topological concept ordering**:
+
 - **Trace the forward logic from its root premise.** Adjust the problem framing or guiding principles upstream so the new design choice is the natural, logical outcome of the updated premise.
 - **Do not patch the conclusion while leaving the old premise intact.** A document that states premise A in the principles section, proposes design B in the architecture section, and then tacks on "but we actually do C because of premise D" has broken its forward logic. Rewrite the principles with premise D, so the architecture section introduces design C directly.
-- **Never make the reader reconstruct the journey.** The reader wants to evaluate the system as designed, not piece together a puzzle of historical compromises.
+- **Vocabulary and data shapes before mechanisms:** Define every domain term and core state ownership *before* the first paragraph that uses them as inputs. State what each coined term is, mark it `*(coined here)*`, state what it is **not** (its boundary exclusion), and never define a concept solely by naming a code struct or function symbol.
+- **Producer before consumer (causal order):** Follow the actual lifecycle or signal path from intake to output. Never explain how a downstream consumer reacts to a state flag before explaining what upstream mechanism produces that flag and why.
+- **Zero forward-dependency loops:** A high-level overview may list child sections in a roadmap table, but no explanatory paragraph in Section $N$ may require the reader to have already read Section $M$ ($M > N$) to understand the sentence in front of them.
 
 ### Banned: Conversational accretion and review rot
 
@@ -473,30 +511,31 @@ Conversational accretion rots a document into an unreadable, fragmented context 
    - ❌ *"Per reviewer comment...", "In review, the user pointed out that...", "As discussed in chat...", "In response to feedback...", "We discussed whether..."*
    - ✅ State the fact about the system: *"The queue drops unauthenticated messages immediately."* The document speaks with a unified authorial voice about the system, never about the meeting.
 2. **No track-changes prose or changelog sediment:**
-   - ❌ *"Originally the transport section proposed a centralized daemon, but this was revised to a client library because...", "Update (turn 4): we decided to...", "Addendum to Persistence:", "Revision notes:"*
+   - ❌ *"Originally the transport section proposed a centralized daemon, but this was revised to a client library because...", "Update (turn 4): we decided to...", "Addendum to Persistence:", "Revision notes:", "Clarification:"*
    - ✅ Replace the section with the client library design. Delete the obsolete daemon proposal.
 3. **No dead branches left dangling with inline repudiation:**
    - When an approach is discarded during review, remove it. Do not leave dead architectures in the body surrounded by paragraphs explaining why they were abandoned.
    - *The Trap Exception:* If the discarded alternative is an intuitive trap that a future engineer would naturally re-derive, capture it as a forward-facing principle, constraint, or `> [!WARNING]` about the *system* (e.g. `> [!WARNING] Do not retry on 429 without backoff because the upstream rate limiter resets per window`). See [the trap test](#critical-rules-for-compacting). Never write it as review minutes.
 4. **No half-document, half-conversation hybrids:**
    - Never intersperse dialog, user quotes, agent explanations, or discussion notes into the document body.
-   - The discussion lives in the conversation. The durable document holds only the settled, forward-logic result.
+   - The discussion lives in the Vantage thread or conversation. The durable document holds only the settled, forward-logic result.
 
-### The review iteration workflow
+### The review iteration workflow & four-pass editorial scrub
 
 When review comments arrive:
 
 1. **Classify each comment:**
    - *Direct design change or constraint:* Identify which sections' forward logic is affected.
+   - *Reviewer question or clarification probe:* Answer directly in the Vantage thread, and identify what blind spot in the prose caused the question.
    - *Settled ruling on an Open Question:* Follow the [Answering Protocol](#answering-protocol) — fold the ruling into the body, compact to the Decision Ledger.
    - *Subtle trap or refuted intuition:* Formulate as a forward-facing warning or invariant.
    - *Genuine unresolved architectural fork:* File as a new `OQ-N` with setup walkthrough and options.
-2. **Refactor upstream premises:** Update problem framing, constraints, or principles so the revised architecture follows naturally.
-3. **Rewrite affected sections in place:** Completely replace obsolete text. Ensure tone, tense, and terminology remain seamless.
-4. **Run the First-Time Test:**
-   Reread the modified sections in the context of the whole document.
-   *Could someone reading this for the first time tell that a debate or misunderstanding took place?*
-   If yes, remove the conversational residue and restore the clean forward narrative.
+2. **Refactor upstream premises and rewrite affected sections in place:** Update problem framing, constraints, or principles so the revised architecture follows naturally. Completely replace obsolete text on disk *before* posting thread replies.
+3. **Run the Four-Pass Editorial Scrub before handing the document back:**
+   - **Pass 1 — Topological dependency check:** Read from line 1 to the end, tracking every domain term, state variable, and mechanism. Whenever a paragraph uses a concept that has not yet been introduced, move the definition earlier or reorder the sections so inputs precede outputs.
+   - **Pass 2 — First-Time Test & scar-tissue excision:** Search the body for review sediment (*"Note:"*, *"Clarification:"*, *"Unlike"*, *"Previously"*, *"Because we rejected"*, *"In round"*). Ask: *Could someone reading this for the first time tell that a debate or misunderstanding took place?* Rewrite every hit into timeless normative prose, moving any ruling provenance to the bottom Decision Ledger (`D1`, `D2`, …).
+   - **Pass 3 — Altitude and density trim:** Cut throat-clearing introductions, restatements of the same invariant across multiple sections, inline `(a), (b), (c)` running lists inside paragraphs, and per-file edit minutiae that belong in the `implementation-plan` seed.
+   - **Pass 4 — Mechanical verification:** Run `uvx vantage-check <path>` and fix every broken anchor, unlinked section/question/filename reference, or directive error before reporting completion.
 
 ---
 
@@ -831,8 +870,9 @@ Follow the **`vantage-docs`** style guide for core Markdown formatting (YAML fro
 - [ ] The audit pass has run since the last substantive edit: negatives re-searched, dated evidence re-read at the current commit
 - [ ] The description reads as currently true — corrections are edits, not strata; the only append-only thing is the Decision Ledger, and ⚠ markers appear only inside a deliberately frozen body
 - [ ] Every preserved correction passes the trap test and is written forward-facing, about the system rather than about the document
-- [ ] Passes the first-time test: the document reads as if the author had known all review feedback, constraints, and rulings from the very first draft — zero conversational residue ("per review", "reviewer pointed out", "as discussed") and no track-changes prose
-- [ ] Narrative forward logic holds: arguments move forward from problem and principles to architecture; comments were not patched on as exceptions or addenda to broken upstream premises
+- [ ] Passes the first-time test: the document reads as if the author had known all review feedback, constraints, and rulings from the very first draft — zero conversational residue ("per review", "reviewer pointed out", "as discussed"), no track-changes prose, and all ruling history quarantined in the Decision Ledger
+- [ ] Vantage Thread Protocol followed: every reviewer question was answered directly in the thread while the governing document section was rewritten on disk first so a fresh reader would never have the question in the first place; ongoing debate stayed in the thread, never in the document body
+- [ ] Narrative and topological forward logic hold: arguments move forward from problem and principles to architecture, every domain term and state input is defined before the first section that consumes it (producer before consumer, zero forward-reference logic puzzles), and comments were not patched on as exceptions to broken upstream premises
 - [ ] Nothing framed as a task list the user has to maintain
 - [ ] Source metadata is current; roadmap links, question coverage, ordering, and rationale were reviewed in the same commit without copying source state
 - [ ] Where this vocabulary now governs a corpus, [the check is in the repository](#land-the-check-in-the-repository) and re-runnable — not only in this skill

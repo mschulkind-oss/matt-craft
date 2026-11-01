@@ -1,9 +1,10 @@
 # matt-craft — Agent Instructions
 
 This repository contains Matt Schulkind's public suite of workflow and
-documentation skills for AI-assisted engineering (`brainstorming`, `design-doc`,
-`engineering-principles`, `implementation-plan`, `research`, `roadmap`, `system-doc`,
-`user-stories`, `vantage-docs`). It also ships a briefing,
+documentation skills for AI-assisted engineering (`architecture-realignment`,
+`brainstorming`, `design-doc`, `doc-constellation`, `doc-janitor`,
+`engineering-principles`, `implementation-plan`, `research`, `roadmap`,
+`system-doc`, `user-stories`, `vantage-docs`). It also ships a briefing,
 [`briefing/document-lifecycle.md`](briefing/document-lifecycle.md), that names each
 skill by the situation that calls for it; [`tests/briefing.test.sh`](tests/briefing.test.sh) fails when a
 skill is not named, so keep the two in step.

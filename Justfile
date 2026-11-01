@@ -13,7 +13,7 @@ test:
 
 # Run vantage-check on documentation, the routing briefing, and skills
 check:
-    uvx vantage-check README.md briefing/*.md skills/*/SKILL.md skills/*/references/*.md
+    uvx vantage-check README.md briefing/*.md docs/reference/*.md skills/*/SKILL.md skills/*/references/*.md
 
 # Run all quality checks before committing
 done: test check

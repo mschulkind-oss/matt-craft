@@ -2,7 +2,7 @@
 
 > Matt Schulkind's workflow and documentation skills for AI-assisted engineering.
 
-`matt-craft` is an opinionated suite of 9 workflow and documentation skills for AI-assisted engineering. It structures the way developers and AI coding agents collaborate—moving architectural decisions out of ephemeral, rotting chat windows into a durable, machine-verifiable Markdown document lifecycle.
+`matt-craft` is an opinionated suite of 12 workflow and documentation skills for AI-assisted engineering. It structures the way developers and AI coding agents collaborate—moving architectural decisions out of ephemeral, rotting chat windows into a durable, machine-verifiable Markdown document lifecycle.
 
 ---
 
@@ -10,14 +10,17 @@
 
 | Skill | Trigger / Description |
 | :--- | :--- |
+| **[`architecture-realignment`](skills/architecture-realignment/SKILL.md)** | Use when recovering a codebase or design from agentic divergence, realigning a drifted architecture across sessions, documents, and code, adopting a legacy codebase not born under matt-craft, or establishing a document-first target architecture when a system was built without a design doc. |
 | **[`brainstorming`](skills/brainstorming/SKILL.md)** | Use when exploring, comparing, or ranking candidate ideas before choosing an architectural direction. |
 | **[`design-doc`](skills/design-doc/SKILL.md)** | Use when designing or revising a feature, system, or architecture that requires settled decisions and explicit Open Questions. |
+| **[`doc-constellation`](skills/doc-constellation/SKILL.md)** | Use when a shipped or graduated subsystem is too large for a single system-doc (> 250 lines or ≥ 3 coupled mechanisms) and needs a coordinated 4–8 file reference directory in docs/reference/<topic>/ so a designer or model can reason about the architecture without opening source code. |
+| **[`doc-janitor`](skills/doc-janitor/SKILL.md)** | Use when a repository has a cluttered, drifted, or duplicated set of documents that needs shelf-level cleanup — inventorying files, fixing lying frontmatter status lines, merging or archiving superseded docs with section-by-section absorption checks, and rewriting inbound links. |
+| **[`engineering-principles`](skills/engineering-principles/SKILL.md)** | Use when specifying a system's structure, its failure handling, its verification, or how an operator will observe and correct it. |
 | **[`implementation-plan`](skills/implementation-plan/SKILL.md)** | Use when a settled design needs a concrete, file-by-file build hand-off grounded in the current repository tree. |
 | **[`research`](skills/research/SKILL.md)** | Use when investigating, evaluating, comparing, or looking into a topic, tool, library, or design space for a project. |
 | **[`roadmap`](skills/roadmap/SKILL.md)** | Use when prioritizing unfinished work with readable ordering reasons while source documents own planning state. |
 | **[`system-doc`](skills/system-doc/SKILL.md)** | Use when documenting how an implemented system works, graduating a shipped design, or re-verifying a system reference. |
 | **[`user-stories`](skills/user-stories/SKILL.md)** | Use when exploring a product or feature through realistic narrative workflows and the gaps they expose. |
-| **[`engineering-principles`](skills/engineering-principles/SKILL.md)** | Use when specifying a system's structure, its failure handling, its verification, or how an operator will observe and correct it. |
 | **[`vantage-docs`](skills/vantage-docs/SKILL.md)** | Use when authoring, formatting, reviewing, or render-verifying Markdown documentation for Vantage and GitHub. |
 
 The pack also ships a briefing, [`briefing/document-lifecycle.md`](briefing/document-lifecycle.md), that names each skill by the situation that calls for it. Installed as an agent pack, it reaches the agent's context, so the trigger is read as a rule rather than only as a catalog entry.
