@@ -1,29 +1,12 @@
 ## Engineering documents
 
-The documents an engineering task produces are owned by these skills. Read the
-owning skill before writing its document — the skill body, not this list, is the
-specification.
+Read the owning skill before writing any engineering document:
 
-- **Settling what to build and why** — the architecture, the trade-offs, and the
-  decisions still open — is a **`design-doc`**. Start it when the design starts,
-  not once it has settled: the open questions are the point, and they are where
-  the user rules. Per-file build detail belongs in the companion
-  **`implementation-plan`**, which opens as a sketch while the design is open
-  and must not be built from while it is one.
-- **A shipped system's reference** is a **`system-doc`** (or a multi-file
-  **`doc-constellation`** for large subsystems); a built design graduates out
-  of the design doc into it, and the design doc is deleted.
-- **Recovering from agent divergence, adopting a legacy codebase, or realigning
-  unanchored code** without treating code as king is **`architecture-realignment`**.
-- **Cleaning a cluttered or drifted shelf of documents**, fixing lying status lines,
-  and executing safe absorption-checked retirements is **`doc-janitor`**.
-- **Unfinished work, and the reason one effort precedes another**, is a
-  **`roadmap`**, which links source documents rather than restating them.
-- **Before a direction exists**, exploration is **`research`** (external
-  questions), **`brainstorming`** (a choice among options), or **`user-stories`**
-  (product behavior through realistic use).
-- **Markdown that must pass Vantage or GitHub review** — links, directives,
-  terms of art — is **`vantage-docs`**.
-- **A rule that keeps being broken, or a system whose state, tests or observation
-  surfaces lie** — the engineering disciplines underneath the documents, rather than
-  the documents themselves — is **`engineering-principles`**.
+- `design-doc` — architecture, trade-offs, and open decisions (start when design starts); companion `implementation-plan` for per-file build detail.
+- `system-doc` / `doc-constellation` — shipped system reference (large subsystems use `doc-constellation`); built designs graduate here and are deleted.
+- `architecture-realignment` — recover drifted architecture or adopt legacy code.
+- `doc-janitor` — clean cluttered or drifted doc shelves and retirements.
+- `roadmap` — unfinished work and sequencing (links source docs).
+- `research` / `brainstorming` / `user-stories` — pre-direction exploration (external questions / comparing options / narrative workflows).
+- `vantage-docs` — Markdown syntax, links, directives, and defined terms for Vantage/GitHub.
+- `engineering-principles` — system-wide engineering disciplines (state, tests, observation).

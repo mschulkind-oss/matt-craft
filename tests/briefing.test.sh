@@ -33,10 +33,11 @@ done
 
 # It is always-on prose, so it has to stay small.
 lines=$(cat "$briefing_dir"/*.md | wc -l | tr -d ' ')
-if [ "$lines" -le 40 ]; then
-    ok "briefing is $lines lines (ceiling 40)"
+bytes=$(cat "$briefing_dir"/*.md | wc -c | tr -d ' ')
+if [ "$lines" -le 20 ] && [ "$bytes" -le 1200 ]; then
+    ok "briefing is $lines lines, $bytes bytes (ceiling 20 lines / 1200 bytes)"
 else
-    bad "briefing is $lines lines, over the 40-line ceiling — something has accreted"
+    bad "briefing is $lines lines, $bytes bytes, over the 20-line / 1200-byte ceiling — something has accreted"
 fi
 
 [ "$fails" -eq 0 ] || { printf '\n%s check(s) failed\n' "$fails" >&2; exit 1; }
